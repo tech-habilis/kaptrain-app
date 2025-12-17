@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "name": "Name"
+  },
+  "menu": {
+    "home": "Home",
+    "profile": "Profile",
+    "tips": "Tips",
+    "articles": "Articles"
+  },
+  "common": {
+    "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?"
+  }
+}
