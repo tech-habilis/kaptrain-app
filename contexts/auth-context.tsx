@@ -1,43 +1,59 @@
 import { STORAGE_KEY } from "@/constants/storage-key";
 import { useJsonStorageState } from "@/hooks/use-storage-state";
-import { createContext, PropsWithChildren, use, useEffect, useState } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  use,
+  useEffect,
+  useState,
+} from "react";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
 import { toast } from "@/components/toast";
-import { Linking } from "react-native";
+import { supabase } from "@/utilities/supabase";
+import { TSession } from "@/types";
 
-type TSession = {
-  accessToken?: string | null;
-  refreshToken?: string | null;
-  user?: {
-    id: string;
-    email: string | null;
-    name: string | null;
-    // ... add other user data here
-  };
+type TEmailSignIn = {
+  email: string;
+  password: string;
 };
+
+type TSignInMethod = "email" | "google" | "apple";
 
 type TAuthContext = {
   signInWithApple: () => void;
   signInWithGoogle: () => void;
+  signInWithEmail: (payload: TEmailSignIn) => void;
   signOut: () => void;
+  setSession: (value: TSession | null) => void;
+
   session: TSession | null;
   isLoadingSession: boolean;
   isLoggingIn: boolean;
   isLoggedIn: boolean;
   canSignInWithApple: boolean;
+  loggingInWith: TSignInMethod | null;
 };
 
 const AuthContext = createContext<TAuthContext>({
   signInWithApple: () => {},
   signInWithGoogle: () => {},
+  signInWithEmail: () => {},
   signOut: () => {},
+  setSession: () => {},
+
   session: null,
   isLoadingSession: false,
   isLoggingIn: false,
   isLoggedIn: false,
   canSignInWithApple: false,
+  loggingInWith: null,
 });
 
 export function useSession() {
@@ -51,12 +67,13 @@ export function useSession() {
 export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoadingSession, session], setSession] =
     useJsonStorageState<TSession>(STORAGE_KEY.SESSION);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loggingInWith, setLoggingInWith] = useState<TSignInMethod | null>(null);
+  const isLoggingIn = loggingInWith !== null;
   const [canSignInWithApple, setCanSignInWithApple] = useState(false);
 
   const signInWithApple = async () => {
     try {
-      setIsLoggingIn(true);
+      setLoggingInWith("apple");
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -90,19 +107,19 @@ export function SessionProvider({ children }: PropsWithChildren) {
         console.error(e);
       }
     } finally {
-      setIsLoggingIn(false);
+      setLoggingInWith(null);
     }
   };
 
   const signInWithGoogle = async () => {
     try {
-      setIsLoggingIn(true);
+      setLoggingInWith("google");
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
         setSession({
           accessToken: response.data.idToken,
-          user: response.data.user
+          user: response.data.user,
         });
       } else {
         // sign in was cancelled by user
@@ -120,20 +137,52 @@ export function SessionProvider({ children }: PropsWithChildren) {
             // some other error happened
             console.log(error);
             toast.warning("Failed to sign in with Google: " + error.message, {
-              id: "google-sign-in-error"
+              id: "google-sign-in-error",
             });
             break;
         }
       } else {
         // an error that's not related to google sign in occurred
         toast.error("Failed to sign in with Google", {
-          id: "google-sign-in-error"
+          id: "google-sign-in-error",
         });
       }
     } finally {
-      setIsLoggingIn(false);
+      setLoggingInWith(null);
     }
   };
+
+  const signInWithEmail = async ({ email, password }: TEmailSignIn) => {
+    setLoggingInWith("email");
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      toast.error(error.message);
+      setLoggingInWith(null);
+      return;
+    }
+
+    if (!session) {
+      toast.success("Please check your inbox for email verification!");
+      setLoggingInWith(null);
+      return;
+    }
+
+    setSession(supabase.toLocalSession(session));
+    setLoggingInWith(null);
+  };
+
+  const signOut = () => {
+    setSession(null);
+    supabase.auth.signOut();
+  }
 
   useEffect(() => {
     AppleAuthentication.isAvailableAsync().then((supported) => {
@@ -146,12 +195,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       value={{
         signInWithApple,
         signInWithGoogle,
-        signOut: () => setSession(null),
+        signInWithEmail,
+        signOut,
+        setSession,
+
         session,
         isLoadingSession,
         isLoggingIn,
         isLoggedIn: !!session?.accessToken,
         canSignInWithApple,
+        loggingInWith
       }}
     >
       {children}

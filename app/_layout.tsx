@@ -1,4 +1,4 @@
-import '../global.css'
+import "../global.css";
 import {
   DarkTheme,
   DefaultTheme,
@@ -13,10 +13,13 @@ import { SplashScreenController } from "@/components/splash";
 import { SessionProvider, useSession } from "@/contexts/auth-context";
 import { ROUTE_NAME } from "@/constants/route";
 import { initI18n } from "@/utilities/i18n";
-import { SafeAreaListener } from 'react-native-safe-area-context';
-import { Uniwind } from 'uniwind'
-import { Toasts } from '@backpackapp-io/react-native-toast';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaListener } from "react-native-safe-area-context";
+import { Uniwind } from "uniwind";
+import { Toasts } from "@backpackapp-io/react-native-toast";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useEffect } from "react";
+import { supabase } from "@/utilities/supabase";
+import * as Linking from "expo-linking";
 
 initI18n();
 
@@ -30,12 +33,12 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <SplashScreenController />
-      <ThemeProvider
-        value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      >
-        <SafeAreaListener onChange={({ insets }) => {
-          Uniwind.updateInsets(insets); // enable className such as p-safe etc.
-        }}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <SafeAreaListener
+          onChange={({ insets }) => {
+            Uniwind.updateInsets(insets); // enable className such as p-safe etc.
+          }}
+        >
           <GestureHandlerRootView>
             <RootNavigator />
             <Toasts />
@@ -48,7 +51,34 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isLoggedIn } = useSession();
+  const { isLoggedIn, setSession } = useSession();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      Linking.parseInitialURLAsync()
+        .then(async (url) => {
+          const session = await supabase.createSessionFromUrl(url).catch(err => {
+            console.log('failed to create session from url', err)
+          });
+
+          if (session) {
+            setSession(supabase.toLocalSession(session));
+          }
+        })
+        .catch((err) => {
+          console.log("failed to set session from url", err);
+        });
+    }
+
+    // supabase.auth.getSession().then(({ data: { session } }) => {
+    //   setSession(supabase.toLocalSession(session));
+    // });
+
+    // supabase.auth.onAuthStateChange((_event, session) => {
+    //   setSession(supabase.toLocalSession(session));
+    // });
+  }, [isLoggedIn, setSession]);
+
   return (
     <Stack
       screenOptions={{

@@ -11,7 +11,7 @@ import IcWarning from "./icons/warning";
 import { ColorConst } from "@/constants/theme";
 import cn from "@/utilities/cn";
 import IcClose from "./icons/close";
-import { Pressable, ViewStyle } from "react-native";
+import { Pressable } from "react-native";
 import { ComponentProps } from "react";
 
 export type ToastType = "success" | "error" | "info" | "warning";
@@ -44,20 +44,6 @@ export const callToast = (
     info: "border-blue-500",
     warning: "border-tertiary",
   };
-  const containerStyle: Record<ToastType, ViewStyle> = {
-    success: {
-      backgroundColor: ColorConst.success,
-    },
-    error: {
-      backgroundColor: ColorConst.error,
-    },
-    info: {
-      backgroundColor: ColorConst.light,
-    },
-    warning: {
-      backgroundColor: ColorConst.light,
-    },
-  };
 
   return rawToast(message, {
     disableShadow: true,
@@ -65,10 +51,10 @@ export const callToast = (
       <ThemedView
         className={cn(
           "px-4 py-3 flex flex-row justify-between gap-2 border rounded-2xl",
-          message.length > 10 ? "items-start" : "items-center",
+          "items-center",
           containerClass[type],
         )}
-        style={{ width: props.width, ...containerStyle[type] }}
+        style={{ width: props.width, backgroundColor: ColorConst.light }}
       >
         <ThemedView>{opts.icon ?? <Icon size={24} />}</ThemedView>
         <ThemedText className={cn("text-primary flex-1")}>
