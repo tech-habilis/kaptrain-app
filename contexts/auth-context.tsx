@@ -67,9 +67,12 @@ export function useSession() {
 export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoadingSession, session], setSession] =
     useJsonStorageState<TSession>(STORAGE_KEY.SESSION);
-  const [loggingInWith, setLoggingInWith] = useState<TSignInMethod | null>(null);
+  const [loggingInWith, setLoggingInWith] = useState<TSignInMethod | null>(
+    null,
+  );
   const isLoggingIn = loggingInWith !== null;
   const [canSignInWithApple, setCanSignInWithApple] = useState(false);
+  const [fetchingSession, setFetchingSession] = useState(false);
 
   const signInWithApple = async () => {
     try {
@@ -182,13 +185,58 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signOut = () => {
     setSession(null);
     supabase.auth.signOut();
-  }
+  };
 
   useEffect(() => {
     AppleAuthentication.isAvailableAsync().then((supported) => {
       setCanSignInWithApple(supported);
     });
   }, []);
+
+  // Fetch the session once, and subscribe to auth state changes
+  useEffect(() => {
+    const fetchSession = async () => {
+      setFetchingSession(true);
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error fetching session:", error);
+      }
+      setSession(supabase.toLocalSession(session));
+      setFetchingSession(false);
+    };
+    fetchSession();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", { event: _event, session });
+      setSession(supabase.toLocalSession(session));
+    });
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [setSession]);
+
+  // Fetch the profile when the session changes
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setFetchingSession(true);
+      if (session) {
+        // const { data } = await supabase.from("profiles")
+        //   .select("*")
+        //   .eq("id", session.user.id)
+        //   .single();
+        // setProfile(data);
+      } else {
+        // setProfile(null);
+      }
+      setFetchingSession(false);
+    };
+    fetchProfile();
+  }, [session]);
 
   return (
     <AuthContext.Provider
@@ -200,11 +248,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
         setSession,
 
         session,
-        isLoadingSession,
+        isLoadingSession: isLoadingSession || fetchingSession,
         isLoggingIn,
         isLoggedIn: !!session?.accessToken,
         canSignInWithApple,
-        loggingInWith
+        loggingInWith,
       }}
     >
       {children}
