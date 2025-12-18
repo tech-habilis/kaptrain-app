@@ -13,9 +13,10 @@ import { SplashScreenController } from "@/components/splash";
 import { SessionProvider, useSession } from "@/contexts/auth-context";
 import { ROUTE_NAME } from "@/constants/route";
 import { initI18n } from "@/utilities/i18n";
-import { StrictMode } from "react";
 import { SafeAreaListener } from 'react-native-safe-area-context';
 import { Uniwind } from 'uniwind'
+import { Toasts } from '@backpackapp-io/react-native-toast';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 initI18n();
 
@@ -27,21 +28,22 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <StrictMode>
-      <SessionProvider>
-        <SplashScreenController />
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <SafeAreaListener onChange={({ insets }) => {
-            Uniwind.updateInsets(insets); // enable className such as p-safe etc.
-          }}>
+    <SessionProvider>
+      <SplashScreenController />
+      <ThemeProvider
+        value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+      >
+        <SafeAreaListener onChange={({ insets }) => {
+          Uniwind.updateInsets(insets); // enable className such as p-safe etc.
+        }}>
+          <GestureHandlerRootView>
             <RootNavigator />
-          </SafeAreaListener>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </SessionProvider>
-    </StrictMode>
+            <Toasts />
+          </GestureHandlerRootView>
+        </SafeAreaListener>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </SessionProvider>
   );
 }
 

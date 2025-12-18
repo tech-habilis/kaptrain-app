@@ -4,6 +4,8 @@ import { createContext, PropsWithChildren, use, useEffect, useState } from "reac
 import * as AppleAuthentication from "expo-apple-authentication";
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
+import { toast } from "@/components/toast";
+import { Linking } from "react-native";
 
 type TSession = {
   accessToken?: string | null;
@@ -93,7 +95,44 @@ export function SessionProvider({ children }: PropsWithChildren) {
   };
 
   const signInWithGoogle = async () => {
-    console.error('Google sign-in is not implemented yet')
+    try {
+      setIsLoggingIn(true);
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      if (isSuccessResponse(response)) {
+        setSession({
+          accessToken: response.data.idToken,
+          user: response.data.user
+        });
+      } else {
+        // sign in was cancelled by user
+      }
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            // operation (eg. sign in) already in progress
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            // Android only, play services not available or outdated
+            break;
+          default:
+            // some other error happened
+            console.log(error);
+            toast.warning("Failed to sign in with Google: " + error.message, {
+              id: "google-sign-in-error"
+            });
+            break;
+        }
+      } else {
+        // an error that's not related to google sign in occurred
+        toast.error("Failed to sign in with Google", {
+          id: "google-sign-in-error"
+        });
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   useEffect(() => {
