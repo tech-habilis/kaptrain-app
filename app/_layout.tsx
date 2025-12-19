@@ -18,8 +18,8 @@ import { Uniwind } from "uniwind";
 import { Toasts } from "@backpackapp-io/react-native-toast";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
-import { supabase } from "@/utilities/supabase";
 import * as Linking from "expo-linking";
+import { supabaseUtils } from "@/utilities/supabase";
 
 initI18n();
 
@@ -57,12 +57,12 @@ function RootNavigator() {
     if (!isLoggedIn) {
       Linking.parseInitialURLAsync()
         .then(async (url) => {
-          const session = await supabase.createSessionFromUrl(url).catch(err => {
+          const session = await supabaseUtils.createSessionFromUrl(url).catch(err => {
             console.log('failed to create session from url', err)
           });
 
           if (session) {
-            setSession(supabase.toLocalSession(session));
+            setSession(supabaseUtils.toLocalSession(session));
           }
         })
         .catch((err) => {
@@ -71,11 +71,11 @@ function RootNavigator() {
     }
 
     // supabase.auth.getSession().then(({ data: { session } }) => {
-    //   setSession(supabase.toLocalSession(session));
+    //   setSession(supabaseUtils.toLocalSession(session));
     // });
 
     // supabase.auth.onAuthStateChange((_event, session) => {
-    //   setSession(supabase.toLocalSession(session));
+    //   setSession(supabaseUtils.toLocalSession(session));
     // });
   }, [isLoggedIn, setSession]);
 

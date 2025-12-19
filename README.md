@@ -1,6 +1,6 @@
-# Welcome to your Expo app 👋
+# Welcome to your Kaptrain App 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is an [Expo](https://expo.dev) project with supabase as the backend.
 
 ## Get started
 
@@ -9,11 +9,18 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    ```bash
    pnpm install
    ```
-   
+If install failed, try running `pnpm approve-builds` and approve supabase if it's not approved yet. Then, run `pnpm install` again.
+
 2. Create prebuild
 
    ```bash
    pnpm dlx expo prebuild
+   ```
+
+3. Create database types
+
+   ```bash
+   pnpm db:generate --project-id "INSERT_SUPABASE_PROJECT_ID_HERE"
    ```
 
 3. Start the app

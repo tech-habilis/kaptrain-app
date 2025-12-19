@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, processLock, Session } from "@supabase/supabase-js";
 import { TSession } from "@/types";
 import { ParsedURL } from "expo-linking";
+import { Database } from "./database.types";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -12,7 +13,7 @@ if (supabaseUrl === undefined || supabaseAnonKey === undefined) {
   throw new Error("ENV NOT CONFIGURED PROPERLY! [1]");
 }
 
-const client = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     ...(Platform.OS !== "web" ? { storage: AsyncStorage } : {}),
     autoRefreshToken: true,
@@ -22,8 +23,7 @@ const client = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-export const supabase = {
-  ...client,
+export const supabaseUtils = {
   toLocalSession: (session: Session | null) => {
     if (!session) return null;
 
@@ -37,27 +37,32 @@ export const supabase = {
       },
     } as TSession;
   },
-  createSessionFromUrl: async ({ queryParams}: ParsedURL) => {
-    const access_token = queryParams?.['access_token'];
-    const refresh_token = queryParams?.['refresh_token'];
+  createSessionFromUrl: async ({ queryParams }: ParsedURL) => {
+    const access_token = queryParams?.["access_token"];
+    const refresh_token = queryParams?.["refresh_token"];
 
     if (!access_token) {
       return;
     }
 
-    if (typeof access_token !== 'string' || typeof refresh_token !== 'string' || access_token.length <= 0 || refresh_token.length <= 0) {
+    if (
+      typeof access_token !== "string" ||
+      typeof refresh_token !== "string" ||
+      access_token.length <= 0 ||
+      refresh_token.length <= 0
+    ) {
       return;
     }
 
-    console.log('refresh token', refresh_token)
+    console.log("refresh token", refresh_token);
 
     const { data, error } = await supabase.auth.setSession({
       access_token,
       refresh_token,
-    })
-    if (error) throw error
-    return data.session
-  }
+    });
+    if (error) throw error;
+    return data.session;
+  },
 };
 
 // Tells Supabase Auth to continuously refresh the session automatically

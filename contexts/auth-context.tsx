@@ -16,12 +16,18 @@ import {
 } from "@react-native-google-signin/google-signin";
 import { router } from "expo-router";
 import { toast } from "@/components/toast";
-import { supabase } from "@/utilities/supabase";
+import { supabase, supabaseUtils } from "@/utilities/supabase";
 import { TSession } from "@/types";
+import Constants from "expo-constants";
 
 type TEmailSignIn = {
   email: string;
   password: string;
+};
+
+type TEmailSignUp = TEmailSignIn & {
+  name: string;
+  confirmPassword: string;
 };
 
 type TSignInMethod = "email" | "google" | "apple";
@@ -30,7 +36,9 @@ type TAuthContext = {
   signInWithApple: () => void;
   signInWithGoogle: () => void;
   signInWithEmail: (payload: TEmailSignIn) => void;
+  signUpWithEmail: (payload: TEmailSignUp) => void;
   signOut: () => void;
+  deleteAccount: () => void;
   setSession: (value: TSession | null) => void;
 
   session: TSession | null;
@@ -45,7 +53,9 @@ const AuthContext = createContext<TAuthContext>({
   signInWithApple: () => {},
   signInWithGoogle: () => {},
   signInWithEmail: () => {},
+  signUpWithEmail: () => {},
   signOut: () => {},
+  deleteAccount: () => {},
   setSession: () => {},
 
   session: null,
@@ -178,13 +188,56 @@ export function SessionProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    setSession(supabase.toLocalSession(session));
+    setSession(supabaseUtils.toLocalSession(session));
     setLoggingInWith(null);
   };
 
   const signOut = () => {
     setSession(null);
     supabase.auth.signOut();
+  };
+
+  const signUpWithEmail = async ({
+    email,
+    password,
+    name,
+    confirmPassword,
+  }: TEmailSignUp) => {
+    setLoggingInWith("email");
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        emailRedirectTo: Constants.expoConfig?.scheme as string,
+        data: {
+          name: name,
+        },
+      },
+    });
+
+    if (error) {
+      toast.error(error.message);
+      setLoggingInWith(null);
+      return;
+    }
+
+    if (!session) {
+      toast.success("Please check your inbox for email verification!");
+      setLoggingInWith(null);
+      return;
+    }
+
+    setSession(supabaseUtils.toLocalSession(session));
+    setLoggingInWith(null);
+  };
+
+  const deleteAccount = async () => {
+    console.info("This feature is not yet implemented.");
+    toast.error("This feature is not yet implemented.");
   };
 
   useEffect(() => {
@@ -204,39 +257,23 @@ export function SessionProvider({ children }: PropsWithChildren) {
       if (error) {
         console.error("Error fetching session:", error);
       }
-      setSession(supabase.toLocalSession(session));
+      setSession(supabaseUtils.toLocalSession(session));
       setFetchingSession(false);
     };
     fetchSession();
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed:", { event: _event, session });
-      setSession(supabase.toLocalSession(session));
+      setSession(supabaseUtils.toLocalSession(session));
     });
+
     // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
   }, [setSession]);
-
-  // Fetch the profile when the session changes
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setFetchingSession(true);
-      if (session) {
-        // const { data } = await supabase.from("profiles")
-        //   .select("*")
-        //   .eq("id", session.user.id)
-        //   .single();
-        // setProfile(data);
-      } else {
-        // setProfile(null);
-      }
-      setFetchingSession(false);
-    };
-    fetchProfile();
-  }, [session]);
 
   return (
     <AuthContext.Provider
@@ -244,7 +281,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signInWithApple,
         signInWithGoogle,
         signInWithEmail,
+        signUpWithEmail,
         signOut,
+        deleteAccount,
         setSession,
 
         session,

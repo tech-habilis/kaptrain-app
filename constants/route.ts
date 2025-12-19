@@ -6,6 +6,7 @@ export const ROUTE_NAME = {
   PROFILE: "profile",
   TIPS: "tips",
   ARTICLES: "articles",
+  SIGN_UP: "sign-up",
 } as const;
 
 /**
@@ -20,4 +21,5 @@ export const ROUTE = {
   PROFILE: `/${ROUTE_NAME.TABS}/${ROUTE_NAME.PROFILE}` as const,
   TIPS: `/${ROUTE_NAME.TABS}/${ROUTE_NAME.TIPS}` as const,
   ARTICLES: `/${ROUTE_NAME.TABS}/${ROUTE_NAME.ARTICLES}` as const,
+  SIGN_UP: `/${ROUTE_NAME.SIGN_UP}` as const,
 } as const;
