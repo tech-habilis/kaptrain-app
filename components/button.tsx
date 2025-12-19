@@ -4,16 +4,16 @@ import { Pressable, PressableProps, Text } from "react-native";
 import { tv } from "tailwind-variants";
 
 const button = tv({
-  base: "font-bold",
+  base: "font-bold flex justify-center items-center",
   variants: {
     type: {
       primary: "bg-primary",
       secondary: "bg-light border-2 border-primary",
-      tertiary: 'bg-transparent'
+      tertiary: "bg-transparent",
     },
     size: {
-      small: "rounded-lg px-3 py-[10.5px]",
-      large: "rounded-2xl p-4",
+      small: "rounded-lg px-3 h-10",
+      large: "rounded-2xl px-4 h-14",
     },
     disabled: {
       true: "opacity-40",
@@ -38,10 +38,25 @@ const buttonText = tv({
   variants: {
     type: {
       primary: "text-white",
-      secondary: "text-primary",
-      tertiary: 'text-secondary'
+      secondary: "",
+      tertiary: "",
+    },
+    size: {
+      small: "text-sm",
+      large: "text-base",
     },
   },
+  compoundVariants: [
+    {
+      type: "tertiary",
+      size: "small",
+      class: "font-medium",
+    },
+    {
+      type: ["secondary", "tertiary"],
+      class: "text-secondary",
+    },
+  ],
   defaultVariants: {
     type: "primary",
   },
@@ -60,8 +75,11 @@ export default function Button({
     children?: PressableProps["children"];
   }) {
   return (
-    <Pressable className={cn(button({ size, type, disabled }), className)} {...props}>
-      <Text className={cn(buttonText({ type }))}>{text}</Text>
+    <Pressable
+      className={cn(button({ size, type, disabled }), className)}
+      {...props}
+    >
+      <Text className={cn(buttonText({ size, type }))}>{text}</Text>
     </Pressable>
   );
 }
