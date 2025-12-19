@@ -14,24 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      for_example: {
-        Row: {
-          created_at: string
-          id: number
-          text: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          text?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          text?: string | null
-        }
-        Relationships: []
-      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -39,12 +21,10 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           email: string
-          email_verified: string | null
           id: string
           is_active: boolean | null
           last_login: string | null
           name: string | null
-          password_hash: string | null
           preferences: Json | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
@@ -55,12 +35,10 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           email: string
-          email_verified?: string | null
-          id?: string
+          id: string
           is_active?: boolean | null
           last_login?: string | null
           name?: string | null
-          password_hash?: string | null
           preferences?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
@@ -71,12 +49,10 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           email?: string
-          email_verified?: string | null
           id?: string
           is_active?: boolean | null
           last_login?: string | null
           name?: string | null
-          password_hash?: string | null
           preferences?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
