@@ -95,6 +95,8 @@ function RootNavigator() {
 
       {/* non-loggedin stack */}
       <Stack.Protected guard={!isLoggedIn}>
+
+        {__DEV__ && <Stack.Screen name='design-system' />}
         <Stack.Screen name={ROUTE_NAME.SIGN_IN} />
       </Stack.Protected>
     </Stack>
