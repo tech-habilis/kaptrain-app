@@ -5,6 +5,7 @@ export type TSession = {
     id: string;
     email: string | null;
     name: string | null;
+    avatarUrl: string | null;
     // ... add other user data here
   };
 };

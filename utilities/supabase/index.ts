@@ -33,7 +33,8 @@ export const supabaseUtils = {
       user: {
         id: session.user.id,
         email: session.user.email,
-        name: null, // we don't get name from supabase session
+        name: session.user.user_metadata["name"],
+        avatarUrl: session.user.user_metadata["avatar_url"],
       },
     } as TSession;
   },

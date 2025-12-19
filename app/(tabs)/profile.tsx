@@ -6,13 +6,10 @@ import i18n, { changeLanguage } from "@/utilities/i18n";
 import { Button } from "@react-navigation/elements";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Image } from "react-native";
 
 export default function ProfileScreen() {
   const { signOut, session } = useSession();
-  const insets = useSafeAreaInsets();
-  const spacing = 24;
   const { t } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
@@ -22,17 +19,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <ThemedView
-      style={{
-        display: "flex",
-        gap: 24,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingHorizontal: spacing,
-        flex: 1,
-      }}
-    >
+    <ThemedView className="py-safe px-6 mt-2 flex-1 gap-6 flex">
       <ThemedText style={{ fontSize: 24 }}>menu.profile</ThemedText>
+      {session?.user?.avatarUrl !== undefined ? (
+        <Image
+          source={{ uri: session?.user.avatarUrl! }}
+          className="size-20 rounded-full self-center"
+        />
+      ) : null}
       <ThemedView
         style={{
           display: "flex",

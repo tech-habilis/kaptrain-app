@@ -130,10 +130,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
-        setSession({
-          accessToken: response.data.idToken,
-          user: response.data.user,
+        const { data } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: response.data.idToken || "",
         });
+
+        setSession(supabaseUtils.toLocalSession(data.session));
       } else {
         // sign in was cancelled by user
       }
@@ -149,16 +151,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
           default:
             // some other error happened
             console.log(error);
-            toast.warning("Failed to sign in with Google: " + error.message, {
-              id: "google-sign-in-error",
-            });
+            toast.warning("Failed to sign in with Google: " + error.message);
             break;
         }
       } else {
         // an error that's not related to google sign in occurred
-        toast.error("Failed to sign in with Google", {
-          id: "google-sign-in-error",
-        });
+        toast.error("Failed to sign in with Google");
       }
     } finally {
       setLoggingInWith(null);
@@ -192,9 +190,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setLoggingInWith(null);
   };
 
-  const signOut = () => {
+  const signOut = async () => {
     setSession(null);
-    supabase.auth.signOut();
+
+    await Promise.all([supabase.auth.signOut(), GoogleSignin.signOut()]);
   };
 
   const signUpWithEmail = async ({

@@ -20,8 +20,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import * as Linking from "expo-linking";
 import { supabaseUtils } from "@/utilities/supabase";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 initI18n();
+
+GoogleSignin.configure({
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_AUTH_WEB_CLIENT_ID,
+});
 
 export const unstable_settings = {
   anchor: ROUTE_NAME.TABS,
@@ -57,9 +62,11 @@ function RootNavigator() {
     if (!isLoggedIn) {
       Linking.parseInitialURLAsync()
         .then(async (url) => {
-          const session = await supabaseUtils.createSessionFromUrl(url).catch(err => {
-            console.log('failed to create session from url', err)
-          });
+          const session = await supabaseUtils
+            .createSessionFromUrl(url)
+            .catch((err) => {
+              console.log("failed to create session from url", err);
+            });
 
           if (session) {
             setSession(supabaseUtils.toLocalSession(session));
@@ -69,14 +76,6 @@ function RootNavigator() {
           console.log("failed to set session from url", err);
         });
     }
-
-    // supabase.auth.getSession().then(({ data: { session } }) => {
-    //   setSession(supabaseUtils.toLocalSession(session));
-    // });
-
-    // supabase.auth.onAuthStateChange((_event, session) => {
-    //   setSession(supabaseUtils.toLocalSession(session));
-    // });
   }, [isLoggedIn, setSession]);
 
   return (
