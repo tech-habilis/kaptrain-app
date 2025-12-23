@@ -6,6 +6,17 @@
     "email": "Email",
     "name": "Nom"
   },
+  "signIn": {
+    "loginToYourAccount": "Connecte-toi à ton compte",
+    "youDontHaveAnAccount": "Tu n’as pas de compte ?",
+    "signUp": "Inscris toi",
+    "emailAddress": "Adresse email",
+    "forgotPassword": "Mot de passe oublié ?",
+    "exampleEmail": "example@gmail.com",
+    "signIn": "Se connecter",
+    "signingIn": "Connexion en cours...",
+    "orConnectWith": "ou connecte toi avec"
+  },
   "menu": {
     "home": "Accueil",
     "profile": "Profil",
@@ -13,6 +24,11 @@
     "articles": "Articles"
   },
   "common": {
-    "helloWorld": "Bonjour tout le monde ! Ceci est un message de test pour ceux qui ont essayé la fonctionnalité de langue. Bien que les utilisateurs de cette application n'utilisent probablement que l'anglais, qui sait s'ils utilisent le français ou le japonais ?"
+    "helloWorld": "Bonjour tout le monde ! Ceci est un message de test pour ceux qui ont essayé la fonctionnalité de langue. Bien que les utilisateurs de cette application n'utilisent probablement que l'anglais, qui sait s'ils utilisent le français ou le japonais ?",
+    "password": "Mot de passe"
+  },
+  "error": {
+    "googleSignInFailed": "Échec de la connexion avec Google. Veuillez réessayer plus tard ou contacter le support.",
+    "emailAndPasswordRequired": "Email et mot de passe sont requis."
   }
 }

@@ -20,6 +20,7 @@ import { supabase, supabaseUtils } from "@/utilities/supabase";
 import { TSession } from "@/types";
 import Constants from "expo-constants";
 import { ROUTE_NAME } from "@/constants/route";
+import { useTranslation } from "react-i18next";
 
 type TEmailSignIn = {
   email: string;
@@ -78,6 +79,7 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
+  const { t } = useTranslation();
   const [[isLoadingSession, session], setSession] =
     useJsonStorageState<TSession>(STORAGE_KEY.SESSION);
   const [loggingInWith, setLoggingInWith] = useState<TSignInMethod | null>(
@@ -168,6 +170,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
   };
 
   const signInWithEmail = async ({ email, password }: TEmailSignIn) => {
+    if (!email || !password) {
+      toast.error(t("error.emailAndPasswordRequired"));
+      return;
+    }
+
     setLoggingInWith("email");
 
     const {

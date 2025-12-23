@@ -7,6 +7,7 @@ export const ROUTE_NAME = {
   TIPS: "tips",
   ARTICLES: "articles",
   SIGN_UP: "sign-up",
+  FORGOT_PASSWORD: "forgot-password",
 } as const;
 
 /**
@@ -22,4 +23,5 @@ export const ROUTE = {
   TIPS: `/${ROUTE_NAME.TABS}/${ROUTE_NAME.TIPS}` as const,
   ARTICLES: `/${ROUTE_NAME.TABS}/${ROUTE_NAME.ARTICLES}` as const,
   SIGN_UP: `/${ROUTE_NAME.SIGN_UP}` as const,
+  FORGOT_PASSWORD: `/${ROUTE_NAME.FORGOT_PASSWORD}` as const,
 } as const;

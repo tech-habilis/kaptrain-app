@@ -17,12 +17,12 @@ export const initI18n = async () => {
   let savedLanguage =
     (await SessionStorage.getItemAsync(STORAGE_KEY.LANGUAGE)) ||
     Localization.getLocales()[0].languageCode ||
-    "en";
+    "fr";
 
   i18n.use(initReactI18next).init({
     resources,
     lng: savedLanguage.split("-")[0], // Use the language part of the locale
-    fallbackLng: "en",
+    fallbackLng: "fr",
     interpolation: {
       escapeValue: false, // React already escapes values
     },

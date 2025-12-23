@@ -20,7 +20,8 @@ export const ColorConst = {
   error: '#FF604B',
 
   // others
-  link: '#04152D'
+  link: '#04152D',
+  secondary500: '#1A1C1E'
 }
 
 const tintColorLight = ColorConst.secondary

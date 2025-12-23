@@ -6,6 +6,17 @@
     "email": "Email",
     "name": "Name"
   },
+  "signIn": {
+    "loginToYourAccount": "Login to your account",
+    "youDontHaveAnAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "emailAddress": "Email Address",
+    "forgotPassword": "Forgot Password?",
+    "exampleEmail": "example@gmail.com",
+    "signIn": "Login",
+    "signingIn": "Logging in...",
+    "orConnectWith": "or connect with"
+  },
   "menu": {
     "home": "Home",
     "profile": "Profile",
@@ -13,9 +24,11 @@
     "articles": "Articles"
   },
   "common": {
-    "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?"
+    "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?",
+    "password": "Password"
   },
   "error": {
-    "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support."
+    "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",
+    "emailAndPasswordRequired": "Email and password are required."
   }
 }
