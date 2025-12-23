@@ -5,7 +5,7 @@ import { Text, Pressable, TextInput, View } from "react-native";
 export default function SignIn() {
   const {
     signUpWithEmail,
-    loggingInWith
+    loggingInWith,
   } = useSession();
 
   const [name, setName] = useState('');

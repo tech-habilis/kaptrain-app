@@ -19,6 +19,7 @@ import { toast } from "@/components/toast";
 import { supabase, supabaseUtils } from "@/utilities/supabase";
 import { TSession } from "@/types";
 import Constants from "expo-constants";
+import { ROUTE_NAME } from "@/constants/route";
 
 type TEmailSignIn = {
   email: string;
@@ -31,6 +32,8 @@ type TEmailSignUp = TEmailSignIn & {
 };
 
 type TSignInMethod = "email" | "google" | "apple";
+
+const appScheme = (Constants.expoConfig?.scheme as string) + "://";
 
 type TAuthContext = {
   signInWithApple: () => void;
@@ -107,6 +110,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
           id: credential.user,
           email: credential.email,
           name: fullName.length > 0 ? fullName : null,
+          avatarUrl: null,
         },
       });
 
@@ -211,7 +215,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       email: email,
       password: password,
       options: {
-        emailRedirectTo: Constants.expoConfig?.scheme as string,
+        emailRedirectTo: appScheme + ROUTE_NAME.SIGN_IN, // will redirect to appSheme://sign-in
         data: {
           name: name,
         },

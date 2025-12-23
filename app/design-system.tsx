@@ -1,5 +1,7 @@
 import Button from "@/components/button";
 import Line from "@/components/line";
+import { ROUTE } from "@/constants/route";
+import { router } from "expo-router";
 import { useState, ReactNode } from "react";
 import { ScrollView, Text, View } from "react-native";
 
@@ -59,6 +61,12 @@ export default function DesignSystem() {
             onPress={() => setSelectedComponent(component)}
           />
         ))}
+        <Button
+          text="Sign In"
+          size="small"
+          type="secondary"
+          onPress={() => router.push(ROUTE.SIGN_IN)}
+        />
       </ScrollView>
 
       <Line className="my-4" />
