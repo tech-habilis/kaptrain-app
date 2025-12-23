@@ -5,7 +5,7 @@ import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Text, Pressable, TextInput, View } from "react-native";
+import { Text, Pressable, TextInput, View, Platform } from "react-native";
 
 export default function SignIn() {
   const {
@@ -67,27 +67,30 @@ export default function SignIn() {
         </Link>
       </View>
 
-      <View className="flex flex-row gap-4 items-center justify-around">
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Standard}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={signInWithGoogle}
-        />
-
-        {canSignInWithApple && (
-          <AppleAuthentication.AppleAuthenticationButton
-            buttonType={
-              AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
-            }
-            buttonStyle={
-              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-            }
-            cornerRadius={5}
-            style={{ width: 44, height: 44 }}
-            onPress={signInWithApple}
+      {/* only support android for now */}
+      {Platform.OS === "android" && (
+        <View className="flex flex-row gap-4 items-center justify-around">
+          <GoogleSigninButton
+            size={GoogleSigninButton.Size.Standard}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={signInWithGoogle}
           />
-        )}
-      </View>
+
+          {canSignInWithApple && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={
+                AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+              }
+              buttonStyle={
+                AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+              }
+              cornerRadius={5}
+              style={{ width: 44, height: 44 }}
+              onPress={signInWithApple}
+            />
+          )}
+        </View>
+      )}
     </ThemedView>
   );
 }

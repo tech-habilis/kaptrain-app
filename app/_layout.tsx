@@ -21,12 +21,16 @@ import { useEffect } from "react";
 import * as Linking from "expo-linking";
 import { supabaseUtils } from "@/utilities/supabase";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { Platform } from "react-native";
 
 initI18n();
 
-GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_AUTH_WEB_CLIENT_ID,
-});
+// TODO: add support for iOS
+if (Platform.OS === 'android') {
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_AUTH_WEB_CLIENT_ID,
+  });
+}
 
 export const unstable_settings = {
   anchor: ROUTE_NAME.TABS,
