@@ -21,6 +21,7 @@ import { TSession } from "@/types";
 import Constants from "expo-constants";
 import { ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
+import { appScheme } from "@/constants/misc";
 
 type TEmailSignIn = {
   email: string;
@@ -33,8 +34,6 @@ type TEmailSignUp = TEmailSignIn & {
 };
 
 type TSignInMethod = "email" | "google" | "apple";
-
-const appScheme = (Constants.expoConfig?.scheme as string) + "://";
 
 type TAuthContext = {
   signInWithApple: () => void;

@@ -1,16 +1,23 @@
-import { ImageBackground, Text } from "react-native";
+import { appName } from "@/constants/misc";
+import Text from "./text";
+import IcKaptrain from "./icons/kaptrain";
+import { FadeIn, FadeOut } from "react-native-reanimated";
+import { AnimatedImageBackground } from "./animated";
 
 export default function CustomSplash() {
   return (
-    <ImageBackground
+    <AnimatedImageBackground
       source={require("../assets/images/onboarding-0.png")}
       className="w-full h-full flex items-center justify-center"
+      entering={FadeIn}
+      exiting={FadeOut}
     >
-      <Text className="text-white text-[44px] font-bold mb-4">KAPTRAIN</Text>
-      <Text className="text-white font-medium">
-        L’Expertise de haut niveau,
+      <IcKaptrain />
+      <Text className="text-white text-[44px] font-bold mb-4 mt-3.5 uppercase">
+        {appName}
       </Text>
-      <Text className="text-white font-medium"> accessible à tous</Text>
-    </ImageBackground>
+      <Text className="text-white font-medium">landing.text1</Text>
+      <Text className="text-white font-medium">landing.text2</Text>
+    </AnimatedImageBackground>
   );
 }

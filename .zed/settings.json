@@ -34,10 +34,11 @@
           "backdropColorClassName",
           "backgroundColorClassName",
           "ListFooterComponentClassName",
-          "ListHeaderComponentClassName"
+          "ListHeaderComponentClassName",
+          "textClassName",
         ],
-        "classFunctions": ["useResolveClassNames", "tv"]
-      }
-    }
-  }
+        "classFunctions": ["useResolveClassNames", "tv"],
+      },
+    },
+  },
 }

@@ -26,7 +26,7 @@ import { Platform } from "react-native";
 initI18n();
 
 // TODO: add support for iOS
-if (Platform.OS === 'android') {
+if (Platform.OS === "android") {
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_AUTH_WEB_CLIENT_ID,
   });
@@ -99,8 +99,8 @@ function RootNavigator() {
 
       {/* non-loggedin stack */}
       <Stack.Protected guard={!isLoggedIn}>
-
         {/*{__DEV__ && <Stack.Screen name='design-system' />}*/}
+        <Stack.Screen name={ROUTE_NAME.LANDING} />
         <Stack.Screen name={ROUTE_NAME.SIGN_IN} />
       </Stack.Protected>
     </Stack>

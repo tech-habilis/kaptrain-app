@@ -9,6 +9,10 @@ import { View, ImageBackground } from "react-native";
 import Text from "@/components/text";
 import IcGoogle from "@/components/icons/google";
 import IcApple from "@/components/icons/apple";
+import { appName } from "@/constants/misc";
+import IcEyeOff from "@/components/icons/eye-off";
+import IcEye from "@/components/icons/eye";
+import IcCheck from "@/components/icons/check";
 
 export default function SignIn() {
   const {
@@ -22,6 +26,7 @@ export default function SignIn() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <View className="w-full h-full flex bg-white">
@@ -30,7 +35,9 @@ export default function SignIn() {
         <View className="px-4 pb-6 pt-2">
           <View className="flex flex-row gap-[4.5px] items-center pt-safe">
             <IcKaptrain size={18} />
-            <Text className="text-white text-lg font-bold">KAPTRAIN</Text>
+            <Text className="text-white text-lg font-bold uppercase">
+              {appName}
+            </Text>
           </View>
           <Text className="text-white text-2xl font-bold mt-3">
             signIn.loginToYourAccount
@@ -55,21 +62,28 @@ export default function SignIn() {
           onChangeText={setEmail}
           placeholder="signIn.exampleEmail"
           autoCapitalize="none"
+          rightIcon={<IcCheck size={24} />}
+          keyboardType="email-address"
         />
         <Input
           label="common.password"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           placeholder="common.password"
           className="mt-6"
+          rightIcon={
+            showPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
+          }
+          onRightIconPress={() => setShowPassword((prev) => !prev)}
+          keyboardType={showPassword ? "visible-password" : "default"}
         />
         <ButtonLink
           href={ROUTE.FORGOT_PASSWORD}
           size="small"
           text="signIn.forgotPassword"
           className="self-end mt-2"
-          textClassName="text-text"
+          textClassName="text-text font-medium"
         />
         <Button
           onPress={() =>
@@ -83,7 +97,7 @@ export default function SignIn() {
             loggingInWith === "email" ? "signIn.signingIn" : "signIn.signIn"
           }
           className="mt-8"
-          loading={loggingInWith === 'email'}
+          loading={loggingInWith === "email"}
         />
       </View>
 
