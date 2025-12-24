@@ -25,7 +25,8 @@
   },
   "common": {
     "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?",
-    "password": "Password"
+    "password": "Password",
+    "next": "Next"
   },
   "error": {
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",

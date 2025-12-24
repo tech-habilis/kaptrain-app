@@ -17,20 +17,24 @@ import { SafeAreaListener } from "react-native-safe-area-context";
 import { Uniwind } from "uniwind";
 import { Toasts } from "@backpackapp-io/react-native-toast";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useEffect } from "react";
-import * as Linking from "expo-linking";
-import { supabaseUtils } from "@/utilities/supabase";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Platform } from "react-native";
 
-initI18n();
+/**
+ * Place all initialization logic here for easier management
+ */
+const initializeApp = () => {
+  initI18n();
 
-// TODO: add support for iOS
-if (Platform.OS === "android") {
-  GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_AUTH_WEB_CLIENT_ID,
-  });
-}
+  // TODO: add support for iOS
+  if (Platform.OS === "android") {
+    GoogleSignin.configure({
+      webClientId: process.env.EXPO_PUBLIC_GOOGLE_AUTH_WEB_CLIENT_ID,
+    });
+  }
+};
+
+initializeApp();
 
 export const unstable_settings = {
   anchor: ROUTE_NAME.TABS,
@@ -60,27 +64,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isLoggedIn, setSession } = useSession();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      Linking.parseInitialURLAsync()
-        .then(async (url) => {
-          const session = await supabaseUtils
-            .createSessionFromUrl(url)
-            .catch((err) => {
-              console.log("failed to create session from url", err);
-            });
-
-          if (session) {
-            setSession(supabaseUtils.toLocalSession(session));
-          }
-        })
-        .catch((err) => {
-          console.log("failed to set session from url", err);
-        });
-    }
-  }, [isLoggedIn, setSession]);
+  const { isFirstOpen, isLoggedIn } = useSession();
 
   return (
     <Stack
@@ -100,8 +84,15 @@ function RootNavigator() {
       {/* non-loggedin stack */}
       <Stack.Protected guard={!isLoggedIn}>
         {/*{__DEV__ && <Stack.Screen name='design-system' />}*/}
-        <Stack.Screen name={ROUTE_NAME.LANDING} />
-        <Stack.Screen name={ROUTE_NAME.SIGN_IN} />
+
+        <Stack.Protected guard={isFirstOpen}>
+          <Stack.Screen name={ROUTE_NAME.ONBOARDING} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={!isFirstOpen}>
+          <Stack.Screen name={ROUTE_NAME.LANDING} />
+          <Stack.Screen name={ROUTE_NAME.SIGN_IN} />
+        </Stack.Protected>
       </Stack.Protected>
     </Stack>
   );

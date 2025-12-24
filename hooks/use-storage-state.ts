@@ -104,3 +104,20 @@ export function useJsonStorageState<T>(key: string): UseStateHook<T> {
 
   return [state, setValue];
 }
+
+export function getStorageValue(key: string) {
+  if (Platform.OS === "web") {
+    try {
+      if (typeof localStorage !== "undefined") {
+        return Promise.resolve(localStorage.getItem(key));
+      }
+
+      return Promise.resolve(null);
+    } catch (e) {
+      console.error("Local storage is unavailable:", e);
+      return Promise.resolve(null);
+    }
+  } else {
+    return SecureStorage.getItemAsync(key);
+  }
+}

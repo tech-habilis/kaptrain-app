@@ -1,5 +1,8 @@
 import { STORAGE_KEY } from "@/constants/storage-key";
-import { useJsonStorageState } from "@/hooks/use-storage-state";
+import {
+  useJsonStorageState,
+  useStorageState,
+} from "@/hooks/use-storage-state";
 import {
   createContext,
   PropsWithChildren,
@@ -18,7 +21,6 @@ import { router } from "expo-router";
 import { toast } from "@/components/toast";
 import { supabase, supabaseUtils } from "@/utilities/supabase";
 import { TSession } from "@/types";
-import Constants from "expo-constants";
 import { ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
 import { appScheme } from "@/constants/misc";
@@ -43,6 +45,7 @@ type TAuthContext = {
   signOut: () => void;
   deleteAccount: () => void;
   setSession: (value: TSession | null) => void;
+  setFirstOpenTimestamp: () => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -50,6 +53,7 @@ type TAuthContext = {
   isLoggedIn: boolean;
   canSignInWithApple: boolean;
   loggingInWith: TSignInMethod | null;
+  isFirstOpen: boolean;
 };
 
 const AuthContext = createContext<TAuthContext>({
@@ -60,6 +64,7 @@ const AuthContext = createContext<TAuthContext>({
   signOut: () => {},
   deleteAccount: () => {},
   setSession: () => {},
+  setFirstOpenTimestamp: () => {},
 
   session: null,
   isLoadingSession: false,
@@ -67,6 +72,7 @@ const AuthContext = createContext<TAuthContext>({
   isLoggedIn: false,
   canSignInWithApple: false,
   loggingInWith: null,
+  isFirstOpen: false,
 });
 
 export function useSession() {
@@ -87,6 +93,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isLoggingIn = loggingInWith !== null;
   const [canSignInWithApple, setCanSignInWithApple] = useState(false);
   const [fetchingSession, setFetchingSession] = useState(false);
+  const [
+    [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
+    setFirstOpenTimestamp,
+  ] = useStorageState(STORAGE_KEY.FIRST_OPEN_TIMESTAMP);
+  const isFirstOpen =
+    !isLoadingFirstOpenTimestamp && firstOpenTimestamp === null;
 
   const signInWithApple = async () => {
     try {
@@ -294,13 +306,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signOut,
         deleteAccount,
         setSession,
+        setFirstOpenTimestamp: () => {
+          const timestamp = Date.now();
+          setFirstOpenTimestamp(timestamp.toString());
+        },
 
         session,
-        isLoadingSession: isLoadingSession || fetchingSession,
+        isLoadingSession: isLoadingSession || fetchingSession || isLoadingFirstOpenTimestamp,
         isLoggingIn,
         isLoggedIn: !!session?.accessToken,
         canSignInWithApple,
         loggingInWith,
+        isFirstOpen,
       }}
     >
       {children}

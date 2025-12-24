@@ -9,6 +9,7 @@ export const ROUTE_NAME = {
   SIGN_UP: "sign-up",
   FORGOT_PASSWORD: "forgot-password",
   LANDING: "landing",
+  ONBOARDING: "onboarding",
 } as const;
 
 /**
@@ -26,4 +27,5 @@ export const ROUTE = {
   SIGN_UP: `/${ROUTE_NAME.SIGN_UP}` as const,
   FORGOT_PASSWORD: `/${ROUTE_NAME.FORGOT_PASSWORD}` as const,
   LANDING: `/${ROUTE_NAME.LANDING}` as const,
+  ONBOARDING: `/${ROUTE_NAME.ONBOARDING}` as const,
 } as const;
