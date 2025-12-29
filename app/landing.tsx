@@ -30,9 +30,13 @@ export default function LandingScreen() {
             className="w-full"
             onPress={() => router.push(ROUTE.SIGN_IN)}
           />
-          <Button text="Inscription" className="my-2 w-full " onPress={() => {
-            setStorageItemAsync(STORAGE_KEY.FIRST_OPEN_TIMESTAMP, null)
-          }} />
+          <Button
+            text="Inscription"
+            className="my-2 w-full "
+            onPress={() => {
+              setStorageItemAsync(STORAGE_KEY.FIRST_OPEN_TIMESTAMP, null);
+            }}
+          />
         </View>
       </View>
     </ImageBackground>

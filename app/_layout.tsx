@@ -45,7 +45,6 @@ export default function RootLayout() {
 
   return (
     <SessionProvider>
-      <SplashScreenController />
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <SafeAreaListener
           onChange={({ insets }) => {
@@ -53,7 +52,8 @@ export default function RootLayout() {
           }}
         >
           <GestureHandlerRootView>
-            <RootNavigator />
+
+            <SplashScreenController onFinishRender={<RootNavigator />} />
             <Toasts />
           </GestureHandlerRootView>
         </SafeAreaListener>
@@ -86,7 +86,7 @@ function RootNavigator() {
         {/*{__DEV__ && <Stack.Screen name='design-system' />}*/}
 
         <Stack.Protected guard={isFirstOpen}>
-          <Stack.Screen name={ROUTE_NAME.ONBOARDING} />
+          <Stack.Screen name={ROUTE_NAME.ONBOARDING} options={{animation: 'fade'}} />
         </Stack.Protected>
 
         <Stack.Protected guard={!isFirstOpen}>
