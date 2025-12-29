@@ -52,7 +52,6 @@ export default function RootLayout() {
           }}
         >
           <GestureHandlerRootView>
-
             <SplashScreenController onFinishRender={<RootNavigator />} />
             <Toasts />
           </GestureHandlerRootView>
@@ -86,11 +85,15 @@ function RootNavigator() {
         {/*{__DEV__ && <Stack.Screen name='design-system' />}*/}
 
         <Stack.Protected guard={isFirstOpen}>
-          <Stack.Screen name={ROUTE_NAME.ONBOARDING} options={{animation: 'fade'}} />
+          <Stack.Screen
+            name={ROUTE_NAME.ONBOARDING}
+            options={{ animation: "fade" }}
+          />
         </Stack.Protected>
 
         <Stack.Protected guard={!isFirstOpen}>
           <Stack.Screen name={ROUTE_NAME.LANDING} />
+          <Stack.Screen name={ROUTE_NAME.SIGN_UP} />
           <Stack.Screen name={ROUTE_NAME.SIGN_IN} />
         </Stack.Protected>
       </Stack.Protected>

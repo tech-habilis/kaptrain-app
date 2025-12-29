@@ -10,6 +10,8 @@ export const ROUTE_NAME = {
   FORGOT_PASSWORD: "forgot-password",
   LANDING: "landing",
   ONBOARDING: "onboarding",
+  VERIFY_EMAIL: "verify-email",
+  EMAIL_VERIFIED: "email-verified",
 } as const;
 
 /**
@@ -28,4 +30,6 @@ export const ROUTE = {
   FORGOT_PASSWORD: `/${ROUTE_NAME.FORGOT_PASSWORD}` as const,
   LANDING: `/${ROUTE_NAME.LANDING}` as const,
   ONBOARDING: `/${ROUTE_NAME.ONBOARDING}` as const,
+  VERIFY_EMAIL: `/${ROUTE_NAME.VERIFY_EMAIL}` as const,
+  EMAIL_VERIFIED: `/${ROUTE_NAME.EMAIL_VERIFIED}` as const,
 } as const;

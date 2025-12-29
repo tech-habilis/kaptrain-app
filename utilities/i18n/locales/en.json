@@ -26,10 +26,32 @@
   "common": {
     "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?",
     "password": "Password",
-    "next": "Next"
+    "next": "Next",
+    "verify": "Verify"
   },
   "error": {
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",
     "emailAndPasswordRequired": "Email and password are required."
+  },
+  "signUp": {
+    "noAccountSignUp": "No account?\nSign up",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login",
+    "createPassword": "Create a password",
+    "confirmPassword": "Confirm password",
+    "passwordRequirements": "Min. 8 characters, 1 uppercase, 1 number, 1 special character",
+    "confirmPasswordPlaceholder": "Repeat password",
+    "agreeByCreatingAccount": "By creating an account, you agree to the <1>Terms of Use</1> and our <3>data processing policy.</3>",
+    "createAccount": "Create account"
+  },
+  "verifyEmail": {
+    "checkMyEmail": "Check my email",
+    "codeSentToEmail": "A code has been sent to",
+    "didntReceiveCode": "Didn't receive the code?",
+    "resendCode": "Resend code"
+  },
+  "emailVerified": {
+    "emailVerified": "Email verified",
+    "emailVerifiedDescription": "Your email address has been successfully verified"
   }
 }

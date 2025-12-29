@@ -26,7 +26,8 @@
   "common": {
     "helloWorld": "Bonjour tout le monde ! Ceci est un message de test pour ceux qui ont essayé la fonctionnalité de langue. Bien que les utilisateurs de cette application n'utilisent probablement que l'anglais, qui sait s'ils utilisent le français ou le japonais ?",
     "password": "Mot de passe",
-    "next": "Suivant"
+    "next": "Suivant",
+    "verify": "Vérifier"
   },
   "error": {
     "googleSignInFailed": "Échec de la connexion avec Google. Veuillez réessayer plus tard ou contacter le support.",
@@ -35,5 +36,26 @@
   "landing": {
     "text1": "L’Expertise de haut niveau,",
     "text2": "accessible à tous"
+  },
+  "signUp": {
+    "noAccountSignUp": "Pas de compte ?\nInscris toi",
+    "alreadyHaveAccount": "Tu as déjà un compte ?",
+    "login": "Connecte toi",
+    "createPassword": "Crée un mot de passe",
+    "confirmPassword": "Confirme ton mot de passe",
+    "passwordRequirements": "Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial",
+    "confirmPasswordPlaceholder": "Répéter le mot de passe",
+    "agreeByCreatingAccount": "En créant un compte, tu acceptes les <1>Conditions d’utilisation</1> et notre <3>politique de traitement des données.</3>",
+    "createAccount": "Créer un compte"
+  },
+  "verifyEmail": {
+    "checkMyEmail": "Vérifier mon e-mail",
+    "codeSentToEmail": "Un code a été envoyé à",
+    "didntReceiveCode": "Tu n’as pas reçu le code ?",
+    "resendCode": "Renvoyer le code"
+  },
+  "emailVerified": {
+    "emailVerified": "Mail vérifié",
+    "emailVerifiedDescription": "Ton adresse mail a été vérifiée avec\nsuccès"
   }
 }
