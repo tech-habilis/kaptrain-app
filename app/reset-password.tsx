@@ -8,8 +8,9 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
 
-export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+export default function ResetPassword() {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   return (
     <View className="py-safe px-4 flex-1 bg-white">
@@ -18,19 +19,29 @@ export default function ForgotPassword() {
         <IcArrowLeft />
       </Pressable>
       <Text className="text-2xl text-secondary font-bold mt-2">
-        Mot de passe oublié ?
+        {"Créer un nouveau mot de\npasse"}
       </Text>
       <Text className="text-subtleText mt-1">
         {
-          "Pour réinitialiser ton mot de passe, entre ton adresse email ci-dessous.\n\nTu recevras un lien par mail pour créer un nouveau mot de passe."
+          "Pour sécuriser ton compte, crée un mot de\npasse contenant au moins 8 caractères,\nune majuscule, une minuscule, un chiffre et\nun caractère spécial (ex : !, ?, @)."
         }
       </Text>
 
       <Input
-        label="signIn.emailAddress"
-        placeholder="signIn.exampleEmail"
-        value={email}
-        onChangeText={setEmail}
+        label="Crée un nouveau mot de passe"
+        placeholder="Nouveau mot de passe"
+        value={password}
+        onChangeText={setPassword}
+        className="mt-8"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+
+      <Input
+        label="signUp.confirmPassword"
+        placeholder="signUp.confirmPasswordPlaceholder"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
         className="mt-8"
         keyboardType="email-address"
         autoCapitalize="none"
@@ -40,10 +51,11 @@ export default function ForgotPassword() {
 
       <Button
         className="mb-6"
-        text="common.next"
-        disabled={!email}
+        text="common.verify"
+        disabled={!password || !confirmPassword}
         onPress={() => {
-          router.replace(ROUTE.PASSWORD_RESET_SENT);
+          router.dismissAll();
+          router.push(ROUTE.PASSWORD_CHANGED);
         }}
       />
     </View>
