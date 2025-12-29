@@ -1,12 +1,42 @@
 import Button from "@/components/button";
+import { Choices, TChoice } from "@/components/choices";
 import Line from "@/components/line";
 import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";
 import { useState, ReactNode } from "react";
 import { ScrollView, Text, View } from "react-native";
 
-const components = ["Button", "Switch", "Radio", "Checkbox"] as const;
+const components = [
+  "Button",
+  "Choices",
+  "Switch",
+  "Radio",
+  "Checkbox",
+] as const;
 type ComponentType = (typeof components)[number];
+
+const ChoicesExample = () => {
+  const options = [
+    { text: "Option 1", },
+    { text: "Option 2", },
+    { text: "Option 3", },
+  ];
+
+  const [option, setOption] = useState<TChoice>();
+
+  const options2 = [
+    { text: "Option 1", secondaryText: "Secondary text 1" },
+    { text: "Option 2", secondaryText: "Secondary text 2" },
+    { text: "Option 3", secondaryText: "Secondary text 3" },
+  ];
+
+  const [option2, setOption2] = useState<TChoice>();
+
+  return (
+    <View className="flex flex-col gap-4">
+    </View>
+  );
+};
 
 const componentMap: Record<ComponentType, ReactNode> = {
   Button: (
@@ -35,6 +65,7 @@ const componentMap: Record<ComponentType, ReactNode> = {
       />
     </View>
   ),
+  Choices: <ChoicesExample />,
   Switch: <></>,
   Radio: <></>,
   Checkbox: <></>,

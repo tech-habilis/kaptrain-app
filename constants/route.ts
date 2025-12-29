@@ -12,6 +12,7 @@ export const ROUTE_NAME = {
   ONBOARDING: "onboarding",
   VERIFY_EMAIL: "verify-email",
   EMAIL_VERIFIED: "email-verified",
+  COMPLETE_PROFILE: "complete-profile",
 } as const;
 
 /**
@@ -32,4 +33,5 @@ export const ROUTE = {
   ONBOARDING: `/${ROUTE_NAME.ONBOARDING}` as const,
   VERIFY_EMAIL: `/${ROUTE_NAME.VERIFY_EMAIL}` as const,
   EMAIL_VERIFIED: `/${ROUTE_NAME.EMAIL_VERIFIED}` as const,
+  COMPLETE_PROFILE: `/${ROUTE_NAME.COMPLETE_PROFILE}` as const,
 } as const;

@@ -52,6 +52,7 @@
   },
   "emailVerified": {
     "emailVerified": "Email verified",
-    "emailVerifiedDescription": "Your email address has been successfully verified"
+    "emailVerifiedDescription": "Your email address has been successfully verified",
+    "completeProfile": "Complete my profile"
   }
 }
