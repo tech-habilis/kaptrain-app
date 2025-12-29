@@ -12,7 +12,12 @@ export const ROUTE_NAME = {
   ONBOARDING: "onboarding",
   VERIFY_EMAIL: "verify-email",
   EMAIL_VERIFIED: "email-verified",
-  COMPLETE_PROFILE: "complete-profile",
+  COMPLETE_PROFILE_1: "complete-profile-1",
+  COMPLETE_PROFILE_2: "complete-profile-2",
+  COMPLETE_PROFILE_3: "complete-profile-3",
+  COMPLETE_PROFILE_4: "complete-profile-4",
+  COMPLETE_PROFILE_5: "complete-profile-5",
+  PROFILE_COMPLETED: "profile-completed",
 } as const;
 
 /**
@@ -33,5 +38,10 @@ export const ROUTE = {
   ONBOARDING: `/${ROUTE_NAME.ONBOARDING}` as const,
   VERIFY_EMAIL: `/${ROUTE_NAME.VERIFY_EMAIL}` as const,
   EMAIL_VERIFIED: `/${ROUTE_NAME.EMAIL_VERIFIED}` as const,
-  COMPLETE_PROFILE: `/${ROUTE_NAME.COMPLETE_PROFILE}` as const,
+  COMPLETE_PROFILE_1: `/${ROUTE_NAME.COMPLETE_PROFILE_1}` as const,
+  COMPLETE_PROFILE_2: `/${ROUTE_NAME.COMPLETE_PROFILE_2}` as const,
+  COMPLETE_PROFILE_3: `/${ROUTE_NAME.COMPLETE_PROFILE_3}` as const,
+  COMPLETE_PROFILE_4: `/${ROUTE_NAME.COMPLETE_PROFILE_4}` as const,
+  COMPLETE_PROFILE_5: `/${ROUTE_NAME.COMPLETE_PROFILE_5}` as const,
+  PROFILE_COMPLETED: `/${ROUTE_NAME.PROFILE_COMPLETED}` as const,
 } as const;

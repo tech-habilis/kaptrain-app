@@ -36,10 +36,6 @@ const initializeApp = () => {
 
 initializeApp();
 
-export const unstable_settings = {
-  anchor: ROUTE_NAME.TABS,
-};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -63,7 +59,9 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isFirstOpen, isLoggedIn } = useSession();
+  const { isFirstOpen, isLoggedIn, showCompleteProfileForm } = useSession();
+  console.log('isLoggedIn', isLoggedIn);
+  console.log('showCompleteProfileForm', showCompleteProfileForm);
 
   return (
     <Stack
@@ -73,6 +71,8 @@ function RootNavigator() {
     >
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
+        <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE_1} />
+
         <Stack.Screen name={ROUTE_NAME.TABS} />
         <Stack.Screen
           name="modal"

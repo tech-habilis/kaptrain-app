@@ -90,7 +90,10 @@ export default function VerifyEmail() {
 
       <Button
         text="common.verify"
-        onPress={() => router.push(ROUTE.EMAIL_VERIFIED)}
+        onPress={() => {
+          router.dismissAll();
+          router.replace(ROUTE.EMAIL_VERIFIED);
+        }}
         className="mb-6"
       />
     </View>

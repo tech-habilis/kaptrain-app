@@ -4,11 +4,13 @@ import IcPlus from "@/components/icons/plus";
 import IcUser from "@/components/icons/user";
 import Input from "@/components/input";
 import Text from "@/components/text";
+import { ROUTE } from "@/constants/route";
 import cn from "@/utilities/cn";
+import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, View } from "react-native";
 
-export default function CompleteProfile() {
+export default function CompleteProfile1() {
   const genders = [
     { text: "Femme" },
     { text: "Homme" },
@@ -62,9 +64,9 @@ export default function CompleteProfile() {
           </View>
         </View>
       </ScrollView>
-      <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 bg-white">
+      <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text>Étape 1/5</Text>
+          <Text className="text-subtleText">Étape 1/5</Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View
@@ -77,7 +79,11 @@ export default function CompleteProfile() {
             ))}
           </View>
         </View>
-        <Button text="Continuer" className="grow" />
+        <Button
+          text="Continuer"
+          className="grow h-full"
+          onPress={() => router.push(ROUTE.COMPLETE_PROFILE_2)}
+        />
       </View>
     </>
   );

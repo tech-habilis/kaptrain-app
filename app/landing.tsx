@@ -5,6 +5,8 @@ import Button from "@/components/button";
 import { useRouter } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import { appName } from "@/constants/misc";
+import { setStorageItemAsync } from "@/hooks/use-storage-state";
+import { STORAGE_KEY } from "@/constants/storage-key";
 
 export default function LandingScreen() {
   const router = useRouter();
@@ -33,7 +35,8 @@ export default function LandingScreen() {
             className="my-2 w-full "
             onPress={() => {
               // setStorageItemAsync(STORAGE_KEY.FIRST_OPEN_TIMESTAMP, null);
-              router.push(ROUTE.SIGN_UP)
+              setStorageItemAsync(STORAGE_KEY.PROFILE_COMPLETED_AT, null);
+              router.push(ROUTE.SIGN_UP);
             }}
           />
         </View>

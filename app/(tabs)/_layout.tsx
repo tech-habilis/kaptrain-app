@@ -33,24 +33,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name={ROUTE_NAME.TIPS}
-        options={{
-          title: t("menu.tips"),
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="message.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name={ROUTE_NAME.ARTICLES}
-        options={{
-          title: t("menu.articles"),
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="doc.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name={ROUTE_NAME.PROFILE}
         options={{
           title: t("menu.profile"),

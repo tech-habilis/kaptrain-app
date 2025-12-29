@@ -46,6 +46,7 @@ type TAuthContext = {
   deleteAccount: () => void;
   setSession: (value: TSession | null) => void;
   setFirstOpenTimestamp: () => void;
+  setProfileCompleted: () => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -54,6 +55,7 @@ type TAuthContext = {
   canSignInWithApple: boolean;
   loggingInWith: TSignInMethod | null;
   isFirstOpen: boolean;
+  showCompleteProfileForm: boolean;
 };
 
 const AuthContext = createContext<TAuthContext>({
@@ -65,6 +67,7 @@ const AuthContext = createContext<TAuthContext>({
   deleteAccount: () => {},
   setSession: () => {},
   setFirstOpenTimestamp: () => {},
+  setProfileCompleted: () => {},
 
   session: null,
   isLoadingSession: false,
@@ -73,6 +76,7 @@ const AuthContext = createContext<TAuthContext>({
   canSignInWithApple: false,
   loggingInWith: null,
   isFirstOpen: false,
+  showCompleteProfileForm: false,
 });
 
 export function useSession() {
@@ -99,6 +103,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
   ] = useStorageState(STORAGE_KEY.FIRST_OPEN_TIMESTAMP);
   const isFirstOpen =
     !isLoadingFirstOpenTimestamp && firstOpenTimestamp === null;
+
+  const [
+    [isLoadingProfileCompletedAt, profileCompletedAt],
+    setProfileCompletedAt,
+  ] = useStorageState(STORAGE_KEY.PROFILE_COMPLETED_AT);
 
   const signInWithApple = async () => {
     try {
@@ -310,14 +319,23 @@ export function SessionProvider({ children }: PropsWithChildren) {
           const timestamp = Date.now();
           setFirstOpenTimestamp(timestamp.toString());
         },
+        setProfileCompleted: () => {
+          const timestamp = Date.now();
+          setProfileCompletedAt(timestamp.toString());
+        },
 
         session,
-        isLoadingSession: isLoadingSession || fetchingSession || isLoadingFirstOpenTimestamp,
+        isLoadingSession:
+          isLoadingSession ||
+          fetchingSession ||
+          isLoadingFirstOpenTimestamp ||
+          isLoadingProfileCompletedAt,
         isLoggingIn,
         isLoggedIn: !!session?.accessToken,
         canSignInWithApple,
         loggingInWith,
         isFirstOpen,
+        showCompleteProfileForm: profileCompletedAt === null,
       }}
     >
       {children}
