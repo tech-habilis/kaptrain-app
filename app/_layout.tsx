@@ -69,6 +69,9 @@ function RootNavigator() {
         headerShown: false,
       }}
     >
+
+      <Stack.Screen name={ROUTE_NAME.WELLNESS} />
+
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE_1} />

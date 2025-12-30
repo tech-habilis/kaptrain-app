@@ -21,6 +21,7 @@ export const ROUTE_NAME = {
   COMPLETE_PROFILE_4: "complete-profile-4",
   COMPLETE_PROFILE_5: "complete-profile-5",
   PROFILE_COMPLETED: "profile-completed",
+  WELLNESS: "wellness"
 } as const;
 
 /**
@@ -50,4 +51,5 @@ export const ROUTE = {
   COMPLETE_PROFILE_4: `/${ROUTE_NAME.COMPLETE_PROFILE_4}` as const,
   COMPLETE_PROFILE_5: `/${ROUTE_NAME.COMPLETE_PROFILE_5}` as const,
   PROFILE_COMPLETED: `/${ROUTE_NAME.PROFILE_COMPLETED}` as const,
+  WELLNESS: `/${ROUTE_NAME.WELLNESS}` as const,
 } as const;
