@@ -17,28 +17,28 @@ export default function CompleteProfile2() {
           <IcArrowLeft />
         </Pressable>
         <Text className="text-2xl text-secondary font-bold mt-2">
-          Indiquer mon poids actuel
+          completeProfile.step2.title
         </Text>
         <Text className="text-subtleText mt-1">
-          {`C’est important pour suivre ton évolution,\ntu pourras l'ajuster à tout moment.`}
+          completeProfile.step2.description
         </Text>
 
         <Input
-          label="Votre poids actuel"
+          label="completeProfile.step2.currentWeight"
           className="mt-8"
           placeholder="00.00"
           type="unit"
           unit="kg"
         />
         <Button
-          text="Je préfère ne pas répondre"
+          text="completeProfile.step2.preferNotToAnswer"
           type="secondary"
           className="rounded-lg mt-3"
         />
       </View>
-      <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 py-6 bg-white">
+      <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">Étape 2/5</Text>
+          <Text className="text-subtleText">completeProfile.step2.progress</Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View
@@ -52,8 +52,8 @@ export default function CompleteProfile2() {
           </View>
         </View>
         <Button
-          text="Continuer"
-          className="grow h-full"
+          text="common.continue"
+          className="grow"
           onPress={() => router.push(ROUTE.COMPLETE_PROFILE_3)}
         />
       </View>

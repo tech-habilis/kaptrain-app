@@ -21,10 +21,10 @@ export default function PasswordChanged() {
 
         <IcCheckVerified />
         <Text className="text-white text-2xl font-bold text-center">
-          {"Ton mot de passe a été\nmis à jour"}
+          passwordChanged.title
         </Text>
         <Text className="text-white text-base text-center">
-          {"Tu peux désormais te connecter avec\nton nouveau mot de passe."}
+          passwordChanged.description
         </Text>
 
         <View className="grow" />

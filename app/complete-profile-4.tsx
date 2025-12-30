@@ -19,35 +19,37 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Pressable, ScrollView, View, Text as RawText } from "react-native";
 import { cn } from "tailwind-variants";
+import { useTranslation } from "react-i18next";
 
 export default function CompleteProfile4() {
+  const { t } = useTranslation();
   const choices: TChoice[] = [
     {
-      text: "Athlétisme",
+      text: "sports.athletics",
       leftIcon: <IcCycling />,
     },
     {
-      text: "Aviron",
+      text: "sports.rowing",
       leftIcon: <IcRowing />,
     },
     {
-      text: "Basketball",
+      text: "sports.basketball",
       leftIcon: <IcBasketball />,
     },
     {
-      text: "Crossfit",
+      text: "sports.crossfit",
       leftIcon: <IcCrossfit />,
     },
     {
-      text: "Cyclisme",
+      text: "sports.cycling",
       leftIcon: <IcCycling />,
     },
     {
-      text: "Musculation",
+      text: "sports.bodybuilding",
       leftIcon: <IcBodybuilding />,
     },
     {
-      text: "Yoga",
+      text: "sports.yoga",
       leftIcon: <IcYoga />,
     },
   ];
@@ -72,10 +74,10 @@ export default function CompleteProfile4() {
           <IcArrowLeft />
         </Pressable>
         <Text className="text-2xl text-secondary font-bold mt-2">
-          {"Sélectionner mes sports\nfavoris"}
+          completeProfile.step4.title
         </Text>
         <Text className="text-subtleText mt-1">
-          Tu peux sélectionner jusqu’à 5 sports.
+          completeProfile.step4.description
         </Text>
 
         <View
@@ -98,8 +100,8 @@ export default function CompleteProfile4() {
         </View>
 
         <RawText className="text-subtleText mt-2">
-          {selectedChoices.length.toString()} sélectionnés{" "}
-          {selectedChoices.length === 5 ? ": limite atteinte" : null}
+          {selectedChoices.length.toString()} {t("completeProfile.step4.selected")}{" "}
+          {selectedChoices.length === 5 ? t("completeProfile.step4.limitReached") : null}
         </RawText>
 
         <View className="flex-row gap-4 mt-6 items-center">
@@ -124,9 +126,9 @@ export default function CompleteProfile4() {
           />
         </ScrollView>
       </View>
-      <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 py-6 bg-white">
+      <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">Étape 4/5</Text>
+          <Text className="text-subtleText">completeProfile.step4.progress</Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View
@@ -140,8 +142,8 @@ export default function CompleteProfile4() {
           </View>
         </View>
         <Button
-          text="Continuer"
-          className="grow h-full"
+          text="common.continue"
+          className="grow"
           onPress={() => router.push(ROUTE.COMPLETE_PROFILE_5)}
         />
       </View>

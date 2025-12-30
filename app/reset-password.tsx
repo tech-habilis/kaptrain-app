@@ -19,17 +19,15 @@ export default function ResetPassword() {
         <IcArrowLeft />
       </Pressable>
       <Text className="text-2xl text-secondary font-bold mt-2">
-        {"Créer un nouveau mot de\npasse"}
+        resetPassword.title
       </Text>
       <Text className="text-subtleText mt-1">
-        {
-          "Pour sécuriser ton compte, crée un mot de\npasse contenant au moins 8 caractères,\nune majuscule, une minuscule, un chiffre et\nun caractère spécial (ex : !, ?, @)."
-        }
+        resetPassword.description
       </Text>
 
       <Input
-        label="Crée un nouveau mot de passe"
-        placeholder="Nouveau mot de passe"
+        label="resetPassword.newPassword"
+        placeholder="resetPassword.newPasswordPlaceholder"
         value={password}
         onChangeText={setPassword}
         className="mt-8"

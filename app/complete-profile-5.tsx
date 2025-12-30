@@ -20,15 +20,14 @@ export default function CompleteProfile5() {
           <IcArrowLeft />
         </Pressable>
         <Text className="text-2xl text-secondary font-bold mt-2">
-          Tu as déjà un coach ?
+          completeProfile.step5.title
         </Text>
         <Text className="text-subtleText mt-1">
-          Si ton coach t’as envoyé une invitation, renseigne le code reçu par
-          mail. Sinon, tu pourras l’ajouter plus tard dans ton profil.
+          completeProfile.step5.description
         </Text>
 
         <Input
-          label="Entre ton code d’invitation"
+          label="completeProfile.step5.invitationCode"
           placeholder="EX : JNKMD701"
           value={invitationCode}
           onChangeText={(text) => {
@@ -39,13 +38,13 @@ export default function CompleteProfile5() {
         />
 
         <Button
-          text="Se connecter à mon coach"
+          text="completeProfile.step5.connectToCoach"
           className="mt-4"
           disabled={invitationCode.length === 0}
         />
 
         <Button
-          text="Continuer sans coach"
+          text="completeProfile.step5.continueWithoutCoach"
           type="tertiary"
           onPress={() => {
             router.dismissAll();
@@ -55,7 +54,7 @@ export default function CompleteProfile5() {
       </View>
       <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">Étape 5/5</Text>
+          <Text className="text-subtleText">completeProfile.step5.progress</Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View

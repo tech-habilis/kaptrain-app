@@ -16,25 +16,31 @@ const components = [
 type ComponentType = (typeof components)[number];
 
 const ChoicesExample = () => {
-  const options = [
-    { text: "Option 1", },
-    { text: "Option 2", },
-    { text: "Option 3", },
+  const genders = [
+    { text: "completeProfile.step1.genderFemale" },
+    { text: "completeProfile.step1.genderMale" },
+    { text: "completeProfile.step1.genderNonBinary" },
   ];
 
-  const [option, setOption] = useState<TChoice>();
-
-  const options2 = [
-    { text: "Option 1", secondaryText: "Secondary text 1" },
-    { text: "Option 2", secondaryText: "Secondary text 2" },
-    { text: "Option 3", secondaryText: "Secondary text 3" },
-  ];
-
-  const [option2, setOption2] = useState<TChoice>();
+  const [selectedGender, setSelectedGender] = useState<TChoice>(genders[0]);
 
   return (
-    <View className="flex flex-col gap-4">
-    </View>
+    <Choices
+      data={[
+        {
+          text: "completeProfile.step1.genderFemale",
+        },
+        {
+          text: "completeProfile.step1.genderMale",
+        },
+        {
+          text: "completeProfile.step1.genderNonBinary",
+        },
+      ]}
+      selectedChoice={selectedGender}
+      type="default"
+      onChange={(choice) => setSelectedGender(choice)}
+    />
   );
 };
 

@@ -8,7 +8,7 @@
   },
   "signIn": {
     "loginToYourAccount": "Connecte-toi à ton compte",
-    "youDontHaveAnAccount": "Tu n’as pas de compte ?",
+    "youDontHaveAnAccount": "Tu n'as pas de compte ?",
     "signUp": "Inscris toi",
     "emailAddress": "Adresse email",
     "forgotPassword": "Mot de passe oublié ?",
@@ -27,14 +27,15 @@
     "helloWorld": "Bonjour tout le monde ! Ceci est un message de test pour ceux qui ont essayé la fonctionnalité de langue. Bien que les utilisateurs de cette application n'utilisent probablement que l'anglais, qui sait s'ils utilisent le français ou le japonais ?",
     "password": "Mot de passe",
     "next": "Suivant",
-    "verify": "Vérifier"
+    "verify": "Vérifier",
+    "continue": "Continuer"
   },
   "error": {
     "googleSignInFailed": "Échec de la connexion avec Google. Veuillez réessayer plus tard ou contacter le support.",
     "emailAndPasswordRequired": "Email et mot de passe sont requis."
   },
   "landing": {
-    "text1": "L’Expertise de haut niveau,",
+    "text1": "L'Expertise de haut niveau,",
     "text2": "accessible à tous"
   },
   "signUp": {
@@ -45,18 +46,128 @@
     "confirmPassword": "Confirme ton mot de passe",
     "passwordRequirements": "Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial",
     "confirmPasswordPlaceholder": "Répéter le mot de passe",
-    "agreeByCreatingAccount": "En créant un compte, tu acceptes les <1>Conditions d’utilisation</1> et notre <3>politique de traitement des données.</3>",
+    "agreeByCreatingAccount": "En créant un compte, tu acceptes les <1>Conditions d'utilisation</1> et notre <3>politique de traitement des données.</3>",
     "createAccount": "Créer un compte"
   },
   "verifyEmail": {
     "checkMyEmail": "Vérifier mon e-mail",
     "codeSentToEmail": "Un code a été envoyé à",
-    "didntReceiveCode": "Tu n’as pas reçu le code ?",
+    "didntReceiveCode": "Tu n'as pas reçu le code ?",
     "resendCode": "Renvoyer le code"
   },
   "emailVerified": {
     "emailVerified": "Mail vérifié",
     "emailVerifiedDescription": "Ton adresse mail a été vérifiée avec\nsuccès",
     "completeProfile": "Compléter mon profil"
+  },
+  "completeProfile": {
+    "step1": {
+      "title": "Compléter les dernières\nétapes",
+      "description": "Indique tes informations personnelles pour créer ton profil.",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Votre prénom",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Votre nom",
+      "birthDate": "Date de naissance",
+      "birthDatePlaceholder": "JJ/MM/AAAA",
+      "gender": "Genre",
+      "genderFemale": "Femme",
+      "genderMale": "Homme",
+      "genderNonBinary": "Non-binaire",
+      "progress": "Étape 1/5"
+    },
+    "step2": {
+      "title": "Indiquer mon poids actuel",
+      "description": "C'est important pour suivre ton évolution,\ntu pourras l'ajuster à tout moment.",
+      "currentWeight": "Votre poids actuel",
+      "preferNotToAnswer": "Je préfère ne pas répondre",
+      "progress": "Étape 2/5"
+    },
+    "step3": {
+      "title": "Choisir mon niveau de\npratique sportive",
+      "description": "Afin de te proposer des programmes\nadaptés à ton niveau d'entraînement.",
+      "levelBeginner": "Débutant",
+      "levelBeginnerHours": "1 à 2h par semaine",
+      "levelIntermediate": "Intermédiaire",
+      "levelIntermediateHours": "3 à 4h par semaine",
+      "levelAdvanced": "Avancé",
+      "levelAdvancedHours": "5 à 7h par semaine",
+      "levelConfirmed": "Confirmé",
+      "levelConfirmedHours": "8 à 11h par semaine",
+      "levelExpert": "Expert",
+      "levelExpertHours": "+ de 12 par semaine",
+      "progress": "Étape 3/5"
+    },
+    "step4": {
+      "title": "Sélectionner mes sports\nfavoris",
+      "description": "Tu peux sélectionner jusqu'à 5 sports.",
+      "selected": "sélectionnés",
+      "limitReached": ": limite atteinte",
+      "progress": "Étape 4/5"
+    },
+    "step5": {
+      "title": "Tu as déjà un coach ?",
+      "description": "Si ton coach t'as envoyé une invitation, renseigne le code reçu par\nmail. Sinon, tu pourras l'ajouter plus tard dans ton profil.",
+      "invitationCode": "Entre ton code d'invitation",
+      "connectToCoach": "Se connecter à mon coach",
+      "continueWithoutCoach": "Continuer sans coach",
+      "progress": "Étape 5/5"
+    }
+  },
+  "sports": {
+    "athletics": "Athlétisme",
+    "rowing": "Aviron",
+    "basketball": "Basketball",
+    "crossfit": "Crossfit",
+    "cycling": "Cyclisme",
+    "bodybuilding": "Musculation",
+    "yoga": "Yoga"
+  },
+  "forgotPassword": {
+    "title": "Mot de passe oublié ?",
+    "description": "Pour réinitialiser ton mot de passe, entre ton adresse email ci-dessous.\n\nTu recevras un lien par mail pour créer un nouveau mot de passe."
+  },
+  "passwordChanged": {
+    "title": "Ton mot de passe a été\nmis à jour",
+    "description": "Tu peux désormais te connecter avec\nton nouveau mot de passe."
+  },
+  "passwordResetSent": {
+    "title": "C'est envoyé !",
+    "description": "Un lien de réinitialisation a été envoyé à",
+    "didntReceiveEmail": "Tu n'as reçu de mail ? Vérifie dans tes spams ou réessaie"
+  },
+  "resetPassword": {
+    "title": "Créer un nouveau mot de\npasse",
+    "description": "Pour sécuriser ton compte, crée un mot de\npasse contenant au moins 8 caractères,\nune majuscule, une minuscule, un chiffre et\nun caractère spécial (ex : !, ?, @).",
+    "newPassword": "Crée un nouveau mot de passe",
+    "newPasswordPlaceholder": "Nouveau mot de passe"
+  },
+  "profileCompleted": {
+    "title": "Félicitations !",
+    "description": "Ton compte est prêt. Tu peux\ncommencer à t'entraîner !",
+    "explore": "Explorer KAPTRAIN !"
+  },
+  "onboarding": {
+    "step1Text": "Visualise, comprends,\naméliore.",
+    "step2Text": "L'expertise sportive,\naccessible à tous.",
+    "step3Text": "Ta progression\ncommence ici."
+  },
+  "wellness": {
+    "title": "Comment te sens-tu\naujourd'hui ?",
+    "description": "Suis ton état de bien-être au quotidien\ngrâce à ces six paramètres essentiels.",
+    "sleep": "Sommeil",
+    "energy": "Energie",
+    "nutritionYesterday": "Nutrition de la veille",
+    "hydrationYesterday": "Hydratation de la veille",
+    "pain": "Douleurs",
+    "stress": "Stress",
+    "veryBad": "Très mauvais",
+    "excellent": "Excellent",
+    "feelingGreat": "Je pète la forme",
+    "veryHealthy": "Très saine",
+    "lessThan1L": "- 1L",
+    "moreThan3L": "+ 3L",
+    "none": "Aucune",
+    "veryImportant": "Très importante"
   }
 }

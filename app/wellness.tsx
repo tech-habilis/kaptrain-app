@@ -20,7 +20,7 @@ export default function Wellness() {
       <StatusBar style="dark" />
       <View className="flex-row items-center justify-between mt-6">
         <Text className="text-lg text-secondary font-bold">
-          {"Comment te sens-tu\naujourd'hui ?"}
+          wellness.title
         </Text>
 
         <Pressable
@@ -33,17 +33,15 @@ export default function Wellness() {
       </View>
 
       <Text className="text-subtleText text-base mt-1">
-        {
-          "Suis ton état de bien-être au quotidien\ngrâce à ces six paramètres essentiels."
-        }
+        wellness.description
       </Text>
 
       <View className="gap-10 mt-6">
         <Slider
-          title="Sommeil"
+          title="wellness.sleep"
           leftIcon={<IcVeryDissatisfied />}
-          leftLabel="Très mauvais"
-          rightLabel="Excellent"
+          leftLabel="wellness.veryBad"
+          rightLabel="wellness.excellent"
           rightIcon={<IcMuscular />}
           value={sommeil}
           onChange={setSommeil}
@@ -51,10 +49,10 @@ export default function Wellness() {
         />
 
         <Slider
-          title="Energie"
+          title="wellness.energy"
           leftIcon={<IcVeryDissatisfied />}
-          leftLabel="Très mauvais"
-          rightLabel="Je pète la forme"
+          leftLabel="wellness.veryBad"
+          rightLabel="wellness.feelingGreat"
           rightIcon={<IcMuscular />}
           value={energie}
           onChange={setEnergie}
@@ -62,10 +60,10 @@ export default function Wellness() {
         />
 
         <Slider
-          title="Nutrition de la veille"
+          title="wellness.nutritionYesterday"
           leftIcon={<IcVeryDissatisfied />}
-          leftLabel="Très mauvaise"
-          rightLabel="Très saine"
+          leftLabel="wellness.veryBad"
+          rightLabel="wellness.veryHealthy"
           rightIcon={<IcMuscular />}
           value={nutrition}
           onChange={setNutrition}
@@ -73,10 +71,10 @@ export default function Wellness() {
         />
 
         <Slider
-          title="Hydratation de la veille"
+          title="wellness.hydrationYesterday"
           leftIcon={<IcVeryDissatisfied />}
-          leftLabel="- 1L"
-          rightLabel="+ 3L"
+          leftLabel="wellness.lessThan1L"
+          rightLabel="wellness.moreThan3L"
           rightIcon={<IcMuscular />}
           value={hydratation}
           onChange={setHydratation}
@@ -84,10 +82,10 @@ export default function Wellness() {
         />
 
         <Slider
-          title="Douleurs"
+          title="wellness.pain"
           leftIcon={<IcMuscular />}
-          leftLabel="Aucune"
-          rightLabel="Très importante"
+          leftLabel="wellness.none"
+          rightLabel="wellness.veryImportant"
           rightIcon={<IcVeryDissatisfied />}
           value={douleurs}
           onChange={setDouleurs}
@@ -96,10 +94,10 @@ export default function Wellness() {
         />
 
         <Slider
-          title="Stress"
+          title="wellness.stress"
           leftIcon={<IcMuscular />}
-          leftLabel="Aucun"
-          rightLabel="Très important"
+          leftLabel="wellness.none"
+          rightLabel="wellness.veryImportant"
           rightIcon={<IcVeryDissatisfied />}
           value={stress}
           onChange={setStress}

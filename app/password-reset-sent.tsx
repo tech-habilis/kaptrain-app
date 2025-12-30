@@ -53,15 +53,15 @@ export default function PasswordResetSent() {
         <IcArrowLeft />
       </Pressable>
       <Text className="text-2xl text-secondary font-bold mt-2">
-        C’est envoyé !
+        passwordResetSent.title
       </Text>
       <Text className="text-subtleText mt-1">
-        Un lien de réinitialisation a été envoyé à
+        passwordResetSent.description
       </Text>
-      <Text className="text-secondary font-medium">exemple@gmail.com.</Text>
+      <RawText className="text-secondary font-medium"><Text className="text-secondary font-medium">signIn.exampleEmail</Text>.</RawText>
 
       <View className="mt-8 gap-4">
-        <Text className="text-subtleText">Tu n’as reçu de mail ? Vérifie dans tes spams ou réessaie</Text>
+        <Text className="text-subtleText">passwordResetSent.didntReceiveEmail</Text>
         <View className="flex-row gap-2">
           <Text className="text-secondary font-semibold">
             verifyEmail.resendCode

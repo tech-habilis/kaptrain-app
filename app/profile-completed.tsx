@@ -20,16 +20,16 @@ export default function ProfileCompleted() {
         <View className="grow" />
 
         <IcCheckVerified />
-        <Text className="text-white text-2xl font-bold">Félicitations !</Text>
+        <Text className="text-white text-2xl font-bold">profileCompleted.title</Text>
         <Text className="text-white text-base text-center">
-          {"Ton compte est prêt. Tu peux\ncommencer à t'entraîner !"}
+          profileCompleted.description
         </Text>
 
         <View className="grow" />
 
         <Button
           className="w-full mb-6"
-          text="Explorer KAPTRAIN !"
+          text="profileCompleted.explore"
           onPress={() => {
             setProfileCompleted();
             router.replace(ROUTE.TABS);

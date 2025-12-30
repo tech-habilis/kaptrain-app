@@ -16,17 +16,17 @@ import Animated, {
 const STEPS = [
   {
     imageBg: require("../assets/images/onboarding-1.png"),
-    text: "Visualise, comprends,\naméliore.",
+    text: "onboarding.step1Text",
     color: ColorConst.tertiary,
   },
   {
     imageBg: require("../assets/images/onboarding-2.png"),
-    text: "L’expertise sportive,\naccessible à tous.",
+    text: "onboarding.step2Text",
     color: "#69FFA2",
   },
   {
     imageBg: require("../assets/images/onboarding-3.png"),
-    text: "Ta progression\ncommence ici.",
+    text: "onboarding.step3Text",
     color: ColorConst.primary,
   },
 ];

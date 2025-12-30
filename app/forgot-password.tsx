@@ -18,12 +18,10 @@ export default function ForgotPassword() {
         <IcArrowLeft />
       </Pressable>
       <Text className="text-2xl text-secondary font-bold mt-2">
-        Mot de passe oublié ?
+        forgotPassword.title
       </Text>
       <Text className="text-subtleText mt-1">
-        {
-          "Pour réinitialiser ton mot de passe, entre ton adresse email ci-dessous.\n\nTu recevras un lien par mail pour créer un nouveau mot de passe."
-        }
+        forgotPassword.description
       </Text>
 
       <Input

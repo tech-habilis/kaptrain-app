@@ -12,9 +12,9 @@ import { ScrollView, View } from "react-native";
 
 export default function CompleteProfile1() {
   const genders = [
-    { text: "Femme" },
-    { text: "Homme" },
-    { text: "Non-binaire" },
+    { text: "completeProfile.step1.genderFemale" },
+    { text: "completeProfile.step1.genderMale" },
+    { text: "completeProfile.step1.genderNonBinary" },
   ];
 
   const [selectedGender, setSelectedGender] = useState<TChoice>(genders[0]);
@@ -23,10 +23,10 @@ export default function CompleteProfile1() {
     <>
       <ScrollView className="py-safe px-4 bg-white flex-1">
         <Text className="text-secondary font-bold text-2xl">
-          {"Compléter les dernières\nétapes"}
+          completeProfile.step1.title
         </Text>
         <Text className="text-subtleText text-base mt-2">
-          Indique tes informations personnelles pour créer ton profil.
+          completeProfile.step1.description
         </Text>
         <View className="bg-light mt-8 self-center p-6 rounded-2xl relative">
           <IcUser />
@@ -37,24 +37,24 @@ export default function CompleteProfile1() {
         </View>
 
         <View className="gap-6 mt-6">
-          <Input label="Prénom" placeholder="Votre prénom" />
+          <Input label="completeProfile.step1.firstName" placeholder="completeProfile.step1.firstNamePlaceholder" />
 
-          <Input label="Nom" placeholder="Votre nom" />
+          <Input label="completeProfile.step1.lastName" placeholder="completeProfile.step1.lastNamePlaceholder" />
 
-          <Input label="Date de naissance" placeholder="JJ/MM/AAAA" />
+          <Input label="completeProfile.step1.birthDate" placeholder="completeProfile.step1.birthDatePlaceholder" />
 
           <View className="mb-28">
-            <Text className="text-accent font-medium text-sm">Genre</Text>
+            <Text className="text-accent font-medium text-sm">completeProfile.step1.gender</Text>
             <Choices
               data={[
                 {
-                  text: "Femme",
+                  text: "completeProfile.step1.genderFemale",
                 },
                 {
-                  text: "Homme",
+                  text: "completeProfile.step1.genderMale",
                 },
                 {
-                  text: "Non-binaire",
+                  text: "completeProfile.step1.genderNonBinary",
                 },
               ]}
               selectedChoice={selectedGender}
@@ -64,9 +64,9 @@ export default function CompleteProfile1() {
           </View>
         </View>
       </ScrollView>
-      <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 py-6 bg-white">
+      <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">Étape 1/5</Text>
+          <Text className="text-subtleText">completeProfile.step1.progress</Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View
@@ -80,8 +80,8 @@ export default function CompleteProfile1() {
           </View>
         </View>
         <Button
-          text="Continuer"
-          className="grow h-full"
+          text="common.continue"
+          className="grow"
           onPress={() => router.push(ROUTE.COMPLETE_PROFILE_2)}
         />
       </View>

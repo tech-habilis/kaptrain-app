@@ -59,9 +59,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isFirstOpen, isLoggedIn, showCompleteProfileForm } = useSession();
-  console.log('isLoggedIn', isLoggedIn);
-  console.log('showCompleteProfileForm', showCompleteProfileForm);
+  const { isFirstOpen, isLoggedIn } = useSession();
 
   return (
     <Stack
@@ -69,7 +67,6 @@ function RootNavigator() {
         headerShown: false,
       }}
     >
-
       <Stack.Screen name={ROUTE_NAME.WELLNESS} />
 
       {/* logged in stack */}

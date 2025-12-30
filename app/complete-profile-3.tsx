@@ -12,24 +12,24 @@ import { cn } from "tailwind-variants";
 export default function CompleteProfile3() {
   const choices: TChoice[] = [
     {
-      text: "Débutant",
-      secondaryText: "1 à 2h par semaine",
+      text: "completeProfile.step3.levelBeginner",
+      secondaryText: "completeProfile.step3.levelBeginnerHours",
     },
     {
-      text: "Intermédiaire",
-      secondaryText: "3 à 4h par semaine",
+      text: "completeProfile.step3.levelIntermediate",
+      secondaryText: "completeProfile.step3.levelIntermediateHours",
     },
     {
-      text: "Avancé",
-      secondaryText: "5 à 7h par semaine",
+      text: "completeProfile.step3.levelAdvanced",
+      secondaryText: "completeProfile.step3.levelAdvancedHours",
     },
     {
-      text: "Confirmé",
-      secondaryText: "8 à 11h par semaine",
+      text: "completeProfile.step3.levelConfirmed",
+      secondaryText: "completeProfile.step3.levelConfirmedHours",
     },
     {
-      text: "Expert",
-      secondaryText: "+ de 12 par semaine",
+      text: "completeProfile.step3.levelExpert",
+      secondaryText: "completeProfile.step3.levelExpertHours",
     },
   ];
 
@@ -43,12 +43,10 @@ export default function CompleteProfile3() {
           <IcArrowLeft />
         </Pressable>
         <Text className="text-2xl text-secondary font-bold mt-2">
-          {"Choisir mon niveau de\npratique sportive"}
+          completeProfile.step3.title
         </Text>
         <Text className="text-subtleText mt-1">
-          {
-            "Afin de te proposer des programmes\nadaptés à ton niveau d'entraînement."
-          }
+          completeProfile.step3.description
         </Text>
 
         <Choices
@@ -59,9 +57,9 @@ export default function CompleteProfile3() {
           className="mt-8"
         />
       </View>
-      <View className="flex-row gap-6 h-28 pb-safe items-center justify-between px-4 py-6 bg-white">
+      <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">Étape 3/5</Text>
+          <Text className="text-subtleText">completeProfile.step3.progress</Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View
@@ -75,8 +73,8 @@ export default function CompleteProfile3() {
           </View>
         </View>
         <Button
-          text="Continuer"
-          className="grow h-full"
+          text="common.continue"
+          className="grow"
           onPress={() => router.push(ROUTE.COMPLETE_PROFILE_4)}
         />
       </View>

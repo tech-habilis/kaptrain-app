@@ -1,10 +1,8 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { toast } from "@/components/toast";
 import cn from "@/utilities/cn";
-import { supabase } from "@/utilities/supabase";
 import { Link } from "expo-router";
-import { Pressable, ScrollView, Text } from "react-native";
+import { ScrollView } from "react-native";
 
 export default function HomeScreen() {
   return (

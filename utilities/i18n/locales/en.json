@@ -27,7 +27,8 @@
     "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?",
     "password": "Password",
     "next": "Next",
-    "verify": "Verify"
+    "verify": "Verify",
+    "continue": "Continue"
   },
   "error": {
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",
@@ -54,5 +55,115 @@
     "emailVerified": "Email verified",
     "emailVerifiedDescription": "Your email address has been successfully verified",
     "completeProfile": "Complete my profile"
+  },
+  "completeProfile": {
+    "step1": {
+      "title": "Complete the last\nsteps",
+      "description": "Enter your personal information to create your profile.",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Your first name",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Your last name",
+      "birthDate": "Date of birth",
+      "birthDatePlaceholder": "DD/MM/YYYY",
+      "gender": "Gender",
+      "genderFemale": "Female",
+      "genderMale": "Male",
+      "genderNonBinary": "Non-binary",
+      "progress": "Step 1/5"
+    },
+    "step2": {
+      "title": "Enter my current weight",
+      "description": "It's important to track your progress,\nyou can adjust it at any time.",
+      "currentWeight": "Your current weight",
+      "preferNotToAnswer": "I prefer not to answer",
+      "progress": "Step 2/5"
+    },
+    "step3": {
+      "title": "Choose my level of\nsports practice",
+      "description": "In order to offer you programs\nadapted to your training level.",
+      "levelBeginner": "Beginner",
+      "levelBeginnerHours": "1 to 2h per week",
+      "levelIntermediate": "Intermediate",
+      "levelIntermediateHours": "3 to 4h per week",
+      "levelAdvanced": "Advanced",
+      "levelAdvancedHours": "5 to 7h per week",
+      "levelConfirmed": "Confirmed",
+      "levelConfirmedHours": "8 to 11h per week",
+      "levelExpert": "Expert",
+      "levelExpertHours": "+ 12 per week",
+      "progress": "Step 3/5"
+    },
+    "step4": {
+      "title": "Select my favorite\nsports",
+      "description": "You can select up to 5 sports.",
+      "selected": "selected",
+      "limitReached": ": limit reached",
+      "progress": "Step 4/5"
+    },
+    "step5": {
+      "title": "Do you already have a coach?",
+      "description": "If your coach sent you an invitation, enter the code received by\nemail. Otherwise, you can add them later in your profile.",
+      "invitationCode": "Enter your invitation code",
+      "connectToCoach": "Connect to my coach",
+      "continueWithoutCoach": "Continue without coach",
+      "progress": "Step 5/5"
+    }
+  },
+  "sports": {
+    "athletics": "Athletics",
+    "rowing": "Rowing",
+    "basketball": "Basketball",
+    "crossfit": "Crossfit",
+    "cycling": "Cycling",
+    "bodybuilding": "Bodybuilding",
+    "yoga": "Yoga"
+  },
+  "forgotPassword": {
+    "title": "Forgot password?",
+    "description": "To reset your password, enter your email address below.\n\nYou will receive a link by email to create a new password."
+  },
+  "passwordChanged": {
+    "title": "Your password has been updated",
+    "description": "You can now log in with\nyour new password."
+  },
+  "passwordResetSent": {
+    "title": "It's sent!",
+    "description": "A reset link has been sent to",
+    "didntReceiveEmail": "Didn't receive an email? Check your spam or try again"
+  },
+  "resetPassword": {
+    "title": "Create a new password",
+    "description": "To secure your account, create a password containing at least 8 characters, an uppercase letter, a lowercase letter, a number and a special character (e.g.: !, ?, @).",
+    "newPassword": "Create a new password",
+    "newPasswordPlaceholder": "New password"
+  },
+  "profileCompleted": {
+    "title": "Congratulations!",
+    "description": "Your account is ready. You can\nstart training!",
+    "explore": "Explore KAPTRAIN!"
+  },
+  "onboarding": {
+    "step1Text": "Visualize, understand,\nimprove.",
+    "step2Text": "Sports expertise,\naccessible to everyone.",
+    "step3Text": "Your progress\nstarts here."
+  },
+  "wellness": {
+    "title": "How are you feeling\ntoday?",
+    "description": "Track your daily well-being\nwith these six essential parameters.",
+    "sleep": "Sleep",
+    "energy": "Energy",
+    "nutritionYesterday": "Nutrition from yesterday",
+    "hydrationYesterday": "Hydration from yesterday",
+    "pain": "Pain",
+    "stress": "Stress",
+    "veryBad": "Very bad",
+    "excellent": "Excellent",
+    "feelingGreat": "Feeling great",
+    "veryHealthy": "Very healthy",
+    "lessThan1L": "- 1L",
+    "moreThan3L": "+ 3L",
+    "none": "None",
+    "veryImportant": "Very important"
   }
 }
