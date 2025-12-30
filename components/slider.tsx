@@ -126,11 +126,11 @@ export const Slider = ({
     <View className={className}>
       {/* Labels and Title Row */}
       <View className="relative flex-row items-center justify-between mb-4">
-        <Text className="text-sm text-subtleText">{leftLabel}</Text>
+        <Text className="text-xs text-subtleText">{leftLabel}</Text>
         <View className="absolute w-full items-center pointer-events-none">
-          <Text className="text-lg text-secondary font-bold">{title}</Text>
+          <Text className="text-sm text-secondary font-bold">{title}</Text>
         </View>
-        <Text className="text-sm text-subtleText">{rightLabel}</Text>
+        <Text className="text-xs text-subtleText">{rightLabel}</Text>
       </View>
 
       {/* Slider Row */}

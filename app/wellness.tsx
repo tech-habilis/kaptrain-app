@@ -1,11 +1,15 @@
+import Button from "@/components/button";
 import IcClose from "@/components/icons/close";
+import IcCog from "@/components/icons/cog";
 import IcMuscular from "@/components/icons/muscular";
 import IcVeryDissatisfied from "@/components/icons/very-dissatisfied";
 import { Slider } from "@/components/slider";
 import Text from "@/components/text";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, View } from "react-native";
+import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
+import BottomSheetModal from "@/components/bottom-sheet-modal";
 
 export default function Wellness() {
   const [sommeil, setSommeil] = useState(0);
@@ -15,13 +19,13 @@ export default function Wellness() {
   const [douleurs, setDouleurs] = useState(0);
   const [stress, setStress] = useState(0);
 
+  const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
+
   return (
     <View className="py-safe px-4 flex-1 bg-white">
       <StatusBar style="dark" />
-      <View className="flex-row items-center justify-between mt-6">
-        <Text className="text-lg text-secondary font-bold">
-          wellness.title
-        </Text>
+      <View className="flex-row items-center justify-between">
+        <Text className="text-lg text-secondary font-bold">wellness.title</Text>
 
         <Pressable
           onPress={() => {
@@ -105,6 +109,43 @@ export default function Wellness() {
           reverseGradient
         />
       </View>
+
+      <View className="grow" />
+
+      <View className="flex-row gap-2 items-center">
+        <Pressable
+          className="p-3"
+          onPress={() => bottomSheetModalRef.current?.present()}
+        >
+          <IcCog />
+        </Pressable>
+        <Button text="Valider" className="flex-1" type="secondary" />
+      </View>
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        name="setting"
+        snapPoints={["88%"]}
+        key="native"
+        className="pb-safe"
+      >
+        <Text className="text-lg font-bold text-secondary">
+          Désactiver l’affichage quotidien du suivi de ta forme ?
+        </Text>
+        <Text className="text-subtleText text-base">
+          {
+            "Suis facilement ton bien-être au quotidien grâce à ces six paramètres essentiels.\n\nLe suivi de forme te permet d’indiquer chaque jour ton état de bien-être grâce à 6 paramètres essentiels : Sommeil, Douleurs, Fatigue, Stress, Nutrition de la veille, Hydratation de la veille.\n\nCes données t’aident à identifier les domaines à améliorer et à adapter tes habitudes pour un meilleur équilibre entre entraînement et récupération.\n\nSi tu le désactives, il ne s’affichera plus à chaque connexion. Tu pourras le réactiver depuis ton profil à tout moment."
+          }
+        </Text>
+
+        <View className="grow" />
+
+        <Button text="Désactiver quand même" type="secondary" />
+        <Button
+          text="Conserver le rappel"
+          className="mt-2 mb-6"
+          onPress={() => bottomSheetModalRef.current?.close()}
+        />
+      </BottomSheetModal>
     </View>
   );
 }

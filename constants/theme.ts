@@ -21,7 +21,8 @@ export const ColorConst = {
 
   // others
   link: '#04152D',
-  secondary500: '#1A1C1E'
+  secondary500: '#1A1C1E',
+  secondaryGrey: '#BABABA'
 }
 
 const tintColorLight = ColorConst.secondary

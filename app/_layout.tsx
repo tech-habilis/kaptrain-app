@@ -19,6 +19,7 @@ import { Toasts } from "@backpackapp-io/react-native-toast";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Platform } from "react-native";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 /**
  * Place all initialization logic here for easier management
@@ -47,8 +48,10 @@ export default function RootLayout() {
             Uniwind.updateInsets(insets); // enable className such as p-safe etc.
           }}
         >
-          <GestureHandlerRootView>
-            <SplashScreenController onFinishRender={<RootNavigator />} />
+          <GestureHandlerRootView className="flex-1">
+            <BottomSheetModalProvider>
+              <SplashScreenController onFinishRender={<RootNavigator />} />
+            </BottomSheetModalProvider>
             <Toasts />
           </GestureHandlerRootView>
         </SafeAreaListener>
