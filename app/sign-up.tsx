@@ -11,7 +11,7 @@ import Input from "@/components/input";
 import IcEye from "@/components/icons/eye";
 import IcEyeOff from "@/components/icons/eye-off";
 import { Trans } from "react-i18next";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 
 export default function SignIn() {
   const { signUpWithEmail, isLoggedIn: isSigningUp } = useSession();
@@ -21,7 +21,6 @@ export default function SignIn() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
 
   return (
     <View className="w-full h-full flex bg-white">
@@ -41,11 +40,7 @@ export default function SignIn() {
             <Text className="text-white text-sm">
               signUp.alreadyHaveAccount
             </Text>
-            <ButtonLink
-              href={ROUTE.SIGN_IN}
-              size="small"
-              text="signUp.login"
-            />
+            <ButtonLink href={ROUTE.SIGN_IN} size="small" text="signUp.login" />
           </View>
         </View>
       </ImageBackground>
@@ -91,21 +86,30 @@ export default function SignIn() {
         <RawText>
           <Trans i18nKey="signUp.agreeByCreatingAccount">
             By creating an account, you agree to the
-            <Link className="font-bold text-secondary" href="https://kaptrain.com">Terms of Use</Link>
+            <Link
+              className="font-bold text-secondary"
+              href="https://kaptrain.com"
+            >
+              Terms of Use
+            </Link>
             and our
-            <Link className="font-bold text-secondary" href="https://kaptrain.com">data processing policy.</Link>
+            <Link
+              className="font-bold text-secondary"
+              href="https://kaptrain.com"
+            >
+              data processing policy.
+            </Link>
           </Trans>
         </RawText>
 
         <Button
           onPress={() => {
-            // signUpWithEmail({
-            //   name: "",
-            //   email,
-            //   password,
-            //   confirmPassword,
-            // });
-            router.push(ROUTE.VERIFY_EMAIL)
+            signUpWithEmail({
+              name: "",
+              email,
+              password,
+              confirmPassword,
+            });
           }}
           disabled={isSigningUp}
           text="signUp.createAccount"

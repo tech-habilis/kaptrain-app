@@ -10,6 +10,7 @@ import { useRef, useState } from "react";
 import { Pressable, View } from "react-native";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import BottomSheetModal from "@/components/bottom-sheet-modal";
+import { router } from "expo-router";
 
 export default function Wellness() {
   const [sommeil, setSommeil] = useState(0);
@@ -27,11 +28,7 @@ export default function Wellness() {
       <View className="flex-row items-center justify-between">
         <Text className="text-lg text-secondary font-bold">wellness.title</Text>
 
-        <Pressable
-          onPress={() => {
-            // TODO: implement close function
-          }}
-        >
+        <Pressable onPress={router.back}>
           <IcClose />
         </Pressable>
       </View>

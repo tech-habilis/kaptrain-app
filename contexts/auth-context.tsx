@@ -21,7 +21,7 @@ import { router } from "expo-router";
 import { toast } from "@/components/toast";
 import { supabase, supabaseUtils } from "@/utilities/supabase";
 import { TSession } from "@/types";
-import { ROUTE_NAME } from "@/constants/route";
+import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
 import { appScheme } from "@/constants/misc";
 
@@ -256,7 +256,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
 
     if (!session) {
-      toast.success("Please check your inbox for email verification!");
+      router.push(ROUTE.VERIFY_EMAIL);
       setLoggingInWith(null);
       return;
     }

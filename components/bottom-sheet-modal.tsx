@@ -30,6 +30,7 @@ const BottomSheetModal = forwardRef<
       handleComponent={(props) => <BottomSheetHandle {...props} name={name} />}
       {...props}
       name={name}
+
     >
       <BottomSheetView className={cn("h-full px-4", className)}>
         {children}

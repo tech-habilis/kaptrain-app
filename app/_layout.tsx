@@ -70,17 +70,11 @@ function RootNavigator() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name={ROUTE_NAME.WELLNESS} />
-
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE_1} />
 
         <Stack.Screen name={ROUTE_NAME.TABS} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
       </Stack.Protected>
 
       {/* non-loggedin stack */}
