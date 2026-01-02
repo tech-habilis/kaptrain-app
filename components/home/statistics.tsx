@@ -12,8 +12,12 @@ import BarChart from "@/components/charts/bar-chart";
 import DonutChart from "@/components/charts/donut-chart";
 import { ColorConst } from "@/constants/theme";
 import { useState } from "react";
+import { router } from "expo-router";
+import { ROUTE } from "@/constants/route";
+import { mockStatistics } from "@/constants/mock";
+import StatisticWidgetCard from "../statistic-widget-card";
 
-const TrainingVolumeChart = () => {
+export const TrainingVolumeChart = () => {
   return (
     <View>
       <BarChart
@@ -33,7 +37,7 @@ const TrainingVolumeChart = () => {
   );
 };
 
-const ActivityDistributionChart = () => {
+export const ActivityDistributionChart = () => {
   const data = [
     { label: "Hyrox", value: 5, color: ColorConst.primary },
     { label: "Course à\npieds", value: 60, color: ColorConst.tertiary },
@@ -67,34 +71,6 @@ const ActivityDistributionChart = () => {
 const Statistics = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const statistics = [
-    {
-      title: "Répartition d'activité",
-      subtitle: "Aujourd'hui",
-      chart: <ActivityDistributionChart />,
-    },
-    {
-      title: "Volume d’entrainement",
-      subtitle: "7 derniers jours",
-      chart: <TrainingVolumeChart />,
-    },
-    {
-      title: "Répartition d'activité",
-      subtitle: "Aujourd'hui",
-      chart: <ActivityDistributionChart />,
-    },
-    {
-      title: "Volume d’entrainement",
-      subtitle: "7 derniers jours",
-      chart: <TrainingVolumeChart />,
-    },
-    {
-      title: "Répartition d'activité",
-      subtitle: "Aujourd'hui",
-      chart: <ActivityDistributionChart />,
-    },
-  ];
-
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollX = event.nativeEvent.contentOffset.x;
     const contentWidth = event.nativeEvent.contentSize.width;
@@ -107,14 +83,14 @@ const Statistics = () => {
     const isNearEnd = scrollX + layoutWidth >= contentWidth - 20;
 
     if (isNearEnd) {
-      setActiveIndex(statistics.length - 1);
+      setActiveIndex(mockStatistics.length - 1);
     } else {
       // Calculate which card is at the center of the screen
       const totalCardWidth = cardWidth + gap;
       const scrollPosition = scrollX + padding;
       const index = Math.round(scrollPosition / totalCardWidth);
 
-      setActiveIndex(Math.max(0, Math.min(index, statistics.length - 1)));
+      setActiveIndex(Math.max(0, Math.min(index, mockStatistics.length - 1)));
     }
   };
 
@@ -134,6 +110,7 @@ const Statistics = () => {
               <IcArrowLeft size={16} />
             </View>
           }
+          onPress={() => router.push(ROUTE.VIEW_SORT_STATISTICS)}
         />
       </View>
 
@@ -145,26 +122,14 @@ const Statistics = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {statistics.map((statistic, index) => (
-          <View
-            key={index}
-            className="bg-white border border-stroke size-42 p-3 gap-1 rounded-lg"
-          >
-            <Text className="font-medium text-xs text-text">
-              {statistic.title}
-            </Text>
-            <Text className="text-[10px] text-subtleText">
-              {statistic.subtitle}
-            </Text>
-
-            {statistic.chart}
-          </View>
+        {mockStatistics.map((statistic, index) => (
+          <StatisticWidgetCard key={index} statistic={statistic} />
         ))}
       </ScrollView>
 
       {/* indicator */}
       <View className="flex-row gap-2 self-center">
-        {Array.from({ length: statistics.length }).map((_, index) => (
+        {Array.from({ length: mockStatistics.length }).map((_, index) => (
           <View
             key={index}
             className={cn(

@@ -35,7 +35,7 @@ export default function LandingScreen() {
             className="my-2 w-full "
             onPress={() => {
               // setStorageItemAsync(STORAGE_KEY.FIRST_OPEN_TIMESTAMP, null);
-              setStorageItemAsync(STORAGE_KEY.PROFILE_COMPLETED_AT, null);
+              // setStorageItemAsync(STORAGE_KEY.PROFILE_COMPLETED_AT, null);
               router.push(ROUTE.SIGN_UP);
             }}
           />
