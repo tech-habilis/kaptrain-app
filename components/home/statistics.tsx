@@ -1,11 +1,17 @@
 import Text from "@/components/text";
 import Button from "@/components/button";
-import { View, ScrollView } from "react-native";
+import {
+  View,
+  ScrollView,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+} from "react-native";
 import { cn } from "tailwind-variants";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import BarChart from "@/components/charts/bar-chart";
 import DonutChart from "@/components/charts/donut-chart";
 import { ColorConst } from "@/constants/theme";
+import { useState } from "react";
 
 const TrainingVolumeChart = () => {
   return (
@@ -59,6 +65,8 @@ const ActivityDistributionChart = () => {
 };
 
 const Statistics = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   const statistics = [
     {
       title: "Répartition d'activité",
@@ -87,6 +95,29 @@ const Statistics = () => {
     },
   ];
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollX = event.nativeEvent.contentOffset.x;
+    const contentWidth = event.nativeEvent.contentSize.width;
+    const layoutWidth = event.nativeEvent.layoutMeasurement.width;
+    const cardWidth = 168; // size-42 = 168px
+    const gap = 8; // gap-2 = 8px
+    const padding = 16; // px-4 = 16px
+
+    // Check if scrolled near the end (within 20px threshold)
+    const isNearEnd = scrollX + layoutWidth >= contentWidth - 20;
+
+    if (isNearEnd) {
+      setActiveIndex(statistics.length - 1);
+    } else {
+      // Calculate which card is at the center of the screen
+      const totalCardWidth = cardWidth + gap;
+      const scrollPosition = scrollX + padding;
+      const index = Math.round(scrollPosition / totalCardWidth);
+
+      setActiveIndex(Math.max(0, Math.min(index, statistics.length - 1)));
+    }
+  };
+
   return (
     <View className="bg-white py-4 gap-4">
       <View className="flex-row justify-between items-center mx-4">
@@ -111,6 +142,8 @@ const Statistics = () => {
         horizontal
         contentContainerClassName="gap-2 px-4"
         showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {statistics.map((statistic, index) => (
           <View
@@ -136,7 +169,7 @@ const Statistics = () => {
             key={index}
             className={cn(
               "size-2 rounded-full",
-              index === 0 ? "bg-primary" : "bg-light",
+              index === activeIndex ? "bg-primary" : "bg-light",
             )}
           />
         ))}
