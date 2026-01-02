@@ -1,8 +1,10 @@
-import Text from "../text";
-import Button from "../button";
+import Text from "@/components/text";
+import Button from "@/components/button";
 import { View, ScrollView } from "react-native";
 import { cn } from "tailwind-variants";
-import IcArrowLeft from "../icons/arrow-left";
+import IcArrowLeft from "@/components/icons/arrow-left";
+import BarChart from "@/components/charts/bar-chart";
+import { ColorConst } from "@/constants/theme";
 
 const Statistics = () => {
   const statistics = [
@@ -13,6 +15,20 @@ const Statistics = () => {
     {
       title: "Volume d’entrainement",
       subtitle: "7 derniers jours",
+      chart: (
+        <BarChart
+          data={[
+            { x: "M", y: 1, color: ColorConst.light },
+            { x: "T", y: 8 },
+            { x: "W", y: 7 },
+            { x: "T", y: 1, color: ColorConst.light },
+            { x: "F", y: 4 },
+            { x: "S", y: 3 },
+            { x: "S", y: 1, color: ColorConst.light },
+          ]}
+          height={110}
+        />
+      ),
     },
     {
       title: "Répartition d’activité",
@@ -56,7 +72,7 @@ const Statistics = () => {
         {statistics.map((statistic, index) => (
           <View
             key={index}
-            className="bg-white border border-stroke size-[168px] p-3 gap-1 rounded-lg"
+            className="bg-white border border-stroke size-42 p-3 gap-1 rounded-lg"
           >
             <Text className="font-medium text-xs text-text">
               {statistic.title}
@@ -64,6 +80,8 @@ const Statistics = () => {
             <Text className="text-[10px] text-subtleText">
               {statistic.subtitle}
             </Text>
+
+            {statistic.chart}
           </View>
         ))}
       </ScrollView>
