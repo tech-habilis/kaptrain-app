@@ -2,16 +2,18 @@ import { Pressable, View } from "react-native";
 import { tv, VariantProps } from "tailwind-variants";
 import Text from "./text";
 import IcClose from "./icons/close";
+import { ReactNode } from "react";
+import cn from "@/utilities/cn";
 
 const chip = tv({
-  base: "bg-white border border-stroke gap-1.5 p-2 rounded-sm",
+  base: "bg-white border border-stroke gap-1.5 p-2 rounded-sm flex-row items-center",
   variants: {
     size: {
       small: "",
     },
     type: {
       default: "",
-      selected: "bg-secondary flex-row items-center",
+      selected: "bg-secondary",
       disabled: "",
       uncheck: "",
     },
@@ -29,7 +31,7 @@ const chipText = tv({
       default: "",
       selected: "text-white",
       disabled: "",
-      uncheck: "",
+      uncheck: "text-subtleText",
     },
   },
   defaultVariants: {
@@ -43,10 +45,14 @@ export const Chip = ({
   text,
   size,
   type,
+  leftIcon,
   onLeftSidePress,
+  className = ''
 }: ChipVariants & {
   text: string;
+  leftIcon?: ReactNode;
   onLeftSidePress?: (isClose: boolean) => void;
+  className?: string;
 }) => {
   const renderLeftSide = () => {
     if (type === "selected") {
@@ -57,11 +63,15 @@ export const Chip = ({
       );
     }
 
+    if (leftIcon) {
+      return leftIcon;
+    }
+
     return null;
   };
 
   return (
-    <View className={chip({ size, type })}>
+    <View className={cn(chip({ size, type }), className)}>
       {renderLeftSide()}
       <Text className={chipText({ type })}>{text}</Text>
     </View>

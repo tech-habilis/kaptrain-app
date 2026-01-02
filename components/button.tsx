@@ -10,6 +10,7 @@ import {
 import { tv, VariantProps } from "tailwind-variants";
 import Text from "./text";
 import { ColorConst } from "@/constants/theme";
+import { clsx } from "clsx";
 
 const button = tv({
   base: "font-bold flex flex-row justify-center items-center",
@@ -22,7 +23,7 @@ const button = tv({
       secondaryV2: "border border-stroke",
     },
     size: {
-      small: "rounded-lg px-3",
+      small: "rounded-xl px-3 py-2.25",
       large: "rounded-2xl p-4",
     },
     disabled: {
@@ -65,7 +66,7 @@ const buttonText = tv({
   },
   compoundVariants: [
     {
-      type: "tertiary",
+      type: ["tertiary", "secondaryV2"],
       size: "small",
       class: "font-medium",
     },
@@ -84,16 +85,20 @@ type ButtonVariants = VariantProps<typeof button>;
 export default function Button({
   className = "",
   text,
+  textClassName = "",
   size,
   type,
   disabled,
   leftIcon,
+  rightIcon,
   loading,
   ...props
 }: Omit<PressableProps, "children"> &
   ComponentProps<typeof button> & {
     text: string;
+    textClassName?: string;
     leftIcon?: React.ReactNode;
+    rightIcon?: React.ReactNode;
     loading?: boolean;
   }) {
   const loadingColorMap: Record<
@@ -124,7 +129,20 @@ export default function Button({
         />
       )}
 
-      <Text className={cn(buttonText({ size, type }))}>{text}</Text>
+      <Text className={cn(buttonText({ size, type }), textClassName)}>
+        {text}
+      </Text>
+
+      {rightIcon && (
+        <View
+          className={clsx({
+            "ml-2.5": size === "large",
+            "ml-1": size === "small",
+          })}
+        >
+          {rightIcon}
+        </View>
+      )}
     </Pressable>
   );
 }
