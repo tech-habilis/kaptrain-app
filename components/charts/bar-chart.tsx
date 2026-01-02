@@ -16,6 +16,7 @@ export interface BarChartProps {
   minY?: number;
   maxY?: number;
   defaultBarColor?: string;
+  defaultEmptyBarColor?: string;
   textColor?: string;
   renderXAxisLabel?: (label: string, index: number) => ReactNode;
   showGridLines?: boolean;
@@ -29,6 +30,7 @@ export default function BarChart({
   minY = 0,
   maxY = 10,
   defaultBarColor = ColorConst.primary,
+  defaultEmptyBarColor = ColorConst.light,
   textColor = ColorConst.subtleText,
   renderXAxisLabel,
   showGridLines = false,
@@ -70,9 +72,14 @@ export default function BarChart({
   const bars = data.map((item, index) => {
     const x =
       padding.left + index * barSpacing + (barSpacing - dynamicBarWidth) / 2;
-    const barHeight = ((item.y - minY) / yRange) * chartHeight;
+    // If value is 0, treat it as 1 for display purposes
+    const displayValue = item.y === 0 ? 1 : item.y;
+    const barHeight = ((displayValue - minY) / yRange) * chartHeight;
     console.log("barHeight", barHeight);
     const y = padding.top + chartHeight - barHeight;
+    // Use defaultEmptyBarColor for 0 values, otherwise use item color or defaultBarColor
+    const barColor =
+      item.y === 0 ? defaultEmptyBarColor : item.color || defaultBarColor;
     return {
       x,
       y,
@@ -80,7 +87,7 @@ export default function BarChart({
       height: barHeight,
       label: item.x,
       value: item.y,
-      color: item.color || defaultBarColor,
+      color: barColor,
       centerX: padding.left + index * barSpacing + barSpacing / 2,
     };
   });
