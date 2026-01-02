@@ -22,7 +22,8 @@ export const ROUTE_NAME = {
   COMPLETE_PROFILE_5: "complete-profile-5",
   PROFILE_COMPLETED: "profile-completed",
   WELLNESS: "wellness",
-  VIEW_SORT_STATISTICS: "view-sort-statistics"
+  VIEW_SORT_STATISTICS: "view-sort-statistics",
+  EDIT_SORT_STATISTICS: "edit-sort-statistics",
 } as const;
 
 /**
@@ -54,4 +55,5 @@ export const ROUTE = {
   PROFILE_COMPLETED: `/${ROUTE_NAME.PROFILE_COMPLETED}` as const,
   WELLNESS: `/${ROUTE_NAME.WELLNESS}` as const,
   VIEW_SORT_STATISTICS: `/${ROUTE_NAME.VIEW_SORT_STATISTICS}` as const,
+  EDIT_SORT_STATISTICS: `/${ROUTE_NAME.EDIT_SORT_STATISTICS}` as const,
 } as const;

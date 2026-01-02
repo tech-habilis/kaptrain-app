@@ -1,12 +1,15 @@
+import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import StatisticWidgetCard from "@/components/statistic-widget-card";
 import Text from "@/components/text";
 import { mockStatistics } from "@/constants/mock";
+import { ROUTE } from "@/constants/route";
+import { router } from "expo-router";
 import { FlatList, View } from "react-native";
 
 export default function ViewSortStatistics() {
   return (
-    <View className="py-safe px-4">
+    <View className="py-safe px-4 h-full">
       <View className="flex flex-row gap-1 items-center">
         <IcArrowLeft />
         <Text className="font-bold text-lg">Toutes mes statistiques</Text>
@@ -23,6 +26,14 @@ export default function ViewSortStatistics() {
         contentContainerClassName="gap-2"
         columnWrapperClassName="gap-2"
         className="mt-6"
+      />
+
+      <View className="grow" />
+
+      <Button
+        text="Modifier mes statistiques"
+        className="mb-6"
+        onPress={() => router.push(ROUTE.EDIT_SORT_STATISTICS)}
       />
     </View>
   );

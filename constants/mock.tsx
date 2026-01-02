@@ -53,17 +53,17 @@ export const mockStatistics: StatisticWidget[] = [
     chart: (
       <LineChart
         data={[
-          { x: "Jan", y: 72 },
-          { x: "Fev", y: 71 },
-          { x: "Fev", y: 70 },
-          { x: "Mar", y: 69 },
+          { x: "Jan", y: 45 },
+          { x: "Fev", y: 60 },
+          { x: "Fev", y: 55 },
+          { x: "Mar", y: 80 },
           { x: "Mar", y: 68 },
-          { x: "Avr", y: 67 },
-          { x: "Avr", y: 68 },
+          { x: "Avr", y: 76 },
+          { x: "Avr", y: 80 },
         ]}
         height={110}
-        minY={60}
-        maxY={80}
+        minY={20}
+        maxY={150}
         lineColor={ColorConst.primary}
         lineWidth={2}
         backgroundColor={ColorConst.light}
