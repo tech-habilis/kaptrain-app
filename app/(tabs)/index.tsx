@@ -2,7 +2,7 @@ import Button from "@/components/button";
 import { Chip } from "@/components/chip";
 import IcAppleFood from "@/components/icons/apple-food";
 import IcArrowLeft from "@/components/icons/arrow-left";
-import IcBellDot from "@/components/icons/bell-dot";
+import IcBell from "@/components/icons/bell";
 import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
 import IcCycling from "@/components/icons/cycling";
 import IcHollowCircle from "@/components/icons/hollow-circle";
@@ -18,6 +18,7 @@ import cn from "@/utilities/cn";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -276,6 +277,8 @@ const Agenda = () => {
 };
 
 export default function HomeScreen() {
+  const [haveUnread, setHaveUnread] = useState(true);
+
   return (
     <ScrollView>
       <StatusBar style="auto" />
@@ -301,8 +304,11 @@ export default function HomeScreen() {
             <Pressable className="p-2">
               <IcMessage />
             </Pressable>
-            <Pressable className="p-2">
-              <IcBellDot />
+            <Pressable
+              className="p-2"
+              onPress={() => setHaveUnread(!haveUnread)}
+            >
+              <IcBell haveUnread={haveUnread} />
             </Pressable>
           </View>
         </View>
