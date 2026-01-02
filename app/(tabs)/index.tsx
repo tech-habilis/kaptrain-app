@@ -9,6 +9,7 @@ import IcHollowCircle from "@/components/icons/hollow-circle";
 import IcLightning from "@/components/icons/lightning";
 import IcMessage from "@/components/icons/message";
 import IcMoon from "@/components/icons/moon";
+import IcMuscular from "@/components/icons/muscular";
 import IcSmiley from "@/components/icons/smiley";
 import IcTeardrop from "@/components/icons/teardrop";
 import Text from "@/components/text";
@@ -151,51 +152,53 @@ const MyFitnessTracking = () => {
 };
 
 const Agenda = () => {
-  const activities = [
+  const sessions = [
     {
       title: "Hyrox",
-      location: "Hyrox Paris Grand palais",
-      by: "Par Enguerrand Aucher",
+      sessionTitle: "Hyrox Paris Grand palais",
+      coachName: "Par Enguerrand Aucher",
       color: ColorConst.tertiary,
-      icon: <IcCheckCircleFilled size={16} />,
+      icon: <IcMuscular size={16} />,
+      status: 'completed'
     },
     {
       title: "Cyclisme",
-      location: "Fractionné court",
-      by: "Par Enguerrand Aucher",
+      sessionTitle: "Fractionné court",
+      coachName: "Par Enguerrand Aucher",
       color: ColorConst.primary,
       icon: <IcCycling size={16} />,
+      status: 'pending'
     },
   ];
 
   const days = [
     {
       title: "Lun",
-      activities: [activities[1]],
+      sessions: [sessions[1]],
     },
     {
       title: "Mar",
-      activities: [activities[0], activities[1]],
+      sessions: [sessions[0], sessions[1]],
     },
     {
       title: "Mer",
-      activities: [],
+      sessions: [],
     },
     {
       title: "Jeu",
-      activities: [activities[0], activities[1]],
+      sessions: [sessions[0], sessions[1]],
     },
     {
       title: "Ven",
-      activities: [activities[1]],
+      sessions: [sessions[1]],
     },
     {
       title: "Sam",
-      activities: [],
+      sessions: [],
     },
     {
       title: "Dim",
-      activities: [],
+      sessions: [],
     },
   ];
 
@@ -215,7 +218,7 @@ const Agenda = () => {
                 )}
               >
                 <View className="absolute -top-1 flex-row gap-0.5">
-                  {day.activities.map((activity, index) => (
+                  {day.sessions.map((activity, index) => (
                     <View
                       key={index}
                       className="size-2 rounded-full border border-light"
@@ -232,7 +235,7 @@ const Agenda = () => {
         })}
       </View>
 
-      {/* today activities */}
+      {/* today sessions */}
       <View className="p-4 flex-row gap-3 justify-stretch">
         <View className="gap-2.5 mt-0.75 items-center">
           <IcHollowCircle size={12} />
@@ -241,7 +244,7 @@ const Agenda = () => {
         <View className="flex-1">
           <Text className="text-accent mb-3">Aujourd’hui</Text>
 
-          {activities.map((activity, index) => (
+          {sessions.map((activity, index) => (
             <View
               key={index}
               className="bg-white border border-stroke rounded-[14px] mt-2 flex-row items-center justify-between"
@@ -253,15 +256,15 @@ const Agenda = () => {
                 }}
               >
                 <View className="flex-row gap-1 items-center">
-                  {activity.icon}
+                  {activity.status === 'completed' ? <IcCheckCircleFilled size={16} /> : activity.icon}
                   <Text className="font-bold">{activity.title}</Text>
                 </View>
 
                 <Text className="text-subtleText text-xs mt-1">
-                  {activity.location}
+                  {activity.sessionTitle}
                 </Text>
                 <Text className="text-text text-[10px] mt-0.5 italic">
-                  {activity.by}
+                  {activity.coachName}
                 </Text>
               </View>
 
