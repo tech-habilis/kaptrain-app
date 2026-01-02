@@ -1,3 +1,4 @@
+import WellnessTrackingChart from "@/components/area-chart/wellness-tracking-chart";
 import Button from "@/components/button";
 import { Chip } from "@/components/chip";
 import IcAppleFood from "@/components/icons/apple-food";
@@ -126,7 +127,38 @@ const MyFitnessTracking = () => {
       </View>
 
       {/* area chart */}
-      <View className="size-[160px] px-4 self-center" />
+      <WellnessTrackingChart
+        data={[
+          {
+            date: new Date(2026, 0, 1),
+            score: 6.5,
+          },
+          {
+            date: new Date(2026, 0, 2),
+            score: 6,
+          },
+          {
+            date: new Date(2026, 0, 3),
+            score: 7,
+          },
+          {
+            date: new Date(2026, 0, 4),
+            score: 8,
+          },
+          {
+            date: new Date(2026, 0, 5),
+            score: 6.5,
+          },
+          {
+            date: new Date(2026, 0, 6),
+            score: 7.5,
+          },
+          {
+            date: new Date(2026, 0, 7),
+            score: 8.5,
+          },
+        ]}
+      />
 
       {/* chips */}
       <ScrollView horizontal contentContainerClassName="gap-2 px-4">
@@ -159,7 +191,7 @@ const Agenda = () => {
       coachName: "Par Enguerrand Aucher",
       color: ColorConst.tertiary,
       icon: <IcMuscular size={16} />,
-      status: 'completed'
+      status: "completed",
     },
     {
       title: "Cyclisme",
@@ -167,7 +199,7 @@ const Agenda = () => {
       coachName: "Par Enguerrand Aucher",
       color: ColorConst.primary,
       icon: <IcCycling size={16} />,
-      status: 'pending'
+      status: "pending",
     },
   ];
 
@@ -256,7 +288,11 @@ const Agenda = () => {
                 }}
               >
                 <View className="flex-row gap-1 items-center">
-                  {activity.status === 'completed' ? <IcCheckCircleFilled size={16} /> : activity.icon}
+                  {activity.status === "completed" ? (
+                    <IcCheckCircleFilled size={16} />
+                  ) : (
+                    activity.icon
+                  )}
                   <Text className="font-bold">{activity.title}</Text>
                 </View>
 
