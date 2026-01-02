@@ -6,6 +6,8 @@ import { ReactNode } from "react";
 import { View } from "react-native";
 import { ColorConst } from "./theme";
 import Text from "@/components/text";
+import CircularProgress from "@/components/charts/circular-progress";
+import LineChart from "@/components/charts/line-chart";
 
 export interface StatisticWidget {
   title: string;
@@ -43,12 +45,34 @@ export const mockStatistics: StatisticWidget[] = [
   {
     title: "Volume d’entrainement",
     subtitle: "7 derniers jours",
-    chart: <TrainingVolumeChart />,
+    chart: <TrainingVolumeChart withTotal />,
   },
   {
     title: "Suivi de poids",
     subtitle: "01 janvier - 30 juillet",
-    chart: <ActivityDistributionChart />,
+    chart: (
+      <LineChart
+        data={[
+          { x: "Jan", y: 72 },
+          { x: "Fev", y: 71 },
+          { x: "Fev", y: 70 },
+          { x: "Mar", y: 69 },
+          { x: "Mar", y: 68 },
+          { x: "Avr", y: 67 },
+          { x: "Avr", y: 68 },
+        ]}
+        height={110}
+        minY={60}
+        maxY={80}
+        lineColor={ColorConst.primary}
+        lineWidth={2}
+        backgroundColor={ColorConst.light}
+        showDots={false}
+        withCurvedLines={true}
+        showXAxisIndices={[0, 2, 4, 6]}
+        barSpacing={2}
+      />
+    ),
   },
   {
     title: "Temps d’activité",
@@ -79,8 +103,20 @@ export const mockStatistics: StatisticWidget[] = [
   },
   {
     title: "Nombre de pas",
-    subtitle: "Aujourd’hui",
-    chart: <ActivityDistributionChart />,
+    subtitle: "Aujourd'hui",
+    chart: (
+      <View className="items-center justify-center flex-1">
+        <CircularProgress
+          current={3500}
+          total={5000}
+          size={100}
+          strokeWidth={8}
+          backgroundColor="#F5F6FD"
+          progressColor={ColorConst.secondary}
+          title="Pas"
+        />
+      </View>
+    ),
   },
   {
     title: "Charge d’entrainement",

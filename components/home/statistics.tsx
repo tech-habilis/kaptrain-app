@@ -17,22 +17,26 @@ import { ROUTE } from "@/constants/route";
 import { mockStatistics } from "@/constants/mock";
 import StatisticWidgetCard from "../statistic-widget-card";
 
-export const TrainingVolumeChart = () => {
+export const TrainingVolumeChart = ({
+  withTotal = false,
+}: {
+  withTotal?: boolean;
+}) => {
   return (
     <View>
       <BarChart
         data={[
+          { x: "D", y: 0 },
+          { x: "L", y: 8 },
+          { x: "M", y: 7 },
           { x: "M", y: 0 },
-          { x: "T", y: 8 },
-          { x: "W", y: 7 },
-          { x: "T", y: 0 },
-          { x: "F", y: 4 },
-          { x: "S", y: 3 },
-          { x: "S", y: 0 },
+          { x: "J", y: 4 },
+          { x: "V", y: 3 },
+          { x: "Auj", y: 0 },
         ]}
         height={85}
       />
-      <Text className="text-base font-semibold">13h20</Text>
+      {withTotal && <Text className="text-base font-semibold">13h20</Text>}
     </View>
   );
 };
