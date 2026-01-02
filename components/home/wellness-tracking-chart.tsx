@@ -1,4 +1,4 @@
-import AreaChart from "./area-chart";
+import AreaChart from "@/components/area-chart";
 import { View, useWindowDimensions } from "react-native";
 import Text from "@/components/text";
 

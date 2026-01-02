@@ -1,24 +1,19 @@
-import WellnessTrackingChart from "@/components/area-chart/wellness-tracking-chart";
 import Button from "@/components/button";
 import { Chip } from "@/components/chip";
-import IcAppleFood from "@/components/icons/apple-food";
+import FitnessTracking from "@/components/home/fitness-tracking";
+import Statistics from "@/components/home/statistics";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcBell from "@/components/icons/bell";
 import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
 import IcCycling from "@/components/icons/cycling";
 import IcHollowCircle from "@/components/icons/hollow-circle";
-import IcLightning from "@/components/icons/lightning";
 import IcMessage from "@/components/icons/message";
-import IcMoon from "@/components/icons/moon";
 import IcMuscular from "@/components/icons/muscular";
 import IcSmiley from "@/components/icons/smiley";
-import IcTeardrop from "@/components/icons/teardrop";
 import Text from "@/components/text";
-import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import cn from "@/utilities/cn";
 import { clsx } from "clsx";
-import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
@@ -28,160 +23,6 @@ import {
   ScrollView,
   View,
 } from "react-native";
-
-const MyStatistic = () => {
-  const statistics = [
-    {
-      title: "Répartition d’activité",
-      subtitle: "Aujourd’hui",
-    },
-    {
-      title: "Volume d’entrainement",
-      subtitle: "7 derniers jours",
-    },
-    {
-      title: "Répartition d’activité",
-      subtitle: "Aujourd’hui",
-    },
-    {
-      title: "Volume d’entrainement",
-      subtitle: "7 derniers jours",
-    },
-    {
-      title: "Répartition d’activité",
-      subtitle: "Aujourd’hui",
-    },
-  ];
-
-  return (
-    <View className="bg-white py-4 gap-4">
-      <View className="flex-row justify-between items-center mx-4">
-        <Text className="font-bold text-base text-secondary">
-          Mes statistiques
-        </Text>
-        <Button
-          text="Tout voir"
-          type="link"
-          size="small"
-          textClassName="text-secondary"
-          rightIcon={
-            <View className="rotate-180">
-              <IcArrowLeft size={16} />
-            </View>
-          }
-        />
-      </View>
-
-      {/* list */}
-      <ScrollView
-        horizontal
-        contentContainerClassName="gap-2 px-4"
-        showsHorizontalScrollIndicator={false}
-      >
-        {statistics.map((statistic, index) => (
-          <View
-            key={index}
-            className="bg-white border border-stroke size-[168px] p-3 gap-1 rounded-lg"
-          >
-            <Text className="font-medium text-xs text-text">
-              {statistic.title}
-            </Text>
-            <Text className="text-[10px] text-subtleText">
-              {statistic.subtitle}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* indicator */}
-      <View className="flex-row gap-2 self-center">
-        {Array.from({ length: statistics.length }).map((_, index) => (
-          <View
-            key={index}
-            className={cn(
-              "size-2 rounded-full",
-              index === 0 ? "bg-primary" : "bg-light",
-            )}
-          />
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const MyFitnessTracking = () => {
-  const chips = [
-    { title: "Sommeil", icon: <IcMoon size={16} /> },
-    { title: "Energie", icon: <IcLightning size={16} /> },
-    { title: "Nutrition", icon: <IcAppleFood size={16} /> },
-    { title: "Hydratation", icon: <IcTeardrop size={16} /> },
-  ];
-
-  return (
-    <View className="bg-white py-4 gap-4">
-      <View className="flex-row justify-between items-center mx-4">
-        <Text className="font-bold text-base text-secondary">
-          Mon suivi de forme
-        </Text>
-        <Button text="Aujourd’hui" type="secondaryV2" size="small" />
-      </View>
-
-      {/* area chart */}
-      <WellnessTrackingChart
-        data={[
-          {
-            date: new Date(2026, 0, 1),
-            score: 6.5,
-          },
-          {
-            date: new Date(2026, 0, 2),
-            score: 6,
-          },
-          {
-            date: new Date(2026, 0, 3),
-            score: 7,
-          },
-          {
-            date: new Date(2026, 0, 4),
-            score: 8,
-          },
-          {
-            date: new Date(2026, 0, 5),
-            score: 6.5,
-          },
-          {
-            date: new Date(2026, 0, 6),
-            score: 7.5,
-          },
-          {
-            date: new Date(2026, 0, 7),
-            score: 8.5,
-          },
-        ]}
-      />
-
-      {/* chips */}
-      <ScrollView horizontal contentContainerClassName="gap-2 px-4">
-        {chips.map((chip, index) => (
-          <Chip
-            type="uncheck"
-            text={chip.title}
-            leftIcon={chip.icon}
-            key={index}
-          />
-        ))}
-      </ScrollView>
-
-      <Button
-        type="secondary"
-        size="small"
-        text="Renseigner ma forme du jour"
-        className="mx-4"
-        onPress={() => router.push(ROUTE.WELLNESS)}
-      />
-    </View>
-  );
-};
 
 const Agenda = () => {
   const sessions = [
@@ -355,11 +196,11 @@ export default function HomeScreen() {
 
       <Agenda />
 
-      {/* my fitness tracking */}
-      <MyFitnessTracking />
+      {/* wellness tracking (mon suivi de forme) */}
+      <FitnessTracking />
 
-      {/* my statistics */}
-      <MyStatistic />
+      {/* Statistics Section (Mes statistiques) */}
+      <Statistics />
 
       {/* timer */}
       <ImageBackground
