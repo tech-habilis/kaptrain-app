@@ -20,7 +20,7 @@ export interface DonutChartProps {
 export default function DonutChart({
   data,
   size,
-  strokeWidth = 20,
+  strokeWidth,
   showPercentageLabels = true,
   className,
 }: DonutChartProps) {
@@ -30,12 +30,25 @@ export default function DonutChart({
     return <View />;
   }
 
-  // Reserve space for percentage labels (circles with offset)
-  const labelSpace = 40; // Space for label circles positioned outside
+  // Calculate label space proportionally (will be updated after stroke width calculation)
+  const tempOuterRadius = (containerSize * 0.6) / 2; // Estimate for initial calculation
+  const tempStrokeWidth = strokeWidth ?? tempOuterRadius * 0.2;
+  const labelCircleRadiusEstimate = tempStrokeWidth * 0.5;
+  const labelSpace = labelCircleRadiusEstimate * 2.5; // Space for label circles positioned outside
   const chartSize = containerSize - labelSpace;
   const center = containerSize / 2;
   const outerRadius = chartSize / 2;
-  const innerRadius = outerRadius - strokeWidth;
+
+  // Calculate strokeWidth as 20% of the radius if not provided
+  const STROKE_WIDTH_PERCENTAGE = 0.45;
+  const calculatedStrokeWidth =
+    strokeWidth ?? outerRadius * STROKE_WIDTH_PERCENTAGE;
+  const innerRadius = outerRadius - calculatedStrokeWidth;
+
+  // Calculate proportional label sizes based on stroke width
+  const labelCircleRadius = calculatedStrokeWidth * 0.45;
+  const labelFontSize = calculatedStrokeWidth * 0.25;
+  const labelCircleStrokeWidth = calculatedStrokeWidth * 0.05; // 5% of stroke width
 
   // Calculate total to normalize percentages
   const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -82,7 +95,7 @@ export default function DonutChart({
     const midRad = (midAngle * Math.PI) / 180;
 
     // Position label outside the donut with offset (overlapping slightly)
-    const labelRadius = outerRadius + 2;
+    const labelRadius = outerRadius;
     const labelX = center + labelRadius * Math.cos(midRad);
     const labelY = center + labelRadius * Math.sin(midRad);
 
@@ -102,7 +115,7 @@ export default function DonutChart({
   return (
     <View
       className={className}
-      style={{ width: size || '100%', height: containerSize }}
+      style={{ width: size || "100%", height: containerSize }}
       onLayout={(event) => {
         const layoutWidth = event.nativeEvent.layout.width;
         if (!size) {
@@ -131,17 +144,17 @@ export default function DonutChart({
                 <Circle
                   cx={segment.labelX}
                   cy={segment.labelY}
-                  r={10}
+                  r={labelCircleRadius}
                   fill="white"
                   stroke="#E5E5E5"
-                  strokeWidth="1"
+                  strokeWidth={labelCircleStrokeWidth}
                 />
                 {/* Percentage text */}
                 <SvgText
-                  x={segment.labelX - 2.75}
-                  y={segment.labelY + 2.5}
+                  x={segment.labelX}
+                  y={segment.labelY + labelFontSize * 0.35}
                   fill="#04152D"
-                  fontSize={6.55}
+                  fontSize={labelFontSize}
                   fontWeight="600"
                   textAnchor="middle"
                   alignmentBaseline="middle"

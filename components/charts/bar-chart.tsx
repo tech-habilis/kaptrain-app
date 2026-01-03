@@ -59,7 +59,6 @@ export default function BarChart({
     50,
     height - padding.top - padding.bottom - labelSpace,
   );
-  console.log("chartHeight", chartHeight);
 
   // Calculate positions
   const barSpacing = innerChartWidth / data.length;
@@ -75,7 +74,6 @@ export default function BarChart({
     // If value is 0, treat it as 1 for display purposes
     const displayValue = item.y === 0 ? 1 : item.y;
     const barHeight = ((displayValue - minY) / yRange) * chartHeight;
-    console.log("barHeight", barHeight);
     const y = padding.top + chartHeight - barHeight;
     // Use defaultEmptyBarColor for 0 values, otherwise use item color or defaultBarColor
     const barColor =

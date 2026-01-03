@@ -5,6 +5,7 @@ import {
   ScrollView,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  FlatList,
 } from "react-native";
 import { cn } from "tailwind-variants";
 import IcArrowLeft from "@/components/icons/arrow-left";
@@ -14,8 +15,10 @@ import { ColorConst } from "@/constants/theme";
 import { useState } from "react";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
-import { mockStatistics } from "@/constants/mock";
 import StatisticWidgetCard from "../statistic-widget-card";
+import { StatisticWidget } from "@/constants/mock";
+import CircularProgress from "@/components/charts/circular-progress";
+import LineChart from "@/components/charts/line-chart";
 
 export const TrainingVolumeChart = ({
   withTotal = false,
@@ -41,24 +44,24 @@ export const TrainingVolumeChart = ({
   );
 };
 
-export const ActivityDistributionChart = () => {
-  const data = [
-    { label: "Hyrox", value: 5, color: ColorConst.primary },
-    { label: "Course à\npieds", value: 60, color: ColorConst.tertiary },
-    { label: "Yoga", value: 5, color: ColorConst.decorative },
-    { label: "Cyclisme", value: 15, color: "#88D18A" },
-    { label: "Aviron", value: 10, color: ColorConst.secondary },
-    { label: "Autres", value: 5, color: ColorConst.subtleText },
-  ];
+const activityDistributionData = [
+  { label: "Course à pieds", value: 60, color: ColorConst.tertiary },
+  { label: "Hyrox", value: 5, color: ColorConst.primary },
+  { label: "Yoga", value: 5, color: ColorConst.decorative },
+  { label: "Cyclisme", value: 15, color: "#88D18A" },
+  { label: "Aviron", value: 10, color: ColorConst.secondary },
+  { label: "Autres", value: 5, color: ColorConst.subtleText },
+];
 
+export const ActivityDistributionChart = () => {
   return (
     <View className="flex-row flex-1">
       <View className="w-[70%] items-start">
-        <DonutChart data={data} strokeWidth={16} />
+        <DonutChart data={activityDistributionData} />
       </View>
 
-      <View className="gap-1.5 ">
-        {data.map((activity) => (
+      <View className="gap-1.5">
+        {activityDistributionData.map((activity) => (
           <View key={activity.label} className="flex-row items-center gap-1">
             <View
               className="size-1.25 rounded-full"
@@ -71,6 +74,147 @@ export const ActivityDistributionChart = () => {
     </View>
   );
 };
+
+export const ActivityDistributionChartDetail = () => {
+  return (
+    <View className="flex-1">
+      <View className="px-14 py-2">
+        <DonutChart data={activityDistributionData} />
+      </View>
+
+      <FlatList
+        data={activityDistributionData}
+        numColumns={2}
+        keyExtractor={(item, index) => index.toString()}
+        columnWrapperClassName="gap-2"
+        contentContainerClassName="gap-1.5 mt-8"
+        renderItem={({ item }) => (
+          <View
+            key={item.label}
+            className="flex-row items-center gap-1 flex-1/2"
+          >
+            <View
+              className="size-2 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <Text className="text-subtleText">{`${item.label} (${item.value}%)`}</Text>
+          </View>
+        )}
+      />
+    </View>
+  );
+};
+
+const mockActivityTime = [
+  {
+    title: "Aujourd'hui",
+    time: "2h51",
+    color: ColorConst.primary,
+    bgColor: ColorConst.light,
+  },
+  {
+    title: "Cette semaine",
+    time: "13h35",
+    color: ColorConst.decorative,
+    bgColor: ColorConst.warmLight,
+  },
+  {
+    title: "Ce mois-ci",
+    time: "48h12",
+    color: ColorConst.tertiary,
+    bgColor: ColorConst.warmLight,
+  },
+];
+
+export const mockStatistics: StatisticWidget[] = [
+  {
+    title: "Répartition d'activité",
+    subtitle: "Aujourd'hui",
+    chart: <ActivityDistributionChart />,
+    chartDetail: <ActivityDistributionChartDetail />,
+  },
+  {
+    title: "Volume d'entrainement",
+    subtitle: "7 derniers jours",
+    chart: <TrainingVolumeChart withTotal />,
+  },
+  {
+    title: "Suivi de poids",
+    subtitle: "01 janvier - 30 juillet",
+    chart: (
+      <LineChart
+        data={[
+          { x: "Jan", y: 45 },
+          { x: "Fev", y: 60 },
+          { x: "Fev", y: 55 },
+          { x: "Mar", y: 80 },
+          { x: "Mar", y: 68 },
+          { x: "Avr", y: 76 },
+          { x: "Avr", y: 80 },
+        ]}
+        height={110}
+        minY={20}
+        maxY={150}
+        lineColor={ColorConst.primary}
+        lineWidth={2}
+        backgroundColor={ColorConst.light}
+        showDots={false}
+        withCurvedLines={true}
+        showXAxisIndices={[0, 2, 4, 6]}
+        barSpacing={2}
+      />
+    ),
+  },
+  {
+    title: "Temps d'activité",
+    subtitle: "",
+    chart: (
+      <View className="gap-3 mt-1">
+        {mockActivityTime.map((item, index) => (
+          <View key={index} className="flex-row items-center">
+            <View
+              style={{ backgroundColor: item.bgColor }}
+              className="p-1 rounded-full"
+            >
+              <View
+                className="size-2 rounded-full"
+                style={{ backgroundColor: item.color }}
+              />
+            </View>
+            <View>
+              <Text className="ml-2 text-[10px] text-subtleText">
+                {item.title}
+              </Text>
+              <Text className="ml-2 font-semibold text-text">{item.time}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    ),
+  },
+  {
+    title: "Nombre de pas",
+    subtitle: "Aujourd'hui",
+    chart: (
+      <View className="items-center justify-center flex-1">
+        <CircularProgress
+          current={3500}
+          total={5000}
+          size={100}
+          strokeWidth={8}
+          backgroundColor="#F5F6FD"
+          progressColor={ColorConst.secondary}
+          title="Pas"
+        />
+      </View>
+    ),
+  },
+  {
+    title: "Charge d'entrainement",
+    subtitle: "7 derniers jours",
+    chart: <TrainingVolumeChart />,
+  },
+];
 
 const Statistics = () => {
   const [activeIndex, setActiveIndex] = useState(0);
