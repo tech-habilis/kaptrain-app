@@ -5,4 +5,5 @@ export interface StatisticWidget {
   subtitle: string;
   chart: ReactNode;
   chartDetail?: ReactNode;
+  route: string;
 }

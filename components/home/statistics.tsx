@@ -7,6 +7,7 @@ import {
   NativeSyntheticEvent,
   FlatList,
   Pressable,
+  Dimensions,
 } from "react-native";
 import { cn } from "tailwind-variants";
 import IcArrowLeft from "@/components/icons/arrow-left";
@@ -18,7 +19,9 @@ import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import StatisticWidgetCard from "../statistic-widget-card";
 import { StatisticWidget } from "@/constants/mock";
-import CircularProgress from "@/components/charts/circular-progress";
+import CircularProgress, {
+  CircularProgressProps,
+} from "@/components/charts/circular-progress";
 import LineChart from "@/components/charts/line-chart";
 import IcMuscular from "../icons/muscular";
 import IcHyrox from "../icons/hyrox";
@@ -211,6 +214,32 @@ export const NumberOfSessionChart = () => {
   );
 };
 
+export const NumberOfStepsChart = ({
+  current = 8_416,
+  total = 10_000,
+  size = 100,
+  strokeWidth = 8,
+  backgroundColor = "#F5F6FD",
+  progressColor = ColorConst.secondary,
+  title = "Pas",
+  ...otherProgressProps
+}: Partial<CircularProgressProps>) => {
+  return (
+    <View className="items-center justify-center flex-1">
+      <CircularProgress
+        current={current}
+        total={total}
+        size={size}
+        strokeWidth={strokeWidth}
+        backgroundColor={backgroundColor}
+        progressColor={progressColor}
+        title={title}
+        {...otherProgressProps}
+      />
+    </View>
+  );
+};
+
 const mockActivityTime = [
   {
     title: "Aujourd'hui",
@@ -238,11 +267,13 @@ export const mockStatistics: StatisticWidget[] = [
     subtitle: "Aujourd'hui",
     chart: <ActivityDistributionChart />,
     chartDetail: <ActivityDistributionChartDetail />,
+    route: ROUTE.ACTIVITY_DISTRIBUTION,
   },
   {
     title: "Volume d'entrainement",
     subtitle: "7 derniers jours",
     chart: <TrainingVolumeChart withTotal />,
+    route: ROUTE.ACTIVITY_DISTRIBUTION,
   },
   {
     title: "Suivi de poids",
@@ -270,6 +301,7 @@ export const mockStatistics: StatisticWidget[] = [
         barSpacing={2}
       />
     ),
+    route: ROUTE.ACTIVITY_DISTRIBUTION,
   },
   {
     title: "Temps d'activité",
@@ -297,28 +329,27 @@ export const mockStatistics: StatisticWidget[] = [
         ))}
       </View>
     ),
+    route: ROUTE.ACTIVITY_DISTRIBUTION,
   },
   {
     title: "Nombre de pas",
     subtitle: "Aujourd'hui",
-    chart: (
-      <View className="items-center justify-center flex-1">
-        <CircularProgress
-          current={3500}
-          total={5000}
-          size={100}
-          strokeWidth={8}
-          backgroundColor="#F5F6FD"
-          progressColor={ColorConst.secondary}
-          title="Pas"
-        />
-      </View>
+    chart: <NumberOfStepsChart />,
+    chartDetail: (
+      <NumberOfStepsChart
+        size={Dimensions.get("screen").width * 0.65}
+        strokeWidth={18}
+        labelFontSize={16}
+        valueFontSize={32}
+      />
     ),
+    route: ROUTE.NUMBER_OF_STEPS,
   },
   {
     title: "Charge d'entrainement",
     subtitle: "7 derniers jours",
     chart: <TrainingVolumeChart />,
+    route: ROUTE.ACTIVITY_DISTRIBUTION,
   },
 ];
 

@@ -21,7 +21,6 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ROUTE } from "@/constants/route";
 
 interface StatisticWidgetWithKey extends StatisticWidget {
   key: string;
@@ -50,6 +49,7 @@ export default function EditSortStatistics() {
     useState<StatisticWidget | null>(null);
 
   const showModal = (selected: StatisticWidget) => {
+    console.log('showModal route', selected.route)
     setSelectedStatistic(selected);
     bottomSheetModalRef.current?.present();
   };
@@ -188,7 +188,8 @@ export default function EditSortStatistics() {
           type="secondary"
           onPress={() => {
             bottomSheetModalRef.current?.close();
-            router.push(ROUTE.ACTIVITY_DISTRIBUTION);
+            console.log(selectedStatistic?.route);
+            router.push(selectedStatistic?.route as any);
           }}
         />
       </BottomSheetModal>

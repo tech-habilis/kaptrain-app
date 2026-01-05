@@ -21,6 +21,8 @@ export interface BarChartProps {
   renderXAxisLabel?: (label: string, index: number) => ReactNode;
   showGridLines?: boolean;
   showYAxis?: boolean;
+  withBarLabel?: boolean;
+  targetY?: number;
 }
 
 export default function BarChart({
@@ -28,13 +30,15 @@ export default function BarChart({
   width,
   height = 200,
   minY = 0,
-  maxY = 10,
+  maxY,
   defaultBarColor = ColorConst.primary,
   defaultEmptyBarColor = ColorConst.light,
   textColor = ColorConst.subtleText,
   renderXAxisLabel,
   showGridLines = false,
   showYAxis = false,
+  withBarLabel = false,
+  targetY,
 }: BarChartProps) {
   const [containerWidth, setContainerWidth] = useState(320);
   const [calculatedBarWidth, setCalculatedBarWidth] = useState(24);
@@ -45,11 +49,16 @@ export default function BarChart({
     return <View />;
   }
 
+  // Auto-calculate maxY from data if not provided
+  // Add 10% padding to the top so bars don't reach the absolute top
+  const dataMaxY = Math.max(...data.map((item) => item.y), 10);
+  const calculatedMaxY = maxY ?? Math.ceil(dataMaxY * 1.1);
+
   // Reserve space for X-axis labels at the bottom
   const labelSpace = renderXAxisLabel ? 40 : 30;
 
   const padding = {
-    top: 10,
+    top: withBarLabel ? 20 : 10,
     right: 10,
     bottom: 5,
     left: showYAxis ? 40 : 10,
@@ -62,7 +71,7 @@ export default function BarChart({
 
   // Calculate positions
   const barSpacing = innerChartWidth / data.length;
-  const yRange = maxY - minY;
+  const yRange = calculatedMaxY - minY;
 
   // Calculate bar width dynamically based on available space
   // Use 70% of the available space per bar, leaving 30% for spacing
@@ -71,9 +80,9 @@ export default function BarChart({
   const bars = data.map((item, index) => {
     const x =
       padding.left + index * barSpacing + (barSpacing - dynamicBarWidth) / 2;
-    // If value is 0, treat it as 1 for display purposes
-    const displayValue = item.y === 0 ? 1 : item.y;
-    const barHeight = ((displayValue - minY) / yRange) * chartHeight;
+    // If value is 0, show a minimal bar for display purposes (2% of range)
+    const normalizedValue = item.y === 0 ? minY + yRange * 0.02 : item.y;
+    const barHeight = ((normalizedValue - minY) / yRange) * chartHeight;
     const y = padding.top + chartHeight - barHeight;
     // Use defaultEmptyBarColor for 0 values, otherwise use item color or defaultBarColor
     const barColor =
@@ -146,6 +155,28 @@ export default function BarChart({
           </G>
         )}
 
+        {/* Placeholder bars (background) */}
+        {targetY !== undefined && (
+          <G>
+            {bars.map((bar, index) => {
+              const placeholderHeight = ((targetY - minY) / yRange) * chartHeight;
+              const placeholderY = padding.top + chartHeight - placeholderHeight;
+              return (
+                <Rect
+                  key={`placeholder-${index}`}
+                  x={bar.x}
+                  y={placeholderY}
+                  width={bar.width}
+                  height={placeholderHeight}
+                  fill={ColorConst.light}
+                  rx={4}
+                  ry={4}
+                />
+              );
+            })}
+          </G>
+        )}
+
         {/* Bars */}
         <G>
           {bars.map((bar, index) => (
@@ -161,6 +192,24 @@ export default function BarChart({
             />
           ))}
         </G>
+
+        {/* Bar value labels on top of bars */}
+        {withBarLabel && (
+          <G>
+            {bars.map((bar, index) => (
+              <Text
+                key={`bar-label-${index}`}
+                x={bar.centerX}
+                y={bar.y - 5}
+                fill={textColor}
+                fontSize={11}
+                textAnchor="middle"
+              >
+                {bar.value}
+              </Text>
+            ))}
+          </G>
+        )}
 
         {/* X-axis labels (default SVG text) */}
         {!renderXAxisLabel && (
