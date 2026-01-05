@@ -170,3 +170,26 @@ export function ButtonLink({
     </Link>
   );
 }
+
+export function ButtonIcon({
+  className = "",
+  textClassName = "",
+  size,
+  type = 'secondaryV2',
+  disabled,
+  children,
+  ...props
+}: Omit<ComponentProps<typeof Button>, "children" | "text"> & {
+  size: "small" | "large";
+  textClassName?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Pressable
+      className={cn(button({ size, type, disabled }), className)}
+      {...props}
+    >
+      {children}
+    </Pressable>
+  );
+}

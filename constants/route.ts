@@ -24,6 +24,7 @@ export const ROUTE_NAME = {
   WELLNESS: "wellness",
   VIEW_SORT_STATISTICS: "view-sort-statistics",
   EDIT_SORT_STATISTICS: "edit-sort-statistics",
+  ACTIVITY_DISTRIBUTION: "activity-distribution",
 } as const;
 
 /**
@@ -56,4 +57,5 @@ export const ROUTE = {
   WELLNESS: `/${ROUTE_NAME.WELLNESS}` as const,
   VIEW_SORT_STATISTICS: `/${ROUTE_NAME.VIEW_SORT_STATISTICS}` as const,
   EDIT_SORT_STATISTICS: `/${ROUTE_NAME.EDIT_SORT_STATISTICS}` as const,
+  ACTIVITY_DISTRIBUTION: `/${ROUTE_NAME.ACTIVITY_DISTRIBUTION}` as const,
 } as const;
