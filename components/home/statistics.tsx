@@ -6,6 +6,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   FlatList,
+  Pressable,
 } from "react-native";
 import { cn } from "tailwind-variants";
 import IcArrowLeft from "@/components/icons/arrow-left";
@@ -24,6 +25,7 @@ import IcHyrox from "../icons/hyrox";
 import IcYoga from "../icons/yoga";
 import IcCycling from "../icons/cycling";
 import IcRowing from "../icons/rowing";
+import NoDataChart from "../no-data-chart";
 
 export const TrainingVolumeChart = ({
   withTotal = false,
@@ -50,11 +52,36 @@ export const TrainingVolumeChart = ({
 };
 
 export const activityDistributionData = [
-  { label: "Course à pieds", value: 60, color: ColorConst.tertiary, icon: <IcMuscular size={24} /> },
-  { label: "Hyrox", value: 5, color: ColorConst.primary, icon: <IcHyrox size={24} /> },
-  { label: "Yoga", value: 5, color: ColorConst.decorative, icon: <IcYoga size={24} /> },
-  { label: "Cyclisme", value: 15, color: "#88D18A", icon: <IcCycling size={24} /> },
-  { label: "Aviron", value: 10, color: ColorConst.secondary, icon: <IcRowing size={24} /> },
+  {
+    label: "Course à pieds",
+    value: 60,
+    color: ColorConst.tertiary,
+    icon: <IcMuscular size={24} />,
+  },
+  {
+    label: "Hyrox",
+    value: 5,
+    color: ColorConst.primary,
+    icon: <IcHyrox size={24} />,
+  },
+  {
+    label: "Yoga",
+    value: 5,
+    color: ColorConst.decorative,
+    icon: <IcYoga size={24} />,
+  },
+  {
+    label: "Cyclisme",
+    value: 15,
+    color: "#88D18A",
+    icon: <IcCycling size={24} />,
+  },
+  {
+    label: "Aviron",
+    value: 10,
+    color: ColorConst.secondary,
+    icon: <IcRowing size={24} />,
+  },
   { label: "Autres", value: 5, color: ColorConst.subtleText },
 ];
 
@@ -80,11 +107,83 @@ export const ActivityDistributionChart = () => {
   );
 };
 
-export const ActivityDistributionChartDetail = () => {
+export const ActivityDistributionChartDetail = ({
+  withDate = false,
+}: {
+  withDate?: boolean;
+}) => {
+  const [showNotFound, setShowNotFound] = useState(false);
   return (
     <View className="flex-1">
+      {withDate && (
+        <View className="flex-row items-center justify-center mb-6 gap-3">
+          <Pressable onPress={() => setShowNotFound(false)}>
+            <IcArrowLeft size={16} />
+          </Pressable>
+          <Text className="text-base text-secondary">
+            Du 14 avril au 20 avril
+          </Text>
+          <Pressable
+            onPress={() => setShowNotFound(true)}
+            className="rotate-180"
+          >
+            <IcArrowLeft size={16} />
+          </Pressable>
+        </View>
+      )}
+
+      {showNotFound ? (
+        <NoDataChart className="mt-6" />
+      ) : (
+        <>
+          <View className="px-14 py-2">
+            <DonutChart data={activityDistributionData} />
+          </View>
+
+          <FlatList
+            data={activityDistributionData}
+            numColumns={2}
+            keyExtractor={(item, index) => index.toString()}
+            columnWrapperClassName="gap-2"
+            contentContainerClassName="gap-1.5 mt-8"
+            renderItem={({ item }) => (
+              <View
+                key={item.label}
+                className="flex-row items-center gap-1 flex-1/2"
+              >
+                <View
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <Text className="text-subtleText">
+                  {`${item.label} (${item.value}%)`}
+                </Text>
+              </View>
+            )}
+          />
+        </>
+      )}
+    </View>
+  );
+};
+
+export const NumberOfSessionChart = () => {
+  return (
+    <View className="flex-1">
+      <View className="flex-row items-center justify-center mb-6 gap-3">
+        <IcArrowLeft size={16} />
+        <Text className="text-base text-secondary">
+          Du 14 avril au 20 avril
+        </Text>
+        <View className="rotate-180">
+          <IcArrowLeft size={16} />
+        </View>
+      </View>
       <View className="px-14 py-2">
-        <DonutChart data={activityDistributionData} />
+        <DonutChart
+          data={activityDistributionData}
+          labelFormatter={(data) => data.value.toString()}
+        />
       </View>
 
       <FlatList
@@ -102,7 +201,9 @@ export const ActivityDistributionChartDetail = () => {
               className="size-2 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <Text className="text-subtleText">{`${item.label} (${item.value}%)`}</Text>
+            <Text className="text-subtleText">
+              {`${item.label} (${item.value})`}
+            </Text>
           </View>
         )}
       />
