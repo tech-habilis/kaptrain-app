@@ -19,6 +19,11 @@ import StatisticWidgetCard from "../statistic-widget-card";
 import { StatisticWidget } from "@/constants/mock";
 import CircularProgress from "@/components/charts/circular-progress";
 import LineChart from "@/components/charts/line-chart";
+import IcMuscular from "../icons/muscular";
+import IcHyrox from "../icons/hyrox";
+import IcYoga from "../icons/yoga";
+import IcCycling from "../icons/cycling";
+import IcRowing from "../icons/rowing";
 
 export const TrainingVolumeChart = ({
   withTotal = false,
@@ -44,12 +49,12 @@ export const TrainingVolumeChart = ({
   );
 };
 
-const activityDistributionData = [
-  { label: "Course à pieds", value: 60, color: ColorConst.tertiary },
-  { label: "Hyrox", value: 5, color: ColorConst.primary },
-  { label: "Yoga", value: 5, color: ColorConst.decorative },
-  { label: "Cyclisme", value: 15, color: "#88D18A" },
-  { label: "Aviron", value: 10, color: ColorConst.secondary },
+export const activityDistributionData = [
+  { label: "Course à pieds", value: 60, color: ColorConst.tertiary, icon: <IcMuscular size={24} /> },
+  { label: "Hyrox", value: 5, color: ColorConst.primary, icon: <IcHyrox size={24} /> },
+  { label: "Yoga", value: 5, color: ColorConst.decorative, icon: <IcYoga size={24} /> },
+  { label: "Cyclisme", value: 15, color: "#88D18A", icon: <IcCycling size={24} /> },
+  { label: "Aviron", value: 10, color: ColorConst.secondary, icon: <IcRowing size={24} /> },
   { label: "Autres", value: 5, color: ColorConst.subtleText },
 ];
 
