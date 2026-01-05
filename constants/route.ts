@@ -25,7 +25,8 @@ export const ROUTE_NAME = {
   VIEW_SORT_STATISTICS: "view-sort-statistics",
   EDIT_SORT_STATISTICS: "edit-sort-statistics",
   ACTIVITY_DISTRIBUTION: "activity-distribution",
-  NUMBER_OF_STEPS: "number-of-steps"
+  NUMBER_OF_STEPS: "number-of-steps",
+  WEIGHT_TRACKING: "weight-tracking"
 } as const;
 
 /**
@@ -60,4 +61,5 @@ export const ROUTE = {
   EDIT_SORT_STATISTICS: `/${ROUTE_NAME.EDIT_SORT_STATISTICS}` as const,
   ACTIVITY_DISTRIBUTION: `/${ROUTE_NAME.ACTIVITY_DISTRIBUTION}` as const,
   NUMBER_OF_STEPS: `/${ROUTE_NAME.NUMBER_OF_STEPS}` as const,
+  WEIGHT_TRACKING: `/${ROUTE_NAME.WEIGHT_TRACKING}` as const,
 } as const;
