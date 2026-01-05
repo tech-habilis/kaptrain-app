@@ -21,7 +21,7 @@ export default function NumberOfSteps() {
   const [tab, setTab] = useState(tabs[0]);
 
   const [current, setCurrent] = useState(8416);
-  const total = 10000;
+  const TARGET_STEPS = 10000;
 
   const renderTabContent = () => {
     if (tab === "Aujourd’hui") {
@@ -43,7 +43,7 @@ export default function NumberOfSteps() {
               strokeWidth={18}
               labelFontSize={16}
               valueFontSize={32}
-              progressColor={current >= total ? ColorConst.primary : undefined}
+              progressColor={current >= TARGET_STEPS ? ColorConst.primary : undefined}
             />
           </View>
         </>
@@ -52,7 +52,7 @@ export default function NumberOfSteps() {
 
     if (tab === "Semaine") {
       const getBarColor = (value: number) => {
-        if (value >= 10000) return ColorConst.primary;
+        if (value >= TARGET_STEPS) return ColorConst.primary;
         return undefined;
       };
 
@@ -73,7 +73,7 @@ export default function NumberOfSteps() {
             <BarChart
               defaultBarColor={ColorConst.secondary}
               withBarLabel
-              targetY={10_000}
+              targetY={TARGET_STEPS}
               data={[
                 { x: "D", y: 6230, color: getBarColor(6230) },
                 { x: "L", y: 3617, color: getBarColor(3617) },
@@ -90,6 +90,56 @@ export default function NumberOfSteps() {
     }
 
     if (tab === "Mois") {
+      // Mock data for April 2024 using real dates
+      const monthData = [
+        { date: new Date(2024, 3, 1), steps: 8500 },
+        { date: new Date(2024, 3, 2), steps: 11200 },
+        { date: new Date(2024, 3, 3), steps: 9800 },
+        { date: new Date(2024, 3, 4), steps: 12500 },
+        { date: new Date(2024, 3, 5), steps: 7200 },
+        { date: new Date(2024, 3, 6), steps: 9000 },
+        { date: new Date(2024, 3, 7), steps: 10500 },
+        { date: new Date(2024, 3, 8), steps: 8900 },
+        { date: new Date(2024, 3, 9), steps: 11800 },
+        { date: new Date(2024, 3, 10), steps: 9500 },
+        { date: new Date(2024, 3, 11), steps: 10200 },
+        { date: new Date(2024, 3, 12), steps: 13000 },
+        { date: new Date(2024, 3, 13), steps: 8100 },
+        { date: new Date(2024, 3, 14), steps: 6230 },
+        { date: new Date(2024, 3, 15), steps: 3617 },
+        { date: new Date(2024, 3, 16), steps: 10089 },
+        { date: new Date(2024, 3, 17), steps: 18200 },
+        { date: new Date(2024, 3, 18), steps: 11368 },
+        { date: new Date(2024, 3, 19), steps: 9120 },
+        { date: new Date(2024, 3, 20), steps: 7416 },
+        { date: new Date(2024, 3, 21), steps: 10800 },
+        { date: new Date(2024, 3, 22), steps: 9200 },
+        { date: new Date(2024, 3, 23), steps: 11500 },
+        { date: new Date(2024, 3, 24), steps: 8700 },
+        { date: new Date(2024, 3, 25), steps: 12100 },
+        { date: new Date(2024, 3, 26), steps: 9900 },
+        { date: new Date(2024, 3, 27), steps: 10300 },
+        { date: new Date(2024, 3, 28), steps: 11700 },
+        { date: new Date(2024, 3, 29), steps: 9400 },
+        { date: new Date(2024, 3, 30), steps: 10600 },
+      ];
+
+      const dayInitials = ["L", "M", "M", "J", "V", "S", "D"];
+
+      // Get first day of month (0 = Monday, 6 = Sunday)
+      const firstDate = monthData[0]?.date;
+      const firstDayOfWeek = firstDate ? (firstDate.getDay() + 6) % 7 : 0; // Convert Sunday=0 to Monday=0
+
+      // Create array with empty slots for days before the 1st
+      const calendarDays = Array(firstDayOfWeek).fill(null);
+      monthData.forEach((data) => calendarDays.push(data));
+
+      // Split into weeks
+      const weeks = [];
+      for (let i = 0; i < calendarDays.length; i += 7) {
+        weeks.push(calendarDays.slice(i, i + 7));
+      }
+
       return (
         <>
           <View className="flex-row items-center justify-center gap-3">
@@ -100,6 +150,57 @@ export default function NumberOfSteps() {
             <Pressable className="rotate-180">
               <IcArrowLeft size={16} />
             </Pressable>
+          </View>
+
+          <View className="flex-1 px-2 pt-4 items-center justify-center">
+            {/* Day headers */}
+            <View className="flex-row gap-3 mb-3">
+              {dayInitials.map((initial, index) => (
+                <View key={index} className="size-8 items-center justify-center">
+                  <Text className="text-sm font-medium text-subtleText">
+                    {initial}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Calendar grid */}
+            {weeks.map((week, weekIndex) => (
+              <View key={weekIndex} className="flex-row gap-3 mb-3">
+                {week.map((dayData, dayIndex) => {
+                  if (!dayData) {
+                    return <View key={dayIndex} className="size-8" />;
+                  }
+
+                  const isAboveTarget = dayData.steps >= TARGET_STEPS;
+                  return (
+                    <View
+                      key={dayIndex}
+                      className={cn(
+                        "size-8 rounded items-center justify-center",
+                        isAboveTarget ? "bg-primary" : "bg-light"
+                      )}
+                    >
+                      <Text
+                        className={cn(
+                          "text-sm font-bold",
+                          isAboveTarget ? "text-white" : "text-black"
+                        )}
+                      >
+                        {dayData.date.getDate()}
+                      </Text>
+                    </View>
+                  );
+                })}
+                {/* Fill empty slots at end of week */}
+                {week.length < 7 &&
+                  Array(7 - week.length)
+                    .fill(null)
+                    .map((_, index) => (
+                      <View key={`empty-${index}`} className="size-8" />
+                    ))}
+              </View>
+            ))}
           </View>
         </>
       );
@@ -145,7 +246,7 @@ export default function NumberOfSteps() {
             {current.toString()}
           </Text>
           <Text className="font-medium text-subtleText text-base">
-            {` / ${total} pas`}
+            {` / ${TARGET_STEPS} pas`}
           </Text>
         </View>
 
@@ -153,10 +254,10 @@ export default function NumberOfSteps() {
           <View
             className={cn(
               "h-3 rounded-full",
-              current >= total ? "bg-primary" : "bg-secondary",
+              current >= TARGET_STEPS ? "bg-primary" : "bg-secondary",
             )}
             style={{
-              width: `${(current / total) * 100}%`,
+              width: `${(current / TARGET_STEPS) * 100}%`,
             }}
           />
         </View>
