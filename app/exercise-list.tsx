@@ -21,6 +21,7 @@ import IcGridV from "@/components/icons/grid-v";
 import IcGrid from "@/components/icons/grid";
 import IcWeight from "@/components/icons/weight";
 import IcLoveFilled from "@/components/icons/love-filled";
+import clsx from "clsx";
 
 type ExerciseItem = {
   title: string;
@@ -161,7 +162,9 @@ export default function ExerciseList() {
           <Button
             text="Favoris"
             type="secondaryV2"
-            className="bg-white rounded-lg"
+            className={clsx("bg-white rounded-lg", {
+              "bg-warmLight border-tertiary": isFavScreen,
+            })}
             size="small"
             rightIcon={
               isFavScreen ? (
