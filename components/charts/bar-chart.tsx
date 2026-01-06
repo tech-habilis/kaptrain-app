@@ -21,6 +21,7 @@ export interface BarChartProps {
   renderXAxisLabel?: (label: string, index: number) => ReactNode;
   showGridLines?: boolean;
   showYAxis?: boolean;
+  renderYAxisLabel?: (value: number, index: number) => ReactNode;
   withBarLabel?: boolean;
   targetY?: number;
 }
@@ -37,6 +38,7 @@ export default function BarChart({
   renderXAxisLabel,
   showGridLines = false,
   showYAxis = false,
+  renderYAxisLabel,
   withBarLabel = false,
   targetY,
 }: BarChartProps) {
@@ -148,7 +150,7 @@ export default function BarChart({
                   fontWeight="500"
                   textAnchor="end"
                 >
-                  {Math.round(label.value)}
+                  {renderYAxisLabel ? renderYAxisLabel(label.value, index) : Math.round(label.value)}
                 </Text>
               </G>
             ))}

@@ -9,7 +9,6 @@ import BottomSheetModal from "@/components/bottom-sheet-modal";
 import Button from "@/components/button";
 import AreaChart from "@/components/charts/area-chart";
 import { ColorConst } from "@/constants/theme";
-import { hexToRgba } from "@/utilities/cn";
 import IcPencil from "@/components/icons/pencil";
 import Input from "@/components/input";
 import DatePicker from "@/components/date-picker";
@@ -82,7 +81,9 @@ export default function WeightTracking() {
               maxY={1.05 * Math.max(...data.map((item) => item.y))}
               lineColor={ColorConst.primary}
               lineWidth={4}
-              fillColor={hexToRgba(ColorConst.primary, 0.15)}
+              // fillColor={hexToRgba(ColorConst.primary, 0.15)}
+              gradientTopColor={ColorConst.primary}
+              gradientBottomColor={ColorConst.light}
               textColor={ColorConst.subtleText}
               data={data}
               withCurvedLines={false}
