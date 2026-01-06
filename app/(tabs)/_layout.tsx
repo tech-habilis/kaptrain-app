@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
-import { Colors } from "@/constants/theme";
+import { ColorConst, Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
@@ -24,6 +24,7 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           paddingTop: 12,
+          backgroundColor: ColorConst.light
         },
         sceneStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].background,
