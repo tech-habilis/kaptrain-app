@@ -287,6 +287,84 @@ const mockActivityTime = [
   },
 ];
 
+export const ActivityTimeChart = () => {
+  return (
+    <View className="gap-3 mt-1">
+      {mockActivityTime.map((item, index) => (
+        <View key={index} className="flex-row items-center">
+          <View
+            style={{ backgroundColor: item.bgColor }}
+            className="p-1 rounded-full"
+          >
+            <View
+              className="size-2 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+          </View>
+          <View>
+            <Text className="ml-2 text-[10px] text-subtleText">
+              {item.title}
+            </Text>
+            <Text className="ml-2 font-semibold text-text">{item.time}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
+export const ActivityTimeChartDetail = () => {
+  const data = [
+    {
+      title: "Aujourd'hui",
+      time: "2 heures 51 minutes",
+      color: ColorConst.primary,
+      bgColor: ColorConst.light,
+    },
+    {
+      title: "Cette semaine",
+      time: "13 heures 35 minutes",
+      color: ColorConst.decorative,
+      bgColor: ColorConst.warmLight,
+    },
+    {
+      title: "Ce mois-ci",
+      time: "48 heures 12 minutes",
+      color: ColorConst.tertiary,
+      bgColor: ColorConst.warmLight,
+    },
+    {
+      title: "Cette année",
+      time: "21 jours, 16 heures et 5 minutes",
+      color: ColorConst.secondary,
+      bgColor: ColorConst.light,
+    },
+  ];
+
+  return (
+    <View className="gap-8">
+      {data.map((item, index) => (
+        <View key={index} className="flex-row items-center">
+          <View
+            style={{ backgroundColor: item.bgColor }}
+            className="p-2 rounded-full"
+          >
+            <View
+              className="size-4 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+          </View>
+          <View className="ml-4">
+            <Text className="text-sm text-subtleText">{item.title}</Text>
+            <Text className="text-base font-semibold text-text">
+              {item.time}
+            </Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
+
 export const mockStatistics: StatisticWidget[] = [
   {
     title: "Répartition d'activité",
@@ -299,7 +377,7 @@ export const mockStatistics: StatisticWidget[] = [
     title: "Volume d'entrainement",
     subtitle: "7 derniers jours",
     chart: <TrainingVolumeChart withTotal />,
-    route: ROUTE.ACTIVITY_DISTRIBUTION,
+    route: ROUTE.TRAINING_VOLUME,
   },
   {
     title: "Suivi de poids",
@@ -333,30 +411,9 @@ export const mockStatistics: StatisticWidget[] = [
   {
     title: "Temps d'activité",
     subtitle: "",
-    chart: (
-      <View className="gap-3 mt-1">
-        {mockActivityTime.map((item, index) => (
-          <View key={index} className="flex-row items-center">
-            <View
-              style={{ backgroundColor: item.bgColor }}
-              className="p-1 rounded-full"
-            >
-              <View
-                className="size-2 rounded-full"
-                style={{ backgroundColor: item.color }}
-              />
-            </View>
-            <View>
-              <Text className="ml-2 text-[10px] text-subtleText">
-                {item.title}
-              </Text>
-              <Text className="ml-2 font-semibold text-text">{item.time}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-    ),
-    route: ROUTE.ACTIVITY_DISTRIBUTION,
+    chart: <ActivityTimeChart />,
+    chartDetail: <ActivityTimeChartDetail />,
+    route: ROUTE.ACTIVITY_TIME,
   },
   {
     title: "Nombre de pas",
@@ -376,7 +433,7 @@ export const mockStatistics: StatisticWidget[] = [
     title: "Charge d'entrainement",
     subtitle: "7 derniers jours",
     chart: <TrainingVolumeChart />,
-    route: ROUTE.ACTIVITY_DISTRIBUTION,
+    route: ROUTE.TRAINING_VOLUME,
   },
 ];
 
