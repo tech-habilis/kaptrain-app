@@ -30,7 +30,8 @@ export const ROUTE_NAME = {
   NUMBER_OF_STEPS: "number-of-steps",
   WEIGHT_TRACKING: "weight-tracking",
   TRAINING_VOLUME: "training-volume",
-  ACTIVITY_TIME: "activity-time"
+  ACTIVITY_TIME: "activity-time",
+  EXERCISE_LIST: "exercise-list",
 } as const;
 
 /**
@@ -70,4 +71,5 @@ export const ROUTE = {
   WEIGHT_TRACKING: `/${ROUTE_NAME.WEIGHT_TRACKING}` as const,
   TRAINING_VOLUME: `/${ROUTE_NAME.TRAINING_VOLUME}` as const,
   ACTIVITY_TIME: `/${ROUTE_NAME.ACTIVITY_TIME}` as const,
+  EXERCISE_LIST: `/${ROUTE_NAME.EXERCISE_LIST}` as const,
 } as const;

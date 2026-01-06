@@ -5,11 +5,13 @@ import IcLightning from "@/components/icons/lightning";
 import IcLove from "@/components/icons/love";
 import Tabs from "@/components/tabs";
 import Text from "@/components/text";
+import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { hexToRgba } from "@/utilities/cn";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { ImageBackground, ScrollView, View } from "react-native";
+import { ImageBackground, Pressable, ScrollView, View } from "react-native";
 
 export default function Library() {
   const tabs = ["Exercices", "Programmes"];
@@ -25,18 +27,23 @@ export default function Library() {
       ),
       bgColor: "#FFFFFF",
       borderColor: ColorConst.text,
+      onPress: () => {
+        router.push(ROUTE.EXERCISE_LIST);
+      },
     },
     {
       title: "Exercices favoris",
       icon: <IcLove />,
       bgColor: hexToRgba(ColorConst.tertiary, 0.1),
       borderColor: ColorConst.tertiary,
+      onPress: () => {},
     },
     {
       title: "Mes sports",
       icon: <IcLightning size={24} color={ColorConst.primary} />,
       bgColor: ColorConst.light,
       borderColor: ColorConst.primary,
+      onPress: () => {},
     },
   ];
 
@@ -136,14 +143,15 @@ export default function Library() {
 
       <ScrollView horizontal contentContainerClassName="gap-2 m-4">
         {menu.map((x, index) => (
-          <View
+          <Pressable
             key={index}
             className="gap-2 p-3 border rounded-xl items-start w-31"
             style={{ backgroundColor: x.bgColor, borderColor: x.borderColor }}
+            onPress={x.onPress}
           >
             {x.icon}
             <Text className="text-text font-bold text-base">{x.title}</Text>
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
 
@@ -152,8 +160,10 @@ export default function Library() {
         {categories.map((x, index) => (
           <ImageBackground key={index} source={x.image} className="rounded-2xl">
             <View className="p-3 pt-8">
-              <Text className="text-white font-semibold text-base">{ x.title}</Text>
-              <Text className="text-white mt-1.5">{ x.description}</Text>
+              <Text className="text-white font-semibold text-base">
+                {x.title}
+              </Text>
+              <Text className="text-white mt-1.5">{x.description}</Text>
             </View>
           </ImageBackground>
         ))}

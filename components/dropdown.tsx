@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { ComponentProps, ReactNode, useRef } from "react";
 import { View } from "react-native";
 import Button from "./button";
 import BottomSheetModal from "./bottom-sheet-modal";
@@ -13,8 +13,11 @@ interface DropdownProps {
   selectedOption: TChoice;
   onSelect: (option: TChoice) => void;
   className?: string;
+  textClassName?: string;
   modalTitle?: string;
   modalDescription?: string;
+  rightIcon?: ReactNode;
+  size?: ComponentProps<typeof Button>["size"];
 }
 
 export default function Dropdown({
@@ -23,8 +26,11 @@ export default function Dropdown({
   selectedOption,
   onSelect,
   className = "",
+  textClassName = "",
   modalTitle,
   modalDescription,
+  rightIcon,
+  size,
 }: DropdownProps) {
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
 
@@ -39,7 +45,9 @@ export default function Dropdown({
         text={label}
         type="secondaryV2"
         className={className}
-        rightIcon={<IcUnfoldMore />}
+        textClassName={textClassName}
+        rightIcon={rightIcon || <IcUnfoldMore />}
+        size={size}
         onPress={() => bottomSheetModalRef.current?.present()}
       />
 
