@@ -6,6 +6,8 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   FlatList,
+  Pressable,
+  Dimensions,
 } from "react-native";
 import { cn } from "tailwind-variants";
 import IcArrowLeft from "@/components/icons/arrow-left";
@@ -17,8 +19,16 @@ import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import StatisticWidgetCard from "../statistic-widget-card";
 import { StatisticWidget } from "@/constants/mock";
-import CircularProgress from "@/components/charts/circular-progress";
+import CircularProgress, {
+  CircularProgressProps,
+} from "@/components/charts/circular-progress";
 import LineChart from "@/components/charts/line-chart";
+import IcMuscular from "../icons/muscular";
+import IcHyrox from "../icons/hyrox";
+import IcYoga from "../icons/yoga";
+import IcCycling from "../icons/cycling";
+import IcRowing from "../icons/rowing";
+import NoDataChart from "../no-data-chart";
 
 export const TrainingVolumeChart = ({
   withTotal = false,
@@ -44,12 +54,37 @@ export const TrainingVolumeChart = ({
   );
 };
 
-const activityDistributionData = [
-  { label: "Course à pieds", value: 60, color: ColorConst.tertiary },
-  { label: "Hyrox", value: 5, color: ColorConst.primary },
-  { label: "Yoga", value: 5, color: ColorConst.decorative },
-  { label: "Cyclisme", value: 15, color: "#88D18A" },
-  { label: "Aviron", value: 10, color: ColorConst.secondary },
+export const activityDistributionData = [
+  {
+    label: "Course à pieds",
+    value: 60,
+    color: ColorConst.tertiary,
+    icon: <IcMuscular size={24} />,
+  },
+  {
+    label: "Hyrox",
+    value: 5,
+    color: ColorConst.primary,
+    icon: <IcHyrox size={24} />,
+  },
+  {
+    label: "Yoga",
+    value: 5,
+    color: ColorConst.decorative,
+    icon: <IcYoga size={24} />,
+  },
+  {
+    label: "Cyclisme",
+    value: 15,
+    color: "#88D18A",
+    icon: <IcCycling size={24} />,
+  },
+  {
+    label: "Aviron",
+    value: 10,
+    color: ColorConst.secondary,
+    icon: <IcRowing size={24} />,
+  },
   { label: "Autres", value: 5, color: ColorConst.subtleText },
 ];
 
@@ -75,11 +110,83 @@ export const ActivityDistributionChart = () => {
   );
 };
 
-export const ActivityDistributionChartDetail = () => {
+export const ActivityDistributionChartDetail = ({
+  withDate = false,
+}: {
+  withDate?: boolean;
+}) => {
+  const [showNotFound, setShowNotFound] = useState(false);
   return (
     <View className="flex-1">
+      {withDate && (
+        <View className="flex-row items-center justify-center mb-6 gap-3">
+          <Pressable onPress={() => setShowNotFound(false)}>
+            <IcArrowLeft size={16} />
+          </Pressable>
+          <Text className="text-base text-secondary">
+            Du 14 avril au 20 avril
+          </Text>
+          <Pressable
+            onPress={() => setShowNotFound(true)}
+            className="rotate-180"
+          >
+            <IcArrowLeft size={16} />
+          </Pressable>
+        </View>
+      )}
+
+      {showNotFound ? (
+        <NoDataChart className="mt-6" />
+      ) : (
+        <>
+          <View className="px-14 py-2">
+            <DonutChart data={activityDistributionData} />
+          </View>
+
+          <FlatList
+            data={activityDistributionData}
+            numColumns={2}
+            keyExtractor={(item, index) => index.toString()}
+            columnWrapperClassName="gap-2"
+            contentContainerClassName="gap-1.5 mt-8"
+            renderItem={({ item }) => (
+              <View
+                key={item.label}
+                className="flex-row items-center gap-1 flex-1/2"
+              >
+                <View
+                  className="size-2 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <Text className="text-subtleText">
+                  {`${item.label} (${item.value}%)`}
+                </Text>
+              </View>
+            )}
+          />
+        </>
+      )}
+    </View>
+  );
+};
+
+export const NumberOfSessionChart = () => {
+  return (
+    <View className="flex-1">
+      <View className="flex-row items-center justify-center mb-6 gap-3">
+        <IcArrowLeft size={16} />
+        <Text className="text-base text-secondary">
+          Du 14 avril au 20 avril
+        </Text>
+        <View className="rotate-180">
+          <IcArrowLeft size={16} />
+        </View>
+      </View>
       <View className="px-14 py-2">
-        <DonutChart data={activityDistributionData} />
+        <DonutChart
+          data={activityDistributionData}
+          labelFormatter={(data) => data.value.toString()}
+        />
       </View>
 
       <FlatList
@@ -97,11 +204,65 @@ export const ActivityDistributionChartDetail = () => {
               className="size-2 rounded-full"
               style={{ backgroundColor: item.color }}
             />
-            <Text className="text-subtleText">{`${item.label} (${item.value}%)`}</Text>
+            <Text className="text-subtleText">
+              {`${item.label} (${item.value})`}
+            </Text>
           </View>
         )}
       />
     </View>
+  );
+};
+
+export const NumberOfStepsChart = ({
+  current = 8_416,
+  total = 10_000,
+  size = 100,
+  strokeWidth = 8,
+  backgroundColor = "#F5F6FD",
+  progressColor = ColorConst.secondary,
+  title = "Pas",
+  ...otherProgressProps
+}: Partial<CircularProgressProps>) => {
+  return (
+    <View className="items-center justify-center flex-1">
+      <CircularProgress
+        current={current}
+        total={total}
+        size={size}
+        strokeWidth={strokeWidth}
+        backgroundColor={backgroundColor}
+        progressColor={progressColor}
+        title={title}
+        {...otherProgressProps}
+      />
+    </View>
+  );
+};
+
+export const WeightTrackingChart = () => {
+  return (
+    <LineChart
+      data={[
+        { x: "Jan", y: 45 },
+        { x: "Fev", y: 60 },
+        { x: "Fev", y: 55 },
+        { x: "Mar", y: 80 },
+        { x: "Mar", y: 68 },
+        { x: "Avr", y: 76 },
+        { x: "Avr", y: 80 },
+      ]}
+      height={240}
+      minY={20}
+      maxY={150}
+      lineColor={ColorConst.primary}
+      lineWidth={2}
+      backgroundColor={ColorConst.light}
+      showDots={false}
+      withCurvedLines={true}
+      showXAxisIndices={[0, 2, 4, 6]}
+      barSpacing={2}
+    />
   );
 };
 
@@ -126,17 +287,97 @@ const mockActivityTime = [
   },
 ];
 
+export const ActivityTimeChart = () => {
+  return (
+    <View className="gap-3 mt-1">
+      {mockActivityTime.map((item, index) => (
+        <View key={index} className="flex-row items-center">
+          <View
+            style={{ backgroundColor: item.bgColor }}
+            className="p-1 rounded-full"
+          >
+            <View
+              className="size-2 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+          </View>
+          <View>
+            <Text className="ml-2 text-[10px] text-subtleText">
+              {item.title}
+            </Text>
+            <Text className="ml-2 font-semibold text-text">{item.time}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
+export const ActivityTimeChartDetail = () => {
+  const data = [
+    {
+      title: "Aujourd'hui",
+      time: "2 heures 51 minutes",
+      color: ColorConst.primary,
+      bgColor: ColorConst.light,
+    },
+    {
+      title: "Cette semaine",
+      time: "13 heures 35 minutes",
+      color: ColorConst.decorative,
+      bgColor: ColorConst.warmLight,
+    },
+    {
+      title: "Ce mois-ci",
+      time: "48 heures 12 minutes",
+      color: ColorConst.tertiary,
+      bgColor: ColorConst.warmLight,
+    },
+    {
+      title: "Cette année",
+      time: "21 jours, 16 heures et 5 minutes",
+      color: ColorConst.secondary,
+      bgColor: ColorConst.light,
+    },
+  ];
+
+  return (
+    <View className="gap-8">
+      {data.map((item, index) => (
+        <View key={index} className="flex-row items-center">
+          <View
+            style={{ backgroundColor: item.bgColor }}
+            className="p-2 rounded-full"
+          >
+            <View
+              className="size-4 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+          </View>
+          <View className="ml-4">
+            <Text className="text-sm text-subtleText">{item.title}</Text>
+            <Text className="text-base font-semibold text-text">
+              {item.time}
+            </Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
+
 export const mockStatistics: StatisticWidget[] = [
   {
     title: "Répartition d'activité",
     subtitle: "Aujourd'hui",
     chart: <ActivityDistributionChart />,
     chartDetail: <ActivityDistributionChartDetail />,
+    route: ROUTE.ACTIVITY_DISTRIBUTION,
   },
   {
     title: "Volume d'entrainement",
     subtitle: "7 derniers jours",
     chart: <TrainingVolumeChart withTotal />,
+    route: ROUTE.TRAINING_VOLUME,
   },
   {
     title: "Suivi de poids",
@@ -164,55 +405,35 @@ export const mockStatistics: StatisticWidget[] = [
         barSpacing={2}
       />
     ),
+    chartDetail: <WeightTrackingChart />,
+    route: ROUTE.WEIGHT_TRACKING,
   },
   {
     title: "Temps d'activité",
     subtitle: "",
-    chart: (
-      <View className="gap-3 mt-1">
-        {mockActivityTime.map((item, index) => (
-          <View key={index} className="flex-row items-center">
-            <View
-              style={{ backgroundColor: item.bgColor }}
-              className="p-1 rounded-full"
-            >
-              <View
-                className="size-2 rounded-full"
-                style={{ backgroundColor: item.color }}
-              />
-            </View>
-            <View>
-              <Text className="ml-2 text-[10px] text-subtleText">
-                {item.title}
-              </Text>
-              <Text className="ml-2 font-semibold text-text">{item.time}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-    ),
+    chart: <ActivityTimeChart />,
+    chartDetail: <ActivityTimeChartDetail />,
+    route: ROUTE.ACTIVITY_TIME,
   },
   {
     title: "Nombre de pas",
     subtitle: "Aujourd'hui",
-    chart: (
-      <View className="items-center justify-center flex-1">
-        <CircularProgress
-          current={3500}
-          total={5000}
-          size={100}
-          strokeWidth={8}
-          backgroundColor="#F5F6FD"
-          progressColor={ColorConst.secondary}
-          title="Pas"
-        />
-      </View>
+    chart: <NumberOfStepsChart />,
+    chartDetail: (
+      <NumberOfStepsChart
+        size={Dimensions.get("screen").width * 0.65}
+        strokeWidth={18}
+        labelFontSize={16}
+        valueFontSize={32}
+      />
     ),
+    route: ROUTE.NUMBER_OF_STEPS,
   },
   {
     title: "Charge d'entrainement",
     subtitle: "7 derniers jours",
     chart: <TrainingVolumeChart />,
+    route: ROUTE.TRAINING_VOLUME,
   },
 ];
 
