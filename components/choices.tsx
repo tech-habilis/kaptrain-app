@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { FlatList, Pressable, View } from "react-native";
 import Text from "./text";
 import { tv, VariantProps } from "tailwind-variants";
 import cn from "@/utilities/cn";
@@ -79,6 +79,9 @@ export const Choices = ({
   maxChoice,
   type = "default",
   className = "",
+  numColumns,
+  itemClassName = "",
+  itemTextClassName = "",
 }: {
   label?: string;
   data: TChoice[];
@@ -88,6 +91,9 @@ export const Choices = ({
   onChangeMultiple?: (choices: TChoice[]) => void;
   maxChoice?: number;
   className?: string;
+  numColumns?: number;
+  itemClassName?: string;
+  itemTextClassName?: string;
 } & ChoiceVariants) => {
   const renderLeftSide = (choice: TChoice) => {
     if (choice.leftIcon) {
@@ -124,11 +130,7 @@ export const Choices = ({
       const isSelected = choice.text === selectedChoice?.text;
       return (
         <View className="flex-1 flex-row justify-end items-center">
-          {isSelected ? (
-            <IcRadioSelected size={24} />
-          ) : (
-            <IcRadio size={24} />
-          )}
+          {isSelected ? <IcRadioSelected size={24} /> : <IcRadio size={24} />}
         </View>
       );
     }
@@ -136,55 +138,78 @@ export const Choices = ({
     return null;
   };
 
+  const Choice = ({
+    choice,
+    className = "",
+    textClassName = "",
+  }: {
+    choice: TChoice;
+    className?: string;
+    textClassName?: string;
+  }) => {
+    const selected =
+      type === "multipleChoice"
+        ? selectedChoices?.map((x) => x.text)?.includes(choice.text)
+        : choice.text === selectedChoice?.text;
+
+    return (
+      <Pressable
+        className={cn(choiceWrapper({ selected, type }), "flex-1", className)}
+        onPress={() => {
+          if (type === "multipleChoice") {
+            const nonNullSelectedChoices = selectedChoices || [];
+            const isSelecting = !selectedChoices?.includes(choice);
+
+            if (
+              maxChoice !== undefined &&
+              isSelecting &&
+              nonNullSelectedChoices.length >= maxChoice
+            ) {
+              return;
+            }
+
+            onChangeMultiple?.(
+              isSelecting
+                ? [...nonNullSelectedChoices, choice]
+                : nonNullSelectedChoices.filter((c) => c !== choice),
+            );
+
+            return;
+          }
+
+          onChange?.(choice);
+        }}
+      >
+        {renderLeftSide(choice)}
+        <Text className={cn(choiceText({ type, selected }), textClassName)}>
+          {choice.text}
+        </Text>
+        {renderRightSide(choice)}
+      </Pressable>
+    );
+  };
+
   return (
     <View className={cn("gap-2", className)}>
       {label !== undefined && (
         <Text className="text-accent font-medium text-sm">{label}</Text>
       )}
-      <View className="gap-2 mt-2">
-        {data.map((choice) => {
-          const selected =
-            type === "multipleChoice"
-              ? selectedChoices?.map((x) => x.text)?.includes(choice.text)
-              : choice.text === selectedChoice?.text;
-          return (
-            <Pressable
-              key={choice.text}
-              className={choiceWrapper({ selected, type })}
-              onPress={() => {
-                if (type === "multipleChoice") {
-                  const nonNullSelectedChoices = selectedChoices || [];
-                  const isSelecting = !selectedChoices?.includes(choice);
 
-                  if (
-                    maxChoice !== undefined &&
-                    isSelecting &&
-                    nonNullSelectedChoices.length >= maxChoice
-                  ) {
-                    return;
-                  }
-
-                  onChangeMultiple?.(
-                    isSelecting
-                      ? [...nonNullSelectedChoices, choice]
-                      : nonNullSelectedChoices.filter((c) => c !== choice),
-                  );
-
-                  return;
-                }
-
-                onChange?.(choice);
-              }}
-            >
-              {renderLeftSide(choice)}
-              <Text className={cn(choiceText({ type, selected }))}>
-                {choice.text}
-              </Text>
-              {renderRightSide(choice)}
-            </Pressable>
-          );
-        })}
-      </View>
+      <FlatList
+        key={`choices-${numColumns || ""}`}
+        numColumns={numColumns}
+        columnWrapperClassName="gap-2"
+        contentContainerClassName="gap-2 mt-2"
+        data={data}
+        renderItem={({ item }) => (
+          <Choice
+            className={itemClassName}
+            choice={item}
+            textClassName={itemTextClassName}
+          />
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
     </View>
   );
 };

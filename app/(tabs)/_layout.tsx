@@ -10,6 +10,7 @@ import IcHome from "@/components/icons/home";
 import IcLibrary from "@/components/icons/library";
 import IcAgenda from "@/components/icons/agenda";
 import IcProfile from "@/components/icons/profile";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -23,7 +24,10 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarShowLabel: false,
         tabBarStyle: {
-          paddingTop: 12,
+          paddingTop: Platform.select({
+            android: 4,
+            ios: 12
+          }),
           backgroundColor: ColorConst.light
         },
         sceneStyle: {

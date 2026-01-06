@@ -24,6 +24,7 @@ import { clsx } from "clsx";
 import getExercises from "@/constants/mock";
 import { ExerciseItem } from "@/types";
 import { ROUTE } from "@/constants/route";
+import CircleBadge from "@/components/circle-badge";
 
 const ExerciseListCard = ({
   item,
@@ -57,11 +58,11 @@ const ExerciseGridCard = ({
   onPress: () => void;
 }) => {
   return (
-    <Pressable onPress={onPress}>
-      <ImageBackground
-        source={item.image}
-        className="rounded-xl gap-4 border border-stroke aspect-square flex-1 overflow-hidden"
-      >
+    <Pressable
+      onPress={onPress}
+      className="rounded-xl gap-4 border border-stroke aspect-square flex-1 overflow-hidden"
+    >
+      <ImageBackground source={item.image} className="size-full">
         <View className="flex-1 gap-1.5 p-3 h-full bg-linear-to-t from-black via-[#35353540] to-[#66666600] justify-end">
           <View className="flex-row gap-1">
             {item.isFavorite && <IcLoveFilled size={16} />}
@@ -113,12 +114,14 @@ export default function ExerciseList() {
 
         <View className="gap-2 flex-row mt-2">
           <Button
-            text="1"
             leftIcon={<IcFilter />}
             type="secondaryV2"
             className="bg-white rounded-lg"
             size="small"
-          />
+            onPress={() => router.push(ROUTE.EXERCISE_FILTER)}
+          >
+            <CircleBadge text="1" />
+          </Button>
           <Dropdown
             label="Trier par"
             options={sorts}
@@ -185,7 +188,7 @@ export default function ExerciseList() {
         key={`grid-${isGridView}`}
         data={exercises.filter((x) => (isFavScreen ? x.isFavorite : true))}
         keyExtractor={(_, index) => index.toString()}
-        contentContainerClassName="p-4 gap-4"
+        contentContainerClassName="p-4 gap-4 pb-safe"
         columnWrapperClassName="gap-4"
         renderItem={({ item }) =>
           isGridView ? (

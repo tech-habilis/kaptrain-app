@@ -33,6 +33,10 @@ export const ROUTE_NAME = {
   ACTIVITY_TIME: "activity-time",
   EXERCISE_LIST: "exercise-list",
   EXERCISE_DETAIL: "exercise-detail",
+  EXERCISE_FILTER: "exercise-filter",
+  EXERCISE_FILTER_MUSCLES: "exercise-filter-muscles",
+  EXERCISE_FILTER_SPORTS: "exercise-filter-sports",
+  EXERCISE_FILTER_THEMES: "exercise-filter-themes",
 } as const;
 
 /**
@@ -74,4 +78,8 @@ export const ROUTE = {
   ACTIVITY_TIME: `/${ROUTE_NAME.ACTIVITY_TIME}` as const,
   EXERCISE_LIST: `/${ROUTE_NAME.EXERCISE_LIST}` as const,
   EXERCISE_DETAIL: `/${ROUTE_NAME.EXERCISE_DETAIL}` as const,
+  EXERCISE_FILTER: `/${ROUTE_NAME.EXERCISE_FILTER}` as const,
+  EXERCISE_FILTER_MUSCLES: `/${ROUTE_NAME.EXERCISE_FILTER_MUSCLES}` as const,
+  EXERCISE_FILTER_SPORTS: `/${ROUTE_NAME.EXERCISE_FILTER_SPORTS}` as const,
+  EXERCISE_FILTER_THEMES: `/${ROUTE_NAME.EXERCISE_FILTER_THEMES}` as const,
 } as const;
