@@ -36,7 +36,14 @@ export default function Library() {
       icon: <IcLove />,
       bgColor: hexToRgba(ColorConst.tertiary, 0.1),
       borderColor: ColorConst.tertiary,
-      onPress: () => {},
+      onPress: () => {
+        router.push({
+          pathname: ROUTE.EXERCISE_LIST,
+          params: {
+            mode: "favorite",
+          },
+        });
+      },
     },
     {
       title: "Mes sports",

@@ -1,12 +1,12 @@
 import * as React from "react";
 import Svg, { G, Path, Defs, ClipPath } from "react-native-svg";
 
-function IcWeight({ size = 16 }) {
+function IcWeight({ size = 16, color = "#424F65" }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
       <G
         clipPath="url(#clip0_3034_33472)"
-        stroke="#424F65"
+        stroke={color}
         strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"

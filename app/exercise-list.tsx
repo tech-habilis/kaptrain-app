@@ -1,8 +1,14 @@
 import IcArrowLeft from "@/components/icons/arrow-left";
 import Text from "@/components/text";
-import { router } from "expo-router";
-import { useState } from "react";
-import { FlatList, Image, Pressable, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { ReactNode, useState } from "react";
+import {
+  FlatList,
+  Image,
+  ImageBackground,
+  Pressable,
+  View,
+} from "react-native";
 import Input from "@/components/input";
 import IcSearch from "@/components/icons/search";
 import Button from "@/components/button";
@@ -14,8 +20,52 @@ import { Chip } from "@/components/chip";
 import IcGridV from "@/components/icons/grid-v";
 import IcGrid from "@/components/icons/grid";
 import IcWeight from "@/components/icons/weight";
+import IcLoveFilled from "@/components/icons/love-filled";
+
+type ExerciseItem = {
+  title: string;
+  image: any;
+  icon?: ReactNode;
+  isFavorite: boolean;
+};
+
+const ExerciseListCard = ({ item }: { item: ExerciseItem }) => {
+  return (
+    <View className="rounded-2xl flex-row items-center gap-4 border border-stroke overflow-hidden pr-2">
+      <Image source={item.image} />
+      <View className="flex-1 gap-2">
+        <Text className="text-text font-semibold text-sm">{item.title}</Text>
+        {item.icon}
+      </View>
+      <View className="rotate-180">
+        <IcArrowLeft />
+      </View>
+    </View>
+  );
+};
+
+const ExerciseGridCard = ({ item }: { item: ExerciseItem }) => {
+  return (
+    <ImageBackground
+      source={item.image}
+      className="rounded-xl gap-4 border border-stroke aspect-square flex-1 overflow-hidden"
+    >
+      <View className="flex-1 gap-1.5 p-3 h-full bg-linear-to-t from-black via-[#35353540] to-[#66666600] justify-end">
+        <View className="flex-row gap-1">
+          {item.isFavorite && <IcLoveFilled size={16} />}
+          {item.icon}
+        </View>
+        <Text className="text-white font-semibold text-sm">{item.title}</Text>
+      </View>
+    </ImageBackground>
+  );
+};
 
 export default function ExerciseList() {
+  const { mode } = useLocalSearchParams();
+  const [isFavScreen, setIsFavScreen] = useState(mode === "favorite");
+  const [isGridView, setIsGridView] = useState(false);
+
   const sorts = [
     {
       text: "Ordre alphabétique (A à Z)",
@@ -26,39 +76,47 @@ export default function ExerciseList() {
   ];
   const [selectedSort, setSelectedSort] = useState(sorts[0]);
 
-  const exercises = [
+  const exercises: ExerciseItem[] = [
     {
       title: "Abods flèches",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: false,
     },
     {
       title: "Abmat sit up",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: true,
     },
     {
       title: "Arch",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: true,
     },
     {
       title: "Abaisseur unilatéral élastique",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: false,
     },
     {
       title: "Arch extension",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: true,
     },
     {
       title: "Abaisseur unilatéral élastique",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: false,
     },
     {
       title: "Abmat sit up",
       image: require("../assets/images/exercise-example-1.png"),
+      isFavorite: true,
     },
     {
       title: "Abaisseur unilatéral élastique",
       image: require("../assets/images/exercise-example-1.png"),
-      icon: <IcWeight />,
+      icon: <IcWeight color={isGridView ? "white" : ColorConst.accent} />,
+      isFavorite: true,
     },
   ];
 
@@ -105,7 +163,16 @@ export default function ExerciseList() {
             type="secondaryV2"
             className="bg-white rounded-lg"
             size="small"
-            rightIcon={<IcLove color={ColorConst.accent} />}
+            rightIcon={
+              isFavScreen ? (
+                <IcLoveFilled />
+              ) : (
+                <IcLove color={ColorConst.accent} />
+              )
+            }
+            onPress={() => {
+              setIsFavScreen(!isFavScreen);
+            }}
           />
         </View>
 
@@ -120,23 +187,32 @@ export default function ExerciseList() {
           50 résultats
         </Text>
 
-        <IcGridV />
-        <IcGrid />
+        <Pressable onPress={() => setIsGridView(false)}>
+          <IcGridV
+            color={isGridView ? ColorConst.subtleText : ColorConst.text}
+          />
+        </Pressable>
+        <Pressable onPress={() => setIsGridView(true)}>
+          <IcGrid
+            color={isGridView ? ColorConst.text : ColorConst.subtleText}
+          />
+        </Pressable>
       </View>
 
       <FlatList
-        data={exercises}
+        numColumns={isGridView ? 2 : 1}
+        key={`grid-${isGridView}`}
+        data={exercises.filter((x) => (isFavScreen ? x.isFavorite : true))}
         keyExtractor={(_, index) => index.toString()}
         contentContainerClassName="p-4 gap-4"
-        renderItem={({ item }) => (
-          <View className="rounded-2xl flex-row items-center gap-4 border border-stroke overflow-hidden pr-2">
-            <Image source={item.image} />
-            <Text className="text-text font-semibold text-sm flex-1">
-              {item.title}
-            </Text>
-            <View className="rotate-180"><IcArrowLeft /></View>
-          </View>
-        )}
+        columnWrapperClassName="gap-4"
+        renderItem={({ item }) =>
+          isGridView ? (
+            <ExerciseGridCard item={item} />
+          ) : (
+            <ExerciseListCard item={item} />
+          )
+        }
       />
     </View>
   );
