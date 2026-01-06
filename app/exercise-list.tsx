@@ -1,7 +1,7 @@
 import IcArrowLeft from "@/components/icons/arrow-left";
 import Text from "@/components/text";
 import { router, useLocalSearchParams } from "expo-router";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import {
   FlatList,
   Image,
@@ -19,20 +19,24 @@ import { ColorConst } from "@/constants/theme";
 import { Chip } from "@/components/chip";
 import IcGridV from "@/components/icons/grid-v";
 import IcGrid from "@/components/icons/grid";
-import IcWeight from "@/components/icons/weight";
 import IcLoveFilled from "@/components/icons/love-filled";
-import clsx from "clsx";
+import { clsx } from "clsx";
+import getExercises from "@/constants/mock";
+import { ExerciseItem } from "@/types";
+import { ROUTE } from "@/constants/route";
 
-type ExerciseItem = {
-  title: string;
-  image: any;
-  icon?: ReactNode;
-  isFavorite: boolean;
-};
-
-const ExerciseListCard = ({ item }: { item: ExerciseItem }) => {
+const ExerciseListCard = ({
+  item,
+  onPress,
+}: {
+  item: ExerciseItem;
+  onPress: () => void;
+}) => {
   return (
-    <View className="rounded-2xl flex-row items-center gap-4 border border-stroke overflow-hidden pr-2">
+    <Pressable
+      onPress={onPress}
+      className="rounded-2xl flex-row items-center gap-4 border border-stroke overflow-hidden pr-2"
+    >
       <Image source={item.image} />
       <View className="flex-1 gap-2">
         <Text className="text-text font-semibold text-sm">{item.title}</Text>
@@ -41,24 +45,32 @@ const ExerciseListCard = ({ item }: { item: ExerciseItem }) => {
       <View className="rotate-180">
         <IcArrowLeft />
       </View>
-    </View>
+    </Pressable>
   );
 };
 
-const ExerciseGridCard = ({ item }: { item: ExerciseItem }) => {
+const ExerciseGridCard = ({
+  item,
+  onPress,
+}: {
+  item: ExerciseItem;
+  onPress: () => void;
+}) => {
   return (
-    <ImageBackground
-      source={item.image}
-      className="rounded-xl gap-4 border border-stroke aspect-square flex-1 overflow-hidden"
-    >
-      <View className="flex-1 gap-1.5 p-3 h-full bg-linear-to-t from-black via-[#35353540] to-[#66666600] justify-end">
-        <View className="flex-row gap-1">
-          {item.isFavorite && <IcLoveFilled size={16} />}
-          {item.icon}
+    <Pressable onPress={onPress}>
+      <ImageBackground
+        source={item.image}
+        className="rounded-xl gap-4 border border-stroke aspect-square flex-1 overflow-hidden"
+      >
+        <View className="flex-1 gap-1.5 p-3 h-full bg-linear-to-t from-black via-[#35353540] to-[#66666600] justify-end">
+          <View className="flex-row gap-1">
+            {item.isFavorite && <IcLoveFilled size={16} />}
+            {item.icon}
+          </View>
+          <Text className="text-white font-semibold text-sm">{item.title}</Text>
         </View>
-        <Text className="text-white font-semibold text-sm">{item.title}</Text>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </Pressable>
   );
 };
 
@@ -66,6 +78,7 @@ export default function ExerciseList() {
   const { mode } = useLocalSearchParams();
   const [isFavScreen, setIsFavScreen] = useState(mode === "favorite");
   const [isGridView, setIsGridView] = useState(false);
+  const exercises = getExercises({ isGridView });
 
   const sorts = [
     {
@@ -77,49 +90,14 @@ export default function ExerciseList() {
   ];
   const [selectedSort, setSelectedSort] = useState(sorts[0]);
 
-  const exercises: ExerciseItem[] = [
-    {
-      title: "Abods flèches",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: false,
-    },
-    {
-      title: "Abmat sit up",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: true,
-    },
-    {
-      title: "Arch",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: true,
-    },
-    {
-      title: "Abaisseur unilatéral élastique",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: false,
-    },
-    {
-      title: "Arch extension",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: true,
-    },
-    {
-      title: "Abaisseur unilatéral élastique",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: false,
-    },
-    {
-      title: "Abmat sit up",
-      image: require("../assets/images/exercise-example-1.png"),
-      isFavorite: true,
-    },
-    {
-      title: "Abaisseur unilatéral élastique",
-      image: require("../assets/images/exercise-example-1.png"),
-      icon: <IcWeight color={isGridView ? "white" : ColorConst.accent} />,
-      isFavorite: true,
-    },
-  ];
+  const onClickItem = (id: string) => {
+    router.push({
+      pathname: ROUTE.EXERCISE_DETAIL,
+      params: {
+        id,
+      },
+    });
+  };
 
   return (
     <View className="bg-white flex-1">
@@ -211,9 +189,15 @@ export default function ExerciseList() {
         columnWrapperClassName="gap-4"
         renderItem={({ item }) =>
           isGridView ? (
-            <ExerciseGridCard item={item} />
+            <ExerciseGridCard
+              item={item}
+              onPress={() => onClickItem(item.id)}
+            />
           ) : (
-            <ExerciseListCard item={item} />
+            <ExerciseListCard
+              item={item}
+              onPress={() => onClickItem(item.id)}
+            />
           )
         }
       />

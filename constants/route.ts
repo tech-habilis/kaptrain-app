@@ -32,6 +32,7 @@ export const ROUTE_NAME = {
   TRAINING_VOLUME: "training-volume",
   ACTIVITY_TIME: "activity-time",
   EXERCISE_LIST: "exercise-list",
+  EXERCISE_DETAIL: "exercise-detail",
 } as const;
 
 /**
@@ -72,4 +73,5 @@ export const ROUTE = {
   TRAINING_VOLUME: `/${ROUTE_NAME.TRAINING_VOLUME}` as const,
   ACTIVITY_TIME: `/${ROUTE_NAME.ACTIVITY_TIME}` as const,
   EXERCISE_LIST: `/${ROUTE_NAME.EXERCISE_LIST}` as const,
+  EXERCISE_DETAIL: `/${ROUTE_NAME.EXERCISE_DETAIL}` as const,
 } as const;
