@@ -9,6 +9,7 @@ import IcCheckbox from "@/components/icons/checkbox";
 import IcCheckboxSelected from "@/components/icons/checkbox-selected";
 import Input from "@/components/input";
 import Text from "@/components/text";
+import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ImageBackground, Pressable, ScrollView, View } from "react-native";
@@ -96,7 +97,7 @@ export default function BuyExercise() {
             29,99 €
           </Text>
         </View>
-        <Button text="Valider et payer" className="mb-6" onPress={() => {}} />
+        <Button text="Valider et payer" className="mb-6" onPress={() => router.replace(ROUTE.PAYMENT_CONFIRMED)} />
       </View>
     </>
   );

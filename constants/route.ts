@@ -41,6 +41,7 @@ export const ROUTE_NAME = {
   PROGRAM_DETAIL: "program-detail",
   PROGRAM_DETAIL_ACTION: "program-detail-action",
   BUY_EXERCISE: "buy-exercise",
+  PAYMENT_CONFIRMED: "payment-confirmed",
 } as const;
 
 /**
@@ -90,4 +91,5 @@ export const ROUTE = {
   PROGRAM_DETAIL: `/${ROUTE_NAME.PROGRAM_DETAIL}` as const,
   PROGRAM_DETAIL_ACTION: `/${ROUTE_NAME.PROGRAM_DETAIL_ACTION}` as const,
   BUY_EXERCISE: `/${ROUTE_NAME.BUY_EXERCISE}` as const,
+  PAYMENT_CONFIRMED: `/${ROUTE_NAME.PAYMENT_CONFIRMED}` as const,
 } as const;
