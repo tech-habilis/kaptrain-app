@@ -192,7 +192,7 @@ export const Choices = ({
             onPress={() => {
               if (type === "multipleChoice") {
                 const nonNullSelectedChoices = selectedChoices || [];
-                const isSelecting = !selectedChoices?.includes(choice);
+                const isSelecting = !selectedChoices?.includes(item);
 
                 if (
                   maxChoice !== undefined &&
@@ -205,7 +205,7 @@ export const Choices = ({
                 onChangeMultiple?.(
                   isSelecting
                     ? [...nonNullSelectedChoices, item]
-                    : nonNullSelectedChoices.filter((c) => c !== choice),
+                    : nonNullSelectedChoices.filter((c) => c !== item),
                 );
 
                 return;
