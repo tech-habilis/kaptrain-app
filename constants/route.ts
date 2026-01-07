@@ -37,6 +37,7 @@ export const ROUTE_NAME = {
   EXERCISE_FILTER_MUSCLES: "exercise-filter-muscles",
   EXERCISE_FILTER_SPORTS: "exercise-filter-sports",
   EXERCISE_FILTER_THEMES: "exercise-filter-themes",
+  TODAY_SESSION: "today-session",
 } as const;
 
 /**
@@ -82,4 +83,5 @@ export const ROUTE = {
   EXERCISE_FILTER_MUSCLES: `/${ROUTE_NAME.EXERCISE_FILTER_MUSCLES}` as const,
   EXERCISE_FILTER_SPORTS: `/${ROUTE_NAME.EXERCISE_FILTER_SPORTS}` as const,
   EXERCISE_FILTER_THEMES: `/${ROUTE_NAME.EXERCISE_FILTER_THEMES}` as const,
+  TODAY_SESSION: `/${ROUTE_NAME.TODAY_SESSION}` as const,
 } as const;
