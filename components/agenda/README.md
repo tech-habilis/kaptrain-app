@@ -42,33 +42,39 @@ import { Day } from "@/components/agenda";
 
 ### `ActivityCard` Component
 
-A reusable card component for displaying activity sessions (Note: Currently not used in the agenda tab as we follow the existing pattern from index.tsx).
+A reusable card component for displaying activity sessions. Used in both the home screen and agenda tab.
 
 **Props:**
 - `title: string` - Activity title
 - `description: string` - Activity description
 - `coachName: string` - Coach/creator name
-- `activityType?: ActivityType` - Type of activity (default: "sport")
-- `borderColor?: string` - Custom left border color (overrides activityType color)
+- `borderColor?: string` - Left border color (default: ColorConst.primary)
 - `icon?: React.ReactNode` - Optional icon to display next to title
+- `status?: ActivityStatus` - Activity status: "completed" or "pending" (default: "pending")
+- `completedIcon?: React.ReactNode` - Icon to show when status is "completed"
 - `onPress?: () => void` - Optional callback when card is pressed
 
-**Activity Types:**
-- `"sport"` - Blue border (#457CE2)
-- `"preparation"` - Orange border (#FF9E69)
-- `"other"` - Grey border (#424F65)
+**Features:**
+- Displays activity with colored left border
+- Shows icon or completed icon based on status
+- Includes title, description, and coach name
+- Clickable with press feedback
 
 **Usage:**
 ```tsx
 import { ActivityCard } from "@/components/agenda";
 import IcHyrox from "@/components/icons/hyrox";
+import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
+import { ColorConst } from "@/constants/theme";
 
 <ActivityCard
   title="Hyrox"
   description="Hyrox Paris Grand palais"
   coachName="Par Enguerrand Aucher"
-  activityType="sport"
+  borderColor={ColorConst.primary}
   icon={<IcHyrox size={16} />}
+  status="completed"
+  completedIcon={<IcCheckCircleFilled size={16} />}
   onPress={() => {}}
 />
 ```
@@ -90,7 +96,7 @@ The agenda tab (`app/(tabs)/agenda.tsx`) implements:
 
 3. **Daily Activities List**
    - Date header
-   - Activity cards following the existing pattern from home screen
+   - Activity cards using the ActivityCard component
    - Left-colored borders matching activity type
    - Coach information
 
@@ -106,9 +112,17 @@ All components use:
 - `clsx()` for conditional classes
 - ColorConst from theme for programmatic colors
 
+## Component Reuse
+
+Both the `Day` and `ActivityCard` components are now used in:
+- `app/(tabs)/index.tsx` - Home screen (week view calendar and today's sessions)
+- `app/(tabs)/agenda.tsx` - Agenda screen (monthly calendar and daily activities)
+
+This ensures consistent UI patterns across the app.
+
 ## Related Files
 
 - `app/(tabs)/agenda.tsx` - Main agenda screen implementation
+- `app/(tabs)/index.tsx` - Home screen using the same components
 - `components/icons/arrow-right.tsx` - Arrow icon for navigation
 - `constants/theme.ts` - Color definitions
-- `app/(tabs)/index.tsx` - Reference implementation for activity cards pattern

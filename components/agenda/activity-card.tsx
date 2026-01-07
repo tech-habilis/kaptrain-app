@@ -1,52 +1,46 @@
 import { View, Pressable } from "react-native";
 import Text from "@/components/text";
 import IcArrowRight from "@/components/icons/arrow-right";
+import { ColorConst } from "@/constants/theme";
 
-export type ActivityType = "sport" | "preparation" | "other";
+export type ActivityStatus = "completed" | "pending";
 
 interface ActivityCardProps {
   title: string;
   description: string;
   coachName: string;
-  activityType?: ActivityType;
   borderColor?: string;
   icon?: React.ReactNode;
+  status?: ActivityStatus;
+  completedIcon?: React.ReactNode;
   onPress?: () => void;
 }
-
-const activityColorMap: Record<ActivityType, string> = {
-  sport: "#457CE2",
-  preparation: "#FF9E69",
-  other: "#424F65",
-};
 
 export function ActivityCard({
   title,
   description,
   coachName,
-  activityType = "sport",
-  borderColor,
+  borderColor = ColorConst.primary,
   icon,
+  status = "pending",
+  completedIcon,
   onPress,
 }: ActivityCardProps) {
-  const leftBorderColor = borderColor || activityColorMap[activityType];
-
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-2 border border-stroke rounded-xl active:opacity-80"
+      className="bg-white border border-stroke rounded-[14px] flex-row items-center justify-between active:opacity-80"
     >
       <View
-        className="flex-1 py-1.5 pl-3 rounded-xl"
+        className="pl-3 rounded-[14px] border-l-4 py-1.5 flex-1"
         style={{
-          borderLeftWidth: 4,
-          borderLeftColor: leftBorderColor,
+          borderColor: borderColor,
         }}
       >
         {/* Title with icon */}
-        <View className="flex-row items-center gap-1">
-          {icon && <View>{icon}</View>}
-          <Text className="font-bold text-sm">{title}</Text>
+        <View className="flex-row gap-1 items-center">
+          {status === "completed" && completedIcon ? completedIcon : icon}
+          <Text className="font-bold">{title}</Text>
         </View>
 
         {/* Description */}
@@ -60,7 +54,7 @@ export function ActivityCard({
 
       {/* Arrow icon */}
       <View className="mr-3">
-        <IcArrowRight size={24} />
+        <IcArrowRight size={24} color={ColorConst.accent} />
       </View>
     </Pressable>
   );

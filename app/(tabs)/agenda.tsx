@@ -3,6 +3,7 @@ import { ScrollView, View, Pressable } from "react-native";
 import Text from "@/components/text";
 import { Chip } from "@/components/chip";
 import { Day, ActivityStatus } from "@/components/agenda/day";
+import { ActivityCard } from "@/components/agenda/activity-card";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcArrowRight from "@/components/icons/arrow-right";
 import IcHyrox from "@/components/icons/hyrox";
@@ -151,37 +152,14 @@ export default function Agenda() {
           {/* Activities list */}
           <View className="gap-2">
             {todayActivities.map((activity, index) => (
-              <View
+              <ActivityCard
                 key={index}
-                className="bg-white border border-stroke rounded-xl flex-row items-center justify-between pr-3"
-              >
-                <View
-                  className="flex-1 py-1.5 pl-3 rounded-xl"
-                  style={{
-                    borderLeftWidth: 4,
-                    borderLeftColor: activity.color,
-                  }}
-                >
-                  {/* Title with icon */}
-                  <View className="flex-row items-center gap-1">
-                    {activity.icon && <View>{activity.icon}</View>}
-                    <Text className="font-bold text-sm">{activity.title}</Text>
-                  </View>
-
-                  {/* Description */}
-                  <Text className="text-subtleText text-xs mt-1">
-                    {activity.sessionTitle}
-                  </Text>
-
-                  {/* Coach name */}
-                  <Text className="text-text text-[10px] mt-0.5 italic">
-                    {activity.coachName}
-                  </Text>
-                </View>
-
-                {/* Arrow icon */}
-                <IcArrowRight size={24} color={ColorConst.accent} />
-              </View>
+                title={activity.title}
+                description={activity.sessionTitle}
+                coachName={activity.coachName}
+                borderColor={activity.color}
+                icon={activity.icon}
+              />
             ))}
           </View>
         </View>
