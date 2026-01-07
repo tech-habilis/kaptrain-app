@@ -281,7 +281,10 @@ export default function CreateSession() {
 
                     {/* Block Content */}
                     <View className="flex-1 gap-1">
-                      <Text numberOfLines={1} className="text-sm font-semibold text-secondary leading-6">
+                      <Text
+                        numberOfLines={1}
+                        className="text-sm font-semibold text-secondary leading-6"
+                      >
                         {block.title}
                       </Text>
 
@@ -309,7 +312,7 @@ export default function CreateSession() {
                   text="Ajouter un bloc"
                   leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
                   onPress={() => {
-                    // Handle add block action
+                    router.push(ROUTE.ADD_BLOCK);
                   }}
                 />
               </View>

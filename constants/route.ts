@@ -43,6 +43,7 @@ export const ROUTE_NAME = {
   BUY_EXERCISE: "buy-exercise",
   PAYMENT_CONFIRMED: "payment-confirmed",
   CREATE_SESSION: "create-session",
+  ADD_BLOCK: "add-block",
 } as const;
 
 /**
@@ -94,4 +95,5 @@ export const ROUTE = {
   BUY_EXERCISE: `/${ROUTE_NAME.BUY_EXERCISE}` as const,
   PAYMENT_CONFIRMED: `/${ROUTE_NAME.PAYMENT_CONFIRMED}` as const,
   CREATE_SESSION: `/${ROUTE_NAME.CREATE_SESSION}` as const,
+  ADD_BLOCK: `/${ROUTE_NAME.ADD_BLOCK}` as const,
 } as const;
