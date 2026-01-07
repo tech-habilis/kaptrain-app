@@ -19,9 +19,9 @@
   },
   "menu": {
     "home": "Home",
-    "profile": "Profile",
-    "tips": "Tips",
-    "articles": "Articles"
+    "library": "Library",
+    "agenda": "Agenda",
+    "profile": "Profile"
   },
   "common": {
     "helloWorld": "Hello world! this is a test message for those who tried the language feature. While there's a big chance this app's users only use english. who know if they use french or japanese?",

@@ -1,8 +1,8 @@
 import { Pressable, View } from "react-native";
-import Button from "./button";
 import Text from "./text";
 import cn from "@/utilities/cn";
-import clsx from "clsx";
+import { clsx } from "clsx";
+import { useState } from "react";
 
 type TTab = string;
 
@@ -11,40 +11,44 @@ export default function Tabs({
   selected,
   onSelected,
   className = "",
+  textClassName = "",
 }: {
   tabs: TTab[];
   selected: TTab;
   onSelected: (tab: TTab) => void;
   className?: string;
+  textClassName?: string;
 }) {
+  const [width, setWidth] = useState(0);
+
   return (
     <View
+      onLayout={(event) => {
+        setWidth(event.nativeEvent.layout.width);
+      }}
       className={cn(
-        "flex-row mt-4 bg-white border border-stroke rounded-md justify-center items-center",
+        "w-full flex-row mt-4 bg-white border border-stroke rounded-md justify-center items-center",
         className,
       )}
     >
       {tabs.map((tab, index) => (
         <Pressable
           key={index}
-          className={clsx("p-3 w-1/3 items-center justify-center rounded-md", {
+          className={clsx("p-3 items-center justify-center rounded-md", {
             "bg-secondary": tab === selected,
           })}
+          style={{
+            width: width / tabs.length,
+          }}
           onPress={() => onSelected(tab)}
         >
-          <Text className={clsx({ "text-white": tab === selected })}>
+          <Text
+            className={clsx({ "text-white": tab === selected }, textClassName)}
+          >
             {tab}
           </Text>
         </Pressable>
       ))}
-      {/*{tabs.map((tab, index) => (
-        <Button
-          key={index}
-          text={tab}
-          type={tab === selected ? "primary" : "secondaryV2"}
-          onPress={() => onSelected(tab)}
-        />
-      ))}*/}
     </View>
   );
 }

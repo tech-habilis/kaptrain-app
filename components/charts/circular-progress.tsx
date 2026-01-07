@@ -10,6 +10,8 @@ export interface CircularProgressProps {
   backgroundColor?: string;
   progressColor?: string;
   title?: string;
+  labelFontSize?: number;
+  valueFontSize?: number;
 }
 
 export default function CircularProgress({
@@ -20,6 +22,8 @@ export default function CircularProgress({
   backgroundColor = "#F5F6FD",
   progressColor = "#04152D",
   title = "Pas",
+  labelFontSize = 12,
+  valueFontSize = 14,
 }: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const center = size / 2;
@@ -66,8 +70,16 @@ export default function CircularProgress({
 
       {/* Center content */}
       <View style={{ position: "absolute", alignItems: "center" }}>
-        <Text className="text-xs text-subtleText">{title}</Text>
-        <Text className="text-sm font-semibold text-text mt-0.5">
+        <Text
+          className="text-subtleText"
+          style={{ fontSize: labelFontSize }}
+        >
+          {title}
+        </Text>
+        <Text
+          className="font-semibold text-text mt-0.5"
+          style={{ fontSize: valueFontSize }}
+        >
           {current.toString()}
         </Text>
       </View>
