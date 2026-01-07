@@ -30,7 +30,7 @@ const SessionCard = ({
   );
 };
 
-export default function TodaySession() {
+export default function SessionView() {
   const sessionData = [
     {
       title: "Réveille ton corps en douceur",
