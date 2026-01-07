@@ -11,6 +11,9 @@ import { Pressable, ScrollView, View, TouchableOpacity } from "react-native";
 import DatePicker from "@/components/date-picker";
 import { DateType } from "react-native-ui-datepicker";
 import { StatusBar } from "expo-status-bar";
+import IcDrag from "@/components/icons/drag";
+import IcPencil from "@/components/icons/pencil";
+import { Chip } from "@/components/chip";
 
 interface ChoiceChipProps {
   label: string;
@@ -54,7 +57,14 @@ const Stepper = ({ current, total }: { current: number; total: number }) => {
   );
 };
 
+interface TrainingBlock {
+  id: string;
+  title: string;
+  exerciseCount: number;
+}
+
 export default function CreateSession() {
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [selectedTheme, setSelectedTheme] = useState<string>("Sports");
   const [selectedSports, setSelectedSports] = useState<string[]>(["Cyclisme"]);
   const [selectedDate, setSelectedDate] = useState<DateType>(
@@ -62,6 +72,16 @@ export default function CreateSession() {
   );
   const [startTime, setStartTime] = useState<string>("10:00");
   const [endTime, setEndTime] = useState<string>("11:00");
+  const [sessionName, setSessionName] = useState<string>(
+    "Séance cyclisme du 19/04",
+  );
+  const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([
+    {
+      id: "1",
+      title: "Travail de l'endurance aérobie haute, zone Z4 (~95 % de la VMA)",
+      exerciseCount: 3,
+    },
+  ]);
 
   const themes = [
     "Sports",
@@ -95,7 +115,7 @@ export default function CreateSession() {
         </View>
 
         {/* Stepper */}
-        <Stepper current={1} total={2} />
+        <Stepper current={currentStep} total={2} />
       </View>
 
       {/* Main Content */}
@@ -104,133 +124,213 @@ export default function CreateSession() {
         contentContainerClassName="px-4 pb-32 pt-2"
         showsVerticalScrollIndicator={false}
       >
-        {/* Thématique Section */}
-        <View className="gap-3 mb-6">
-          <Text className="text-sm font-medium text-accent">Thématique</Text>
-          <View className="gap-2">
-            <View className="flex-row gap-2">
-              <ChoiceChip
-                label={themes[0]}
-                selected={selectedTheme === themes[0]}
-                onPress={() => setSelectedTheme(themes[0])}
-              />
-              <ChoiceChip
-                label={themes[1]}
-                selected={selectedTheme === themes[1]}
-                onPress={() => setSelectedTheme(themes[1])}
-              />
+        {currentStep === 1 ? (
+          <>
+            {/* Thématique Section */}
+            <View className="gap-3 mb-6">
+              <Text className="text-sm font-medium text-accent">
+                Thématique
+              </Text>
+              <View className="gap-2">
+                <View className="flex-row gap-2">
+                  <ChoiceChip
+                    label={themes[0]}
+                    selected={selectedTheme === themes[0]}
+                    onPress={() => setSelectedTheme(themes[0])}
+                  />
+                  <ChoiceChip
+                    label={themes[1]}
+                    selected={selectedTheme === themes[1]}
+                    onPress={() => setSelectedTheme(themes[1])}
+                  />
+                </View>
+                <View className="flex-row gap-2">
+                  <ChoiceChip
+                    label={themes[2]}
+                    selected={selectedTheme === themes[2]}
+                    onPress={() => setSelectedTheme(themes[2])}
+                  />
+                  <ChoiceChip
+                    label={themes[3]}
+                    selected={selectedTheme === themes[3]}
+                    onPress={() => setSelectedTheme(themes[3])}
+                  />
+                </View>
+              </View>
             </View>
-            <View className="flex-row gap-2">
-              <ChoiceChip
-                label={themes[2]}
-                selected={selectedTheme === themes[2]}
-                onPress={() => setSelectedTheme(themes[2])}
-              />
-              <ChoiceChip
-                label={themes[3]}
-                selected={selectedTheme === themes[3]}
-                onPress={() => setSelectedTheme(themes[3])}
-              />
-            </View>
-          </View>
-        </View>
 
-        {/* Sports Section */}
-        <View className="gap-3 mb-6">
-          <Text className="text-sm font-medium text-accent">Sports</Text>
-          <View className="gap-2">
-            <View className="flex-row gap-2">
-              <ChoiceChip
-                label={sports[0]}
-                selected={selectedSports.includes(sports[0])}
-                onPress={() => toggleSport(sports[0])}
-              />
-              <ChoiceChip
-                label={sports[1]}
-                selected={selectedSports.includes(sports[1])}
-                onPress={() => toggleSport(sports[1])}
-              />
+            {/* Sports Section */}
+            <View className="gap-3 mb-6">
+              <Text className="text-sm font-medium text-accent">Sports</Text>
+              <View className="gap-2">
+                <View className="flex-row gap-2">
+                  <ChoiceChip
+                    label={sports[0]}
+                    selected={selectedSports.includes(sports[0])}
+                    onPress={() => toggleSport(sports[0])}
+                  />
+                  <ChoiceChip
+                    label={sports[1]}
+                    selected={selectedSports.includes(sports[1])}
+                    onPress={() => toggleSport(sports[1])}
+                  />
+                </View>
+                <View className="flex-row gap-2">
+                  <ChoiceChip
+                    label={sports[2]}
+                    selected={selectedSports.includes(sports[2])}
+                    onPress={() => toggleSport(sports[2])}
+                  />
+                  <Button
+                    type="tertiary"
+                    size="small"
+                    text="Ajouter un sport"
+                    className="flex-1 min-h-12"
+                    leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+                    onPress={() => {
+                      // Handle add sport action
+                    }}
+                  />
+                </View>
+              </View>
             </View>
-            <View className="flex-row gap-2">
-              <ChoiceChip
-                label={sports[2]}
-                selected={selectedSports.includes(sports[2])}
-                onPress={() => toggleSport(sports[2])}
-              />
-              <Button
-                type="tertiary"
-                size="small"
-                text="Ajouter un sport"
-                className="flex-1 min-h-12"
-                leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-                onPress={() => {
-                  // Handle add sport action
-                }}
-              />
-            </View>
-          </View>
-        </View>
 
-        {/* Date & Time Section */}
-        <View className="gap-3">
-          <Text className="text-sm font-medium text-accent">Date & Heure</Text>
+            {/* Date & Time Section */}
+            <View className="gap-3">
+              <Text className="text-sm font-medium text-accent">
+                Date & Heure
+              </Text>
 
-          {/* Date Input */}
-          <View className="flex-row items-center gap-2">
-            <Text className="text-sm font-medium text-accent w-6">Le</Text>
-            <View className="flex-1">
-              <DatePicker
-                label="25/04/2025"
-                selectedDate={selectedDate}
-                onSelect={setSelectedDate}
-                className="w-full"
-              />
-            </View>
-          </View>
+              {/* Date Input */}
+              <View className="flex-row items-center gap-2">
+                <Text className="text-sm font-medium text-accent w-6">Le</Text>
+                <View className="flex-1">
+                  <DatePicker
+                    label="25/04/2025"
+                    selectedDate={selectedDate}
+                    onSelect={setSelectedDate}
+                    className="w-full"
+                  />
+                </View>
+              </View>
 
-          {/* Time Range Input */}
-          <View className="flex-row items-center gap-2">
-            <Text
-              className="text-sm font-medium text-accent"
-              style={{ width: 24 }}
-            >
-              De
-            </Text>
-            <View className="flex-1">
-              <Input
-                value={startTime}
-                onChangeText={setStartTime}
-                placeholder="10:00"
-                inputClassName="text-center text-base"
-              />
+              {/* Time Range Input */}
+              <View className="flex-row items-center gap-2">
+                <Text
+                  className="text-sm font-medium text-accent"
+                  style={{ width: 24 }}
+                >
+                  De
+                </Text>
+                <View className="flex-1">
+                  <Input
+                    value={startTime}
+                    onChangeText={setStartTime}
+                    placeholder="10:00"
+                    inputClassName="text-center text-base"
+                  />
+                </View>
+                <Text
+                  className="text-sm font-medium text-accent text-center"
+                  style={{ width: 16 }}
+                >
+                  à
+                </Text>
+                <View className="flex-1">
+                  <Input
+                    value={endTime}
+                    onChangeText={setEndTime}
+                    placeholder="11:00"
+                    inputClassName="text-center text-base"
+                  />
+                </View>
+              </View>
             </View>
-            <Text
-              className="text-sm font-medium text-accent text-center"
-              style={{ width: 16 }}
-            >
-              à
-            </Text>
-            <View className="flex-1">
-              <Input
-                value={endTime}
-                onChangeText={setEndTime}
-                placeholder="11:00"
-                inputClassName="text-center text-base"
-              />
+          </>
+        ) : (
+          <>
+            {/* Step 2: Session Details */}
+            {/* Session Name Section */}
+            <View className="gap-3 mb-6">
+              <Text className="text-sm font-medium text-accent">
+                Nom de la séance
+              </Text>
+              <View className="border border-stroke rounded-lg px-3 py-3 flex-row items-center justify-between">
+                <Text className="text-base font-semibold text-text flex-1">
+                  {sessionName}
+                </Text>
+              </View>
             </View>
-          </View>
-        </View>
+
+            {/* Training Blocks Section */}
+            <View className="gap-3">
+              <Text className="text-sm font-medium text-accent">
+                Déroulé de la séance
+              </Text>
+
+              <View className="gap-2">
+                {trainingBlocks.map((block) => (
+                  <View
+                    key={block.id}
+                    className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
+                  >
+                    {/* Drag Handle */}
+                    <View className="w-8 h-8 items-center justify-center">
+                      <IcDrag size={24} />
+                    </View>
+
+                    {/* Block Content */}
+                    <View className="flex-1 gap-1">
+                      <Text numberOfLines={1} className="text-sm font-semibold text-secondary leading-6">
+                        {block.title}
+                      </Text>
+
+                      {/* Exercise Count Tag */}
+                      <View className="flex-row">
+                        <Chip
+                          text={`${block.exerciseCount} exercices`}
+                          type="default"
+                          className="bg-light border-0"
+                        />
+                      </View>
+                    </View>
+
+                    {/* Drag Handle (right side) */}
+                    <View className="w-8 h-8 items-center justify-center">
+                      <IcPencil size={24} />
+                    </View>
+                  </View>
+                ))}
+
+                {/* Add Block Button */}
+                <Button
+                  type="secondary"
+                  size="small"
+                  text="Ajouter un bloc"
+                  leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+                  onPress={() => {
+                    // Handle add block action
+                  }}
+                />
+              </View>
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Bottom CTA */}
       <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-6 pb-safe">
         <Button
-          text="Continuer"
+          text={currentStep === 1 ? "Continuer" : "Valider ma séance"}
           type="primary"
           size="large"
           onPress={() => {
-            // Navigate to step 2
-            router.push(ROUTE.TABS);
+            if (currentStep === 1) {
+              setCurrentStep(2);
+            } else {
+              // Navigate to tabs or show success
+              router.push(ROUTE.TABS);
+            }
           }}
         />
       </View>

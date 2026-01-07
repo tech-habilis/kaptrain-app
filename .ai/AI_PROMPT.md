@@ -63,6 +63,43 @@ import { StatusBar } from "expo-status-bar";
 <StatusBar style="auto" />
 ```
 
+### 5. Routing
+**ALWAYS use ROUTE constants** for navigation (never hardcoded strings):
+```typescript
+import { ROUTE } from "@/constants/route";
+import { router } from "expo-router";
+
+// ✅ Correct
+router.push(ROUTE.CREATE_SESSION);
+router.push(ROUTE.TABS);
+
+// ❌ Wrong
+router.push("/create-session");
+router.push("/(tabs)");
+```
+
+**When creating a new screen:**
+1. Add the route name to `ROUTE_NAME` object in `constants/route.ts`
+2. Add the route path to `ROUTE` object
+3. Use the constant when navigating
+
+Example:
+```typescript
+// In constants/route.ts
+export const ROUTE_NAME = {
+  // ... existing routes
+  MY_NEW_SCREEN: "my-new-screen",
+} as const;
+
+export const ROUTE = {
+  // ... existing routes
+  MY_NEW_SCREEN: `/${ROUTE_NAME.MY_NEW_SCREEN}` as const,
+} as const;
+
+// In your component
+router.push(ROUTE.MY_NEW_SCREEN);
+```
+
 ## Color System
 
 ### Theme Colors
@@ -273,6 +310,7 @@ export function Component({
 ❌ Forgetting `StatusBar` on screens
 ❌ Missing TypeScript types for props
 ❌ Creating duplicate components
+❌ Hardcoding route strings instead of using `ROUTE` constants
 
 ## File Organization
 
