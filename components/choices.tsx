@@ -69,6 +69,77 @@ const choiceText = tv({
 
 type ChoiceVariants = VariantProps<typeof choiceWrapper>;
 
+export const Choice = ({
+  choice,
+  className = "",
+  textClassName = "",
+  selected = false,
+  onPress,
+  type,
+}: {
+  choice: TChoice;
+  className?: string;
+  textClassName?: string;
+  selected: boolean;
+  onPress: () => void;
+  type: ChoiceVariants["type"];
+}) => {
+  const renderLeftSide = (choice: TChoice) => {
+    if (choice.leftIcon) {
+      return <View className="mr-1.5">{choice.leftIcon}</View>;
+    }
+
+    return null;
+  };
+
+  const renderRightSide = (choice: TChoice) => {
+    if (type === "secondary" && choice.secondaryText !== undefined) {
+      return (
+        <View className="flex-1 flex-row justify-end items-center">
+          <Text className="text-accent font-medium">
+            {choice.secondaryText}
+          </Text>
+        </View>
+      );
+    }
+
+    if (type === "multipleChoice") {
+      return (
+        <View className="flex-1 flex-row justify-end items-center">
+          {selected ? (
+            <IcCheckboxSelected size={24} />
+          ) : (
+            <IcCheckbox size={24} />
+          )}
+        </View>
+      );
+    }
+
+    if (type === "radio") {
+      return (
+        <View className="flex-1 flex-row justify-end items-center">
+          {selected ? <IcRadioSelected size={24} /> : <IcRadio size={24} />}
+        </View>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Pressable
+      className={cn(choiceWrapper({ selected, type }), "flex-1", className)}
+      onPress={onPress}
+    >
+      {renderLeftSide(choice)}
+      <Text className={cn(choiceText({ type, selected }), textClassName)}>
+        {choice.text}
+      </Text>
+      {renderRightSide(choice)}
+    </Pressable>
+  );
+};
+
 export const Choices = ({
   label,
   data,
@@ -95,100 +166,6 @@ export const Choices = ({
   itemClassName?: string;
   itemTextClassName?: string;
 } & ChoiceVariants) => {
-  const renderLeftSide = (choice: TChoice) => {
-    if (choice.leftIcon) {
-      return <View className="mr-1.5">{choice.leftIcon}</View>;
-    }
-
-    return null;
-  };
-
-  const renderRightSide = (choice: TChoice) => {
-    if (type === "secondary" && choice.secondaryText !== undefined) {
-      return (
-        <View className="flex-1 flex-row justify-end items-center">
-          <Text className="text-accent font-medium">
-            {choice.secondaryText}
-          </Text>
-        </View>
-      );
-    }
-
-    if (type === "multipleChoice") {
-      return (
-        <View className="flex-1 flex-row justify-end items-center">
-          {selectedChoices?.map((x) => x.text)?.includes(choice.text) ? (
-            <IcCheckboxSelected size={24} />
-          ) : (
-            <IcCheckbox size={24} />
-          )}
-        </View>
-      );
-    }
-
-    if (type === "radio") {
-      const isSelected = choice.text === selectedChoice?.text;
-      return (
-        <View className="flex-1 flex-row justify-end items-center">
-          {isSelected ? <IcRadioSelected size={24} /> : <IcRadio size={24} />}
-        </View>
-      );
-    }
-
-    return null;
-  };
-
-  const Choice = ({
-    choice,
-    className = "",
-    textClassName = "",
-  }: {
-    choice: TChoice;
-    className?: string;
-    textClassName?: string;
-  }) => {
-    const selected =
-      type === "multipleChoice"
-        ? selectedChoices?.map((x) => x.text)?.includes(choice.text)
-        : choice.text === selectedChoice?.text;
-
-    return (
-      <Pressable
-        className={cn(choiceWrapper({ selected, type }), "flex-1", className)}
-        onPress={() => {
-          if (type === "multipleChoice") {
-            const nonNullSelectedChoices = selectedChoices || [];
-            const isSelecting = !selectedChoices?.includes(choice);
-
-            if (
-              maxChoice !== undefined &&
-              isSelecting &&
-              nonNullSelectedChoices.length >= maxChoice
-            ) {
-              return;
-            }
-
-            onChangeMultiple?.(
-              isSelecting
-                ? [...nonNullSelectedChoices, choice]
-                : nonNullSelectedChoices.filter((c) => c !== choice),
-            );
-
-            return;
-          }
-
-          onChange?.(choice);
-        }}
-      >
-        {renderLeftSide(choice)}
-        <Text className={cn(choiceText({ type, selected }), textClassName)}>
-          {choice.text}
-        </Text>
-        {renderRightSide(choice)}
-      </Pressable>
-    );
-  };
-
   return (
     <View className={cn("gap-2", className)}>
       {label !== undefined && (
@@ -203,9 +180,39 @@ export const Choices = ({
         data={data}
         renderItem={({ item }) => (
           <Choice
+            type={type}
             className={itemClassName}
             choice={item}
             textClassName={itemTextClassName}
+            selected={
+              (type === "multipleChoice"
+                ? selectedChoices?.map((x) => x.text)?.includes(item.text)
+                : item.text === selectedChoice?.text) || false
+            }
+            onPress={() => {
+              if (type === "multipleChoice") {
+                const nonNullSelectedChoices = selectedChoices || [];
+                const isSelecting = !selectedChoices?.includes(choice);
+
+                if (
+                  maxChoice !== undefined &&
+                  isSelecting &&
+                  nonNullSelectedChoices.length >= maxChoice
+                ) {
+                  return;
+                }
+
+                onChangeMultiple?.(
+                  isSelecting
+                    ? [...nonNullSelectedChoices, item]
+                    : nonNullSelectedChoices.filter((c) => c !== choice),
+                );
+
+                return;
+              }
+
+              onChange?.(item);
+            }}
           />
         )}
         keyExtractor={(item, index) => index.toString()}

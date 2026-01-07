@@ -27,3 +27,22 @@ export type ExerciseItem = {
   icon?: ReactNode;
   isFavorite: boolean;
 };
+
+export type ProgramItem = {
+  id: string;
+  title: string;
+  price: string;
+  isBought: boolean;
+  createdBy: string;
+  image: any;
+  chips: {
+    icon: ReactNode;
+    text: string;
+  }[];
+};
+
+export type ProgramSectionProps = {
+  title: string;
+  description?: string;
+  programs: ProgramItem[];
+};
