@@ -1,36 +1,72 @@
 import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
+import IcCheck from "@/components/icons/check";
 import IcCheckbox from "@/components/icons/checkbox";
 import IcClock from "@/components/icons/clock";
 import IcInfoCircle from "@/components/icons/info-circle";
 import IcLightning from "@/components/icons/lightning";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
+import { clsx } from "clsx";
 import { router } from "expo-router";
+import { useState } from "react";
 import { ImageBackground, Pressable, ScrollView, View } from "react-native";
 
 const SessionCard = ({
   title,
   description,
+  isCompleted,
+  onToggleComplete,
+  isExpanded,
+  onToggleExpand,
 }: {
   title: string;
   description: string;
+  isCompleted: boolean;
+  onToggleComplete: () => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
 }) => {
   return (
     <View className="p-3 gap-3 border border-stroke rounded-xl">
-      <View className="flex-row gap-2 items-center">
-        <IcCheckbox />
-        <Text className="text-base font-semibold flex-1">{title}</Text>
-        <View className="-rotate-90">
-          <IcArrowLeft />
+      <Pressable onPress={onToggleExpand}>
+        <View className="flex-row gap-2 items-center">
+          <Pressable onPress={onToggleComplete}>
+            {isCompleted ? (
+              <IcCheck size={24} color={ColorConst.success} />
+            ) : (
+              <IcCheckbox />
+            )}
+          </Pressable>
+          <Text className={"text-base font-semibold flex-1"}>{title}</Text>
+          <View
+            className="transition-transform"
+            style={{
+              transform: [{ rotate: isExpanded ? "-90deg" : "90deg" }],
+            }}
+          >
+            <IcArrowLeft color={ColorConst.subtleText} />
+          </View>
         </View>
-      </View>
-      <Text className="text-subtleText">{description}</Text>
+      </Pressable>
+      {isExpanded && (
+        <Text className="text-subtleText leading-6">{description}</Text>
+      )}
     </View>
   );
 };
 
 export default function SessionView() {
+  const [expandedCards, setExpandedCards] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [completedCards, setCompletedCards] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  const totalWeek = 4;
+  const [currentWeek, setCurrentWeek] = useState<number>(1);
+
   const sessionData = [
     {
       title: "Réveille ton corps en douceur",
@@ -43,18 +79,59 @@ export default function SessionView() {
         "20 secondes à fond / 20 secondes de récupération x 18 rounds\n\nAlterne les exercices suivants en boucle :\n\nBurpees\n\nMountain climbers\n\nJump squats\n\nHigh knees\n\nPush-ups\n\nSkater jumps\n\nRépète cette série 3 fois avec 1 minute de pause entre chaque round complet.",
     },
   ];
+
+  const toggleExpanded = (index: number) => {
+    setExpandedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const toggleCompleted = (index: number) => {
+    setCompletedCards((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   return (
     <>
       <ScrollView className="bg-white" contentContainerClassName="pb-24">
         <ImageBackground source={require("../assets/images/today-session.png")}>
-          <View className="flex flex-row gap-1 items-center pt-safe pb-6 px-4">
-            <Pressable onPress={router.back} className="p-2">
-              <IcArrowLeft color="white" />
-            </Pressable>
-            <Text className="text-lg font-bold text-white flex-1">
-              Séance du jour
-            </Text>
-            <IcInfoCircle size={24} color="white" />
+          <View className="pt-safe pb-6 px-4">
+            <View className="flex-row gap-1 items-center ">
+              <Pressable onPress={router.back} className="p-2">
+                <IcArrowLeft color="white" />
+              </Pressable>
+              <Text className="text-lg font-bold text-white flex-1">
+                Séance du jour
+              </Text>
+              <IcInfoCircle size={24} color="white" />
+            </View>
+            <View className="flex-row items-center justify-center mt-6">
+              {Array.from({ length: totalWeek }).map((_, i) => (
+                <View key={i} className="flex-row items-center">
+                  <View className="bg-white items-center justify-center w-18.5 h-14 rounded-lg border-4 border-tertiary">
+                    <Text className="text-[10px] font-bold text-text">
+                      {i < currentWeek ? "S" + (i + 1) : "Semaine"}
+                    </Text>
+                    {i < currentWeek ? (
+                      <IcCheck size={24} color={ColorConst.text} />
+                    ) : (
+                      <Text className="text-2xl font-bold text-text">
+                        {(i + 1).toString()}
+                      </Text>
+                    )}
+                  </View>
+
+                  <View
+                    className={clsx("h-1 w-4 bg-red-300", {
+                      hidden: i === totalWeek - 1,
+                    })}
+                  />
+                </View>
+              ))}
+            </View>
           </View>
         </ImageBackground>
 
@@ -76,11 +153,15 @@ export default function SessionView() {
               key={index}
               title={session.title}
               description={session.description}
+              isCompleted={completedCards[index] || false}
+              onToggleComplete={() => toggleCompleted(index)}
+              isExpanded={expandedCards[index] || false}
+              onToggleExpand={() => toggleExpanded(index)}
             />
           ))}
         </View>
       </ScrollView>
-      <View className="px-4 pb-safe absolute bottom-0 left-0 right-0 flex-row items-center p-4 gap-3">
+      <View className="px-4 pb-safe absolute bottom-0 left-0 right-0 flex-row items-center p-4 gap-3 bg-white">
         <View className="p-3">
           <IcClock size={32} />
         </View>
