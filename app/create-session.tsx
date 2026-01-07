@@ -1,12 +1,12 @@
-import Button from "@/components/button";
+import Button, { ButtonIcon } from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcPlus from "@/components/icons/plus";
 import Input from "@/components/input";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { ROUTE } from "@/constants/route";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useRef, useState } from "react";
 import { Pressable, ScrollView, View, TouchableOpacity } from "react-native";
 import DatePicker from "@/components/date-picker";
 import { DateType } from "react-native-ui-datepicker";
@@ -14,6 +14,12 @@ import { StatusBar } from "expo-status-bar";
 import IcDrag from "@/components/icons/drag";
 import IcPencil from "@/components/icons/pencil";
 import { Chip } from "@/components/chip";
+import IcCycling from "@/components/icons/cycling";
+import { clsx } from "clsx";
+import IcTrash from "@/components/icons/trash";
+import BottomSheetModal, {
+  RawBottomSheetModalType,
+} from "@/components/bottom-sheet-modal";
 
 interface ChoiceChipProps {
   label: string;
@@ -63,8 +69,83 @@ interface TrainingBlock {
   exerciseCount: number;
 }
 
+const SessionBlock = ({
+  block,
+  onClickDelete,
+}: {
+  block: TrainingBlock;
+  onClickDelete: () => void;
+}) => {
+  const [showMenu, setShowMenu] = useState(false);
+
+  return (
+    <View
+      className={clsx("flex-row gap-4 items-center", {
+        "-translate-x-18": showMenu,
+      })}
+    >
+      <Pressable
+        className="border border-stroke rounded-xl p-3 flex-row items-center gap-2 w-full"
+        onLongPress={() => setShowMenu(!showMenu)}
+      >
+        {/* Drag Handle */}
+        <View className="size-8 rotate-90 items-center justify-center cla">
+          <IcDrag size={24} />
+        </View>
+
+        {/* Block Content */}
+        <View className="flex-1 gap-1">
+          <Text
+            numberOfLines={1}
+            className="text-sm font-semibold text-secondary leading-6"
+          >
+            {block.title}
+          </Text>
+
+          {/* Exercise Count Tag */}
+          <View className="flex-row">
+            <Chip
+              text={`${block.exerciseCount} exercices`}
+              type="default"
+              className="bg-light border-0"
+            />
+          </View>
+        </View>
+
+        {/* Drag Handle (right side) */}
+        <Pressable
+          className="size-8"
+          onPress={() =>
+            router.push({
+              pathname: ROUTE.ADD_BLOCK,
+              params: { mode: "edit" },
+            })
+          }
+        >
+          <IcPencil size={24} />
+        </Pressable>
+      </Pressable>
+      <ButtonIcon
+        size="large"
+        type="primary"
+        className="bg-[#E32828]/10 h-full rounded-md"
+        onPress={() => {
+          setShowMenu(false);
+          onClickDelete();
+        }}
+      >
+        <IcTrash />
+      </ButtonIcon>
+    </View>
+  );
+};
+
 export default function CreateSession() {
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const { mode } = useLocalSearchParams();
+  const isEditing = mode === "edit";
+
+  const confirmDeleteRef = useRef<RawBottomSheetModalType | null>(null);
+  const [currentStep, setCurrentStep] = useState<number>(isEditing ? 2 : 1);
   const [selectedTheme, setSelectedTheme] = useState<string>("Sports");
   const [selectedSports, setSelectedSports] = useState<string[]>(["Cyclisme"]);
   const [selectedDate, setSelectedDate] = useState<DateType>(
@@ -110,12 +191,12 @@ export default function CreateSession() {
             <IcArrowLeft color={ColorConst.secondary} />
           </Pressable>
           <Text className="text-lg font-bold text-secondary flex-1 ml-1">
-            Créer une séance
+            {isEditing ? "Modifier la séance" : "Créer une séance"}
           </Text>
         </View>
 
         {/* Stepper */}
-        <Stepper current={currentStep} total={2} />
+        {!isEditing && <Stepper current={currentStep} total={2} />}
       </View>
 
       {/* Main Content */}
@@ -270,44 +351,18 @@ export default function CreateSession() {
 
               <View className="gap-2">
                 {trainingBlocks.map((block) => (
-                  <View
+                  <SessionBlock
                     key={block.id}
-                    className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
-                  >
-                    {/* Drag Handle */}
-                    <View className="w-8 h-8 items-center justify-center">
-                      <IcDrag size={24} />
-                    </View>
-
-                    {/* Block Content */}
-                    <View className="flex-1 gap-1">
-                      <Text
-                        numberOfLines={1}
-                        className="text-sm font-semibold text-secondary leading-6"
-                      >
-                        {block.title}
-                      </Text>
-
-                      {/* Exercise Count Tag */}
-                      <View className="flex-row">
-                        <Chip
-                          text={`${block.exerciseCount} exercices`}
-                          type="default"
-                          className="bg-light border-0"
-                        />
-                      </View>
-                    </View>
-
-                    {/* Drag Handle (right side) */}
-                    <View className="w-8 h-8 items-center justify-center">
-                      <IcPencil size={24} />
-                    </View>
-                  </View>
+                    block={block}
+                    onClickDelete={() => {
+                      confirmDeleteRef.current?.present();
+                    }}
+                  />
                 ))}
 
                 {/* Add Block Button */}
                 <Button
-                  type="secondary"
+                  type={isEditing ? "tertiary" : "secondary"}
                   size="small"
                   text="Ajouter un bloc"
                   leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
@@ -315,6 +370,51 @@ export default function CreateSession() {
                     router.push(ROUTE.ADD_BLOCK);
                   }}
                 />
+
+                <View className="flex-row justify-between items-center mt-8">
+                  <Text className="text-accent">
+                    Informations complémentaires
+                  </Text>
+                  <View className="-rotate-90">
+                    <IcArrowLeft />
+                  </View>
+                </View>
+
+                <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
+                  {/* Block Content */}
+                  <View className="flex-1 gap-1">
+                    <Text numberOfLines={1} className="text-sm text-subtleText">
+                      Choix de thématique
+                    </Text>
+
+                    <View className="flex-row gap-1.5 items-center">
+                      <IcCycling />
+                      <Text className="text-base font-semibold text-secondary flex-1">
+                        Cyclisme
+                      </Text>
+                      <IcPencil size={24} />
+                    </View>
+                  </View>
+                </View>
+
+                <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
+                  {/* Block Content */}
+                  <View className="flex-1 gap-1">
+                    <Text numberOfLines={1} className="text-sm text-subtleText">
+                      Date
+                    </Text>
+
+                    <View className="flex-row gap-1.5 items-center">
+                      <Text className="text-accent text-base font-medium">
+                        Le
+                      </Text>
+                      <Text className="text-base font-semibold text-secondary flex-1">
+                        25/04/2025
+                      </Text>
+                      <IcPencil size={24} />
+                    </View>
+                  </View>
+                </View>
               </View>
             </View>
           </>
@@ -322,9 +422,24 @@ export default function CreateSession() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-6 pb-safe">
+      <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-6 pb-safe gap-2">
         <Button
-          text={currentStep === 1 ? "Continuer" : "Valider ma séance"}
+          size="large"
+          text="Supprimer ma séance"
+          type="tertiary"
+          onPress={() => {}}
+          className={clsx({
+            hidden: !isEditing,
+          })}
+        />
+        <Button
+          text={
+            currentStep === 1
+              ? "Continuer"
+              : isEditing
+                ? "Enregistrer les modifications"
+                : "Valider ma séance"
+          }
           type="primary"
           size="large"
           onPress={() => {
@@ -337,6 +452,29 @@ export default function CreateSession() {
           }}
         />
       </View>
+
+      <BottomSheetModal
+        ref={confirmDeleteRef}
+        name="confirm-delete-ref"
+        snapPoints={["45%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-secondary text-lg">
+          Supprimer cette séance ?
+        </Text>
+        <Text className="text-subtleText text-base mt-1 grow">
+          Cette action est définitive. La séance sera retirée de ta
+          planification.
+        </Text>
+
+        <Button text="Annuler" type="secondary" />
+        <Button
+          text="Supprimer la séance"
+          type="secondary"
+          className="bg-[#FDFAFA] border-error mt-2 mb-6"
+          textClassName="text-error"
+        />
+      </BottomSheetModal>
     </View>
   );
 }

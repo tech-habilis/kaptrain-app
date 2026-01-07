@@ -233,6 +233,12 @@ export default function Agenda() {
                 coachName={activity.coachName}
                 borderColor={activity.color}
                 icon={activity.icon}
+                onPress={() =>
+                  router.push({
+                    pathname: ROUTE.CREATE_SESSION,
+                    params: { mode: "edit" },
+                  })
+                }
               />
             ))}
           </View>

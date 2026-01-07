@@ -4,9 +4,16 @@ import IcPlus from "@/components/icons/plus";
 import IcClose from "@/components/icons/close";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { Pressable, ScrollView, View, TextInput } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  View,
+  TextInput,
+  Image,
+  FlatList,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Dropdown from "@/components/dropdown";
 import { TChoice } from "@/types";
@@ -18,6 +25,8 @@ import IcFilter from "@/components/icons/filter";
 import getExercises from "@/constants/mock";
 import { Choices } from "@/components/choices";
 import Tabs from "@/components/tabs";
+import IcInfoCircle from "@/components/icons/info-circle";
+import clsx from "clsx";
 
 interface Exercise {
   id: string;
@@ -26,6 +35,9 @@ interface Exercise {
 }
 
 export default function AddBlock() {
+  const { mode } = useLocalSearchParams();
+  const isEditing = mode === "edit";
+
   const [blockTitle, setBlockTitle] = useState<string>(
     "Travail de l'endurance aérobie haute, zone Z4 (~95 % de la VMA)",
   );
@@ -67,6 +79,48 @@ export default function AddBlock() {
     },
   ]);
 
+  const reference = [
+    {
+      zone: "Zones",
+      percentage: "Pourcentage VMA",
+      targetPace: "Allure cible (km/h)",
+      color: ColorConst.secondary,
+    },
+    {
+      zone: "Z1",
+      percentage: "30-50%",
+      targetPace: "9:00 – 6:00",
+      color: ColorConst.success,
+    },
+    {
+      zone: "Z2",
+      percentage: "51-70%",
+      targetPace: "5:53 – 4:17",
+      color: "#CEA700",
+    },
+    {
+      zone: "Z3",
+      percentage: "71-91%",
+      targetPace: "4:13 – 3:45",
+      color: "#DB8000",
+    },
+    {
+      zone: "Z4",
+      percentage: "85-105%",
+      targetPace: "3:42 – 3:18",
+      color: "#E65B08",
+    },
+    {
+      zone: "Z5",
+      percentage: "91-105%",
+      targetPace: "3:18 – 3:00",
+      color: "#E35D56",
+    },
+    { zone: "Z6", percentage: "150%", targetPace: "2:30", color: "#E04D60" },
+    { zone: "Z7", percentage: "250%", targetPace: "1:30", color: "#BA0003" },
+  ];
+
+  const referenceModalRef = useRef<BottomSheetModalType>(null);
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<TChoice[]>([]);
@@ -107,7 +161,7 @@ export default function AddBlock() {
             <IcArrowLeft color={ColorConst.secondary} />
           </Pressable>
           <Text className="text-lg font-bold text-secondary flex-1 ml-1">
-            Ajouter un bloc
+            {isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
           </Text>
         </View>
       </View>
@@ -161,7 +215,12 @@ export default function AddBlock() {
         {/* VMA Form - Show when Vitesse (%VMA) is selected */}
         {selectedIntensity.text === "Vitesse (%VMA)" && (
           <View className="mb-6 gap-2">
-            <Text>Vitesse maximale aérobie (VMA)</Text>
+            <View className="flex-row items-center gap-2">
+              <Text>Vitesse maximale aérobie (VMA)</Text>
+              <Pressable onPress={() => referenceModalRef.current?.present()}>
+                <IcInfoCircle />
+              </Pressable>
+            </View>
             <View className="flex-row items-center gap-4">
               <Input
                 placeholder="0"
@@ -184,12 +243,70 @@ export default function AddBlock() {
               />
             </View>
 
-            <Tabs tabs={["Temps", "Distance"]} selected="Temps" onSelected={() => null} />
+            <Tabs
+              tabs={["Temps", "Distance"]}
+              selected="Temps"
+              onSelected={() => null}
+            />
             <Input placeholder="00:00:00:00" inputClassName="text-center" />
 
-            <Tabs tabs={["Zone", "%"]} selected="Zone" onSelected={() => null} />
+            <Tabs
+              tabs={["Zone", "%"]}
+              selected="Zone"
+              onSelected={() => null}
+            />
             <Input placeholder="Z1 30-50%" inputClassName="text-center" />
 
+            <BottomSheetModal
+              ref={referenceModalRef}
+              name="reference-modal-ref"
+              snapPoints={["50%"]}
+            >
+              <View className="flex-row gap-2">
+                <Image
+                  source={require("../assets/images/sample-avatar.png")}
+                  className="rounded-md"
+                />
+                <View className="justify-center">
+                  <Text className="text-subtleText text-sm">
+                    Camille Durand
+                  </Text>
+                  <Text className="text-sm font-semibold">
+                    VMA de référence : 16,5 km/h
+                  </Text>
+                </View>
+              </View>
+              <FlatList
+                contentContainerClassName="mt-6"
+                data={reference}
+                renderItem={({ item, index }) => (
+                  <View className="flex-row items-center overflow-hidden">
+                    <Text
+                      className={clsx("border border-stroke py-1 px-4 w-1/5", {
+                        "font-medium text-secondary": index === 0,
+                      })}
+                      style={{ color: item.color }}
+                    >
+                      {item.zone}
+                    </Text>
+                    <Text
+                      className={clsx("border border-stroke py-1 px-4 w-2/5", {
+                        "font-medium text-secondary": index === 0,
+                      })}
+                    >
+                      {item.percentage}
+                    </Text>
+                    <Text
+                      className={clsx("border border-stroke py-1 px-4 w-2/5", {
+                        "font-medium text-secondary": index === 0,
+                      })}
+                    >
+                      {item.targetPace}
+                    </Text>
+                  </View>
+                )}
+              />
+            </BottomSheetModal>
           </View>
         )}
 
@@ -292,7 +409,16 @@ export default function AddBlock() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-6 pb-safe">
+      <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-6 pb-safe gap-2">
+        <Button
+          type="secondary"
+          text="Supprimer le bloc"
+          onPress={() => {}}
+          className={clsx({
+            hidden: !isEditing,
+          })}
+        />
+
         <Button
           text="Enregistrer le bloc"
           type="primary"
