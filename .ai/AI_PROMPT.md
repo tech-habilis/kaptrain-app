@@ -298,6 +298,35 @@ After implementation:
 - [ ] Verify responsive behavior
 - [ ] Follow existing patterns
 
+## Communication Guidelines
+
+### Response Style
+- Be concise and direct
+- Only provide detailed explanations when necessary
+- Focus on actionable information
+- Minimize use of emoticons and excessive formatting
+- Skip obvious or redundant explanations
+
+### Documentation
+- **Do not create markdown files** explaining your work unless explicitly requested
+- **Do not create summary documents** after completing tasks
+- Only create documentation when the user asks for it
+- Keep conversation focused on the implementation
+
+### When to Explain
+- Complex architectural decisions
+- Non-obvious trade-offs
+- Breaking changes
+- Important caveats or limitations
+
+### What to Skip
+- Obvious implementation details
+- Step-by-step narration of your work
+- Celebratory comments
+- Unnecessary markdown summaries
+
+**Remember**: The user wants efficient, focused responses. Let your code speak for itself.
+
 ## Quick Reference Files
 
 - **Full guide**: `CODEBASE_GUIDE.md`
