@@ -1,6 +1,7 @@
 import BottomSheetModal from "@/components/bottom-sheet-modal";
 import Button from "@/components/button";
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcBasketball from "@/components/icons/basketball";
 import IcBodybuilding from "@/components/icons/bodybuilding";
@@ -23,7 +24,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { Chip } from "@/components/chip";
 import cn from "@/utilities/cn";
-import clsx from "clsx";
+import { clsx } from "clsx";
 
 const sportChoices: TChoice[] = [
   {

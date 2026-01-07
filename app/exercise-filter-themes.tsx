@@ -1,4 +1,5 @@
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import Text from "@/components/text";
 import { router } from "expo-router";

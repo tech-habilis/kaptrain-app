@@ -6,12 +6,7 @@ import IcCheckboxSelected from "./icons/checkbox-selected";
 import IcCheckbox from "./icons/checkbox";
 import IcRadio from "./icons/radio";
 import IcRadioSelected from "./icons/radio-selected";
-
-export interface TChoice {
-  text: string;
-  secondaryText?: string;
-  leftIcon?: React.ReactNode;
-}
+import { TChoice } from "@/types";
 
 const choiceWrapper = tv({
   base: "rounded-lg px-2 py-4 justify-center items-center",

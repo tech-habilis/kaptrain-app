@@ -15,9 +15,9 @@ import { FlatList, Pressable, View } from "react-native";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import IcDrag from "@/components/icons/drag";
 import Dropdown from "@/components/dropdown";
-import { TChoice } from "@/components/choices";
 import DonutChart, { DonutChartItem } from "@/components/charts/donut-chart";
 import { ColorConst } from "@/constants/theme";
+import { TChoice } from "@/types";
 
 const cognitiveFeelingDistribution: DonutChartItem[] = [
   {

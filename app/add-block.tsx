@@ -2,13 +2,14 @@ import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcPlus from "@/components/icons/plus";
 import IcClose from "@/components/icons/close";
-import IcUnfoldMore from "@/components/icons/unfold-more";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View, TextInput } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import Dropdown from "@/components/dropdown";
+import { TChoice } from "@/types";
 
 interface Exercise {
   id: string;
@@ -23,8 +24,22 @@ export default function AddBlock() {
   const [blockDescription, setBlockDescription] = useState<string>(
     "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
   );
-  const [intensityReference, setIntensityReference] =
-    useState<string>("Aucune");
+
+  const intensityOptions: TChoice[] = [
+    { text: "Aucun" },
+    { text: "FORCE (%RM)" },
+    { text: "Cardiaque (%FC Max)" },
+    { text: "Puissance (%PMA)" },
+    { text: "Puissance (%FTP)" },
+    { text: "Vitesse (%VMA)" },
+    { text: "Vitesse (Vitesse brute)" },
+    { text: "Ressenti (RPE physique)" },
+    { text: "Ressenti (RPE cognitif)" },
+  ];
+
+  const [selectedIntensity, setSelectedIntensity] = useState<TChoice>(
+    intensityOptions[0],
+  );
   const [exercises, setExercises] = useState<Exercise[]>([
     {
       id: "1",
@@ -95,18 +110,17 @@ export default function AddBlock() {
         </View>
 
         {/* Intensity Reference Dropdown */}
-        <View className="gap-4 mb-6">
-          <Pressable className="border border-stroke rounded-lg px-3 py-4 flex-row items-center justify-between">
-            <View className="gap-1">
-              <Text className="text-xs text-subtleText leading-none">
-                Référence d&apos;intensité
-              </Text>
-              <Text className="text-sm font-semibold text-text">
-                {intensityReference}
-              </Text>
-            </View>
-            <IcUnfoldMore size={24} />
-          </Pressable>
+        <View className="mb-6">
+          <Dropdown
+            label="Référence d’intensité"
+            options={intensityOptions}
+            selectedOption={selectedIntensity}
+            onSelect={setSelectedIntensity}
+            modalTitle="Choisis une référence d'intensité"
+            size="large"
+            className="justify-between"
+            alwaysShowLabel
+          />
         </View>
 
         {/* Exercises Section */}

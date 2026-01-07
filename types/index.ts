@@ -46,3 +46,9 @@ export type ProgramSectionProps = {
   description?: string;
   programs: ProgramItem[];
 };
+
+export interface TChoice {
+  text: string;
+  secondaryText?: string;
+  leftIcon?: React.ReactNode;
+}
