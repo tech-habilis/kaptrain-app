@@ -17,6 +17,7 @@ import IcSearch from "@/components/icons/search";
 import IcFilter from "@/components/icons/filter";
 import getExercises from "@/constants/mock";
 import { Choices } from "@/components/choices";
+import Tabs from "@/components/tabs";
 
 interface Exercise {
   id: string;
@@ -47,6 +48,7 @@ export default function AddBlock() {
   const [selectedIntensity, setSelectedIntensity] = useState<TChoice>(
     intensityOptions[0],
   );
+  const [vmaValue, setVmaValue] = useState<string>("");
   const [exercises, setExercises] = useState<Exercise[]>([
     {
       id: "1",
@@ -81,7 +83,9 @@ export default function AddBlock() {
 
   const addSelectedExercises = () => {
     const newExercises = selectedExercises.map((choice) => {
-      const exercise = availableExercises.find((ex) => ex.title === choice.text);
+      const exercise = availableExercises.find(
+        (ex) => ex.title === choice.text,
+      );
       return {
         id: exercise?.id || String(Date.now()),
         title: choice.text,
@@ -143,7 +147,7 @@ export default function AddBlock() {
         {/* Intensity Reference Dropdown */}
         <View className="mb-6">
           <Dropdown
-            label="Référence d’intensité"
+            label="Référence d'intensité"
             options={intensityOptions}
             selectedOption={selectedIntensity}
             onSelect={setSelectedIntensity}
@@ -153,6 +157,41 @@ export default function AddBlock() {
             alwaysShowLabel
           />
         </View>
+
+        {/* VMA Form - Show when Vitesse (%VMA) is selected */}
+        {selectedIntensity.text === "Vitesse (%VMA)" && (
+          <View className="mb-6 gap-2">
+            <Text>Vitesse maximale aérobie (VMA)</Text>
+            <View className="flex-row items-center gap-4">
+              <Input
+                placeholder="0"
+                type="unit"
+                unit="series"
+                value={vmaValue}
+                onChangeText={setVmaValue}
+                className="grow"
+                inputClassName="text-base font-normal"
+              />
+
+              <Input
+                placeholder="0s"
+                type="unit"
+                unit="Récup"
+                value={vmaValue}
+                onChangeText={setVmaValue}
+                className="grow"
+                inputClassName="text-base font-normal"
+              />
+            </View>
+
+            <Tabs tabs={["Temps", "Distance"]} selected="Temps" onSelected={() => null} />
+            <Input placeholder="00:00:00:00" inputClassName="text-center" />
+
+            <Tabs tabs={["Zone", "%"]} selected="Zone" onSelected={() => null} />
+            <Input placeholder="Z1 30-50%" inputClassName="text-center" />
+
+          </View>
+        )}
 
         {/* Exercises Section */}
         <View className="gap-3">
