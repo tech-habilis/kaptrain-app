@@ -145,7 +145,7 @@ export const Choices = ({
   maxChoice,
   type = "default",
   className = "",
-  numColumns,
+  numColumns = 1,
   itemClassName = "",
   itemTextClassName = "",
 }: {

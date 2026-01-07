@@ -5,11 +5,18 @@ import IcClose from "@/components/icons/close";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, ScrollView, View, TextInput } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Dropdown from "@/components/dropdown";
 import { TChoice } from "@/types";
+import BottomSheetModal from "@/components/bottom-sheet-modal";
+import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
+import Input from "@/components/input";
+import IcSearch from "@/components/icons/search";
+import IcFilter from "@/components/icons/filter";
+import getExercises from "@/constants/mock";
+import { Choices } from "@/components/choices";
 
 interface Exercise {
   id: string;
@@ -58,8 +65,32 @@ export default function AddBlock() {
     },
   ]);
 
+  const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedExercises, setSelectedExercises] = useState<TChoice[]>([]);
+
+  const availableExercises = getExercises({ isGridView: true });
+  const exerciseChoices: TChoice[] = availableExercises.map((ex) => ({
+    text: ex.title,
+    leftIcon: ex.icon,
+  }));
+
   const removeExercise = (id: string) => {
     setExercises(exercises.filter((ex) => ex.id !== id));
+  };
+
+  const addSelectedExercises = () => {
+    const newExercises = selectedExercises.map((choice) => {
+      const exercise = availableExercises.find((ex) => ex.title === choice.text);
+      return {
+        id: exercise?.id || String(Date.now()),
+        title: choice.text,
+        image: exercise?.image || "",
+      };
+    });
+    setExercises([...exercises, ...newExercises]);
+    setSelectedExercises([]);
+    bottomSheetModalRef.current?.dismiss();
   };
 
   return (
@@ -215,7 +246,7 @@ export default function AddBlock() {
             text="Ajouter des exercices"
             leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
             onPress={() => {
-              // Navigate to exercise selection
+              bottomSheetModalRef.current?.present();
             }}
           />
         </View>
@@ -233,6 +264,61 @@ export default function AddBlock() {
           }}
         />
       </View>
+
+      {/* Exercise Selection Bottom Sheet */}
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        name="exercise-selection"
+        snapPoints={["90%"]}
+        className="pb-0"
+      >
+        <View className="flex-1">
+          {/* Search and Filter */}
+          <View className="gap-3 mb-4">
+            <Input
+              placeholder="Rechercher un exercice"
+              leftIcon={<IcSearch />}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <Button
+              type="secondaryV2"
+              size="small"
+              text="Filtres"
+              leftIcon={<IcFilter />}
+              onPress={() => {
+                // Open filter modal
+              }}
+            />
+          </View>
+
+          {/* Exercise List */}
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
+          >
+            <Choices
+              data={exerciseChoices}
+              selectedChoices={selectedExercises}
+              onChangeMultiple={setSelectedExercises}
+              type="multipleChoice"
+            />
+          </ScrollView>
+
+          {/* Bottom CTA */}
+          {selectedExercises.length > 0 && (
+            <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-4 pb-6">
+              <Button
+                text={`Ajouter ${selectedExercises.length} exercice${selectedExercises.length > 1 ? "s" : ""}`}
+                type="primary"
+                size="large"
+                onPress={addSelectedExercises}
+              />
+            </View>
+          )}
+        </View>
+      </BottomSheetModal>
     </View>
   );
 }
