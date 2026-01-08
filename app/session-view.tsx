@@ -127,7 +127,9 @@ export default function SessionView() {
           className="mx-4 my-6"
           onClose={() => setShowDeleteTabata(true)}
           onModify={() => router.push(ROUTE.MODIFY_TIMER)}
-          onStart={() => {}}
+          onStarted={() => {
+            console.log("started!");
+          }}
         />
 
         <View className="gap-2 px-4">
