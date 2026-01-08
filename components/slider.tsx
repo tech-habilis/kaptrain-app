@@ -22,17 +22,27 @@ export const Slider = ({
   onChange,
   className,
   reverseGradient = false,
+  readOnly = false,
+  hideStep = false,
+  hideThumb = false,
+  gradientClassName,
+  baseClassName = ""
 }: {
   title: string;
   leftLabel: string;
   rightLabel: string;
-  leftIcon: ReactNode;
-  rightIcon: ReactNode;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   value?: number;
   steps?: number;
   onChange?: (value: number) => void;
   className?: string;
   reverseGradient?: boolean;
+  readOnly?: boolean;
+  hideStep?: boolean;
+  hideThumb?: boolean;
+  gradientClassName?: string;
+  baseClassName?: string;
 }) => {
   const [isLayoutReady, setIsLayoutReady] = useState(false);
   const sliderWidth = useSharedValue(0);
@@ -99,7 +109,9 @@ export const Slider = ({
     scheduleOnRN(notifyChange, snapped.step);
   });
 
-  const composedGesture = Gesture.Race(panGesture, tapGesture);
+  const composedGesture = readOnly
+    ? Gesture.Race()
+    : Gesture.Race(panGesture, tapGesture);
 
   // NOTE: commented because not needed, but let's keep it for reference
   // Calculate progress percentage for visual display
@@ -144,10 +156,11 @@ export const Slider = ({
             <Animated.View onLayout={handleSliderLayout}>
               <View className="relative h-4 justify-center">
                 {/* Base Track */}
-                <View className="absolute w-full h-4 bg-light rounded-full" />
+                <View className={cn("absolute w-full h-4 bg-light rounded-full", baseClassName)} />
 
                 {/* Step Circles - only render after layout */}
-                {isLayoutReady &&
+                {!hideStep &&
+                  isLayoutReady &&
                   Array.from({ length: steps }).map((_, index) => {
                     // Calculate position with 8px padding on each side
                     const width = sliderWidth.value;
@@ -175,15 +188,16 @@ export const Slider = ({
                 <Animated.View
                   className={cn(
                     "absolute h-4 rounded-full bg-linear-to-r",
-                    reverseGradient
-                      ? "from-primary to-secondary"
-                      : "from-secondary to-primary",
+                    gradientClassName ||
+                      (reverseGradient
+                        ? "from-primary to-secondary"
+                        : "from-secondary to-primary"),
                   )}
                   style={progressBarStyle}
                 />
 
                 {/* Thumb - only render after layout */}
-                {isLayoutReady && (
+                {!hideThumb && isLayoutReady && (
                   <Animated.View
                     className={cn(
                       "absolute size-6 rounded-full left-0 bg-white border-4",

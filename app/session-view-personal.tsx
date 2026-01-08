@@ -5,50 +5,66 @@ import IcClock from "@/components/icons/clock";
 import IcHyrox from "@/components/icons/hyrox";
 import IcPencil from "@/components/icons/pencil";
 import { SessionCard } from "@/components/session";
+import { Slider } from "@/components/slider";
 import Text from "@/components/text";
 import { mockExercises } from "@/constants/mock";
 import { Exercise } from "@/types";
-import { router } from "expo-router";
+import clsx from "clsx";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
+const sessionData: {
+  title: string;
+  description: string;
+  exercises: Exercise[];
+  haveNote: boolean;
+}[] = [
+  {
+    title: "Échauffement",
+    description:
+      "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
+    exercises: [],
+    haveNote: false,
+  },
+  {
+    title: "Hyrox Grand Palais",
+    description:
+      "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
+    exercises: mockExercises,
+    haveNote: false,
+  },
+  {
+    title: "Récupération",
+    description:
+      "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
+    exercises: mockExercises,
+    haveNote: false,
+  },
+];
+
 export default function SessionViewPersonal() {
+  const { status } = useLocalSearchParams();
+  const isDone = status === "done";
+
   const [expandedSections, setExpandedSections] = useState<{
     [key: number]: boolean;
   }>({});
   const [completedSections, setCompletedSections] = useState<{
     [key: number]: boolean;
-  }>({});
+  }>(
+    isDone
+      ? {
+          0: true,
+          1: true,
+          2: true,
+        }
+      : {},
+  );
 
-  const sessionData: {
-    title: string;
-    description: string;
-    exercises: Exercise[];
-    haveNote: boolean;
-  }[] = [
-    {
-      title: "Échauffement",
-      description:
-        "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: [],
-      haveNote: false,
-    },
-    {
-      title: "Hyrox Grand Palais",
-      description:
-        "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: mockExercises,
-      haveNote: false,
-    },
-    {
-      title: "Récupération",
-      description:
-        "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: mockExercises,
-      haveNote: false,
-    },
-  ];
+  const [rpePhysique, setRpePhysique] = useState<number>(2);
+  const [rpeCognitive, setRpeCognitive] = useState<number>(7);
 
   const toggleExpanded = (index: number) => {
     setExpandedSections((prev) => ({
@@ -96,9 +112,44 @@ export default function SessionViewPersonal() {
 
               <Chip text="19/04/2025 - 16h00" className="bg-light" />
             </View>
-            <Text className="text-sm text-text italic mt-1">
+            <Text
+              className={clsx("text-sm text-text italic mt-1", {
+                hidden: isDone,
+              })}
+            >
               Par Enguerrand Aucher
             </Text>
+          </View>
+
+          {/* Chart section */}
+          <View className={clsx("px-4 mt-6 gap-8", { hidden: !isDone })}>
+            <Slider
+              title="RPE Physique"
+              leftLabel="Aucun effort"
+              rightLabel="Effort maximal"
+              value={rpePhysique}
+              onChange={setRpePhysique}
+              steps={10}
+              readOnly
+              hideStep
+              hideThumb
+              gradientClassName="from-green-500 to-yellow-500"
+              baseClassName="bg-linear-to-r from-green-500 via-yellow-500 to-orange-500 opacity-30"
+            />
+
+            <Slider
+              title="RPE Cognitif"
+              leftLabel="Aucun effort"
+              rightLabel="Effort maximal"
+              value={rpeCognitive}
+              onChange={setRpeCognitive}
+              steps={10}
+              readOnly
+              hideStep
+              hideThumb
+              gradientClassName="from-green-500 via-yellow-500 to-orange-500"
+              baseClassName="bg-linear-to-r from-green-500 via-yellow-500 to-orange-500 opacity-30"
+            />
           </View>
 
           {/* Session Sections */}
