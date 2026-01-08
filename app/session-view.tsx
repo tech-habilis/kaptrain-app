@@ -126,7 +126,7 @@ export default function SessionView() {
         <TabataCard
           className="mx-4 my-6"
           onClose={() => setShowDeleteTabata(true)}
-          onModify={() => {}}
+          onModify={() => router.push(ROUTE.MODIFY_TIMER)}
           onStart={() => {}}
         />
 
@@ -232,7 +232,7 @@ export default function SessionView() {
       </BottomSheetModal>
 
       <ConfirmActionModal
-        height={300}
+        height="40%"
         show={showDeleteTabata}
         onCancel={() => setShowDeleteTabata(false)}
         name="confirm-delete-tabata"

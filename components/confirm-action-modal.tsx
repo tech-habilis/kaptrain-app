@@ -1,4 +1,4 @@
-import { ComponentProps, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import BottomSheetModal, {
   RawBottomSheetModalType,
 } from "./bottom-sheet-modal";
@@ -23,8 +23,8 @@ export default function ConfirmActionModal({
     text: string;
     isDestructive?: boolean;
   };
-    show: boolean;
-    height?: number | string;
+  show: boolean;
+  height?: number | string;
 }) {
   const ref = useRef<RawBottomSheetModalType>(null);
 
