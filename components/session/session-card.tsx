@@ -8,6 +8,9 @@ import { Exercise } from "@/types";
 import ExerciseCards from "../exercise-cards";
 import IcFile from "../icons/file";
 import SessionNote from "../session-note";
+import Button from "../button";
+import IcPlus from "../icons/plus";
+import { clsx } from "clsx";
 
 interface SessionCardProps {
   title: string;
@@ -54,12 +57,22 @@ export function SessionCard({
         </View>
       </Pressable>
       {isExpanded && (
-        <Text className="text-subtleText leading-6">{description}</Text>
+        <>
+          <Text className="text-subtleText leading-6">{description}</Text>
+          <ExerciseCards exercises={exercises} onRemoveExercise={(id) => {}} />
+          <Button
+            type="tertiary"
+            size="small"
+            text="Ajouter des exercices"
+            leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+            onPress={() => {}}
+            className={clsx({
+              hidden: exercises.length > 0,
+            })}
+          />
+          {haveNote && <SessionNote />}
+        </>
       )}
-
-      <ExerciseCards exercises={exercises} onRemoveExercise={(id) => { }} />
-
-      {haveNote && <SessionNote />}
     </View>
   );
 }

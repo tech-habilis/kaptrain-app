@@ -1,22 +1,19 @@
-import Button, { ButtonIcon } from "@/components/button";
+import Button from "@/components/button";
 import { Chip } from "@/components/chip";
 import IcArrowLeft from "@/components/icons/arrow-left";
-import IcChat from "@/components/icons/chat";
 import IcClock from "@/components/icons/clock";
-import IcFile from "@/components/icons/file";
 import IcHyrox from "@/components/icons/hyrox";
 import IcPencil from "@/components/icons/pencil";
 import { SessionCard } from "@/components/session";
 import Text from "@/components/text";
 import { mockExercises } from "@/constants/mock";
-import { ColorConst } from "@/constants/theme";
 import { Exercise } from "@/types";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
-export default function SessionViewIndividualized() {
+export default function SessionViewPersonal() {
   const [expandedSections, setExpandedSections] = useState<{
     [key: number]: boolean;
   }>({});
@@ -34,8 +31,8 @@ export default function SessionViewIndividualized() {
       title: "Échauffement",
       description:
         "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: mockExercises,
-      haveNote: true,
+      exercises: [],
+      haveNote: false,
     },
     {
       title: "Hyrox Grand Palais",
@@ -83,7 +80,7 @@ export default function SessionViewIndividualized() {
                 <IcArrowLeft />
               </Pressable>
               <Text className="text-lg font-bold text-secondary flex-1">
-                Séance du jour
+                Hyrox Paris Grand palais
               </Text>
               <IcPencil size={24} />
             </View>
@@ -97,7 +94,7 @@ export default function SessionViewIndividualized() {
                 Hyrox
               </Text>
 
-              <Chip text="19/04/2025" className="bg-light" />
+              <Chip text="19/04/2025 - 16h00" className="bg-light" />
             </View>
             <Text className="text-sm text-text italic mt-1">
               Par Enguerrand Aucher
@@ -123,22 +120,11 @@ export default function SessionViewIndividualized() {
         </ScrollView>
 
         {/* Bottom Action Bar */}
-        <View className="absolute bottom-0 left-0 right-0 gap-3">
-          <ButtonIcon size="large" type="primary" className="self-end mr-4">
-            <IcChat />
-          </ButtonIcon>
-
-          <View className="px-4 pb-safe  flex-row items-center p-4 gap-3 bg-white">
-            <View className="flex-row items-center gap-3">
-              <View className="p-3">
-                <IcClock size={32} />
-              </View>
-              <View className="p-3">
-                <IcFile size={32} color={ColorConst.accent} />
-              </View>
-            </View>
-            <Button type="secondary" text="J’ai terminé" className="flex-1" />
+        <View className="px-4 pb-safe absolute bottom-0 left-0 right-0 flex-row items-center p-4 gap-3 bg-white">
+          <View className="p-3">
+            <IcClock size={32} />
           </View>
+          <Button type="secondary" text="J’ai terminé" className="flex-1" />
         </View>
       </View>
     </>
