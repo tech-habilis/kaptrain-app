@@ -52,3 +52,9 @@ export interface TChoice {
   secondaryText?: string;
   leftIcon?: React.ReactNode;
 }
+
+export interface Exercise {
+  id: string;
+  title: string;
+  image: string;
+}

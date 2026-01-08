@@ -1,5 +1,5 @@
 import IcWeight from "@/components/icons/weight";
-import { ExerciseItem, ProgramSectionProps } from "@/types";
+import { Exercise, ExerciseItem, ProgramSectionProps } from "@/types";
 import { ColorConst } from "./theme";
 import IcFire from "@/components/icons/fire";
 import IcClockRound from "@/components/icons/clock-round";
@@ -226,5 +226,23 @@ export const programs: ProgramSectionProps[] = [
         ],
       },
     ],
+  },
+];
+
+export const mockExercises: Exercise[] = [
+  {
+    id: "1",
+    title: "Abmat sit up",
+    image: "https://via.placeholder.com/200",
+  },
+  {
+    id: "2",
+    title: "Abmat sit up",
+    image: "https://via.placeholder.com/200",
+  },
+  {
+    id: "3",
+    title: "Abmat sit up",
+    image: "https://via.placeholder.com/200",
   },
 ];

@@ -1,7 +1,6 @@
 import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcPlus from "@/components/icons/plus";
-import IcClose from "@/components/icons/close";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router, useLocalSearchParams } from "expo-router";
@@ -16,23 +15,18 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Dropdown from "@/components/dropdown";
-import { TChoice } from "@/types";
+import { Exercise, TChoice } from "@/types";
 import BottomSheetModal from "@/components/bottom-sheet-modal";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import Input from "@/components/input";
 import IcSearch from "@/components/icons/search";
 import IcFilter from "@/components/icons/filter";
-import getExercises from "@/constants/mock";
+import getExercises, { mockExercises } from "@/constants/mock";
 import { Choices } from "@/components/choices";
 import Tabs from "@/components/tabs";
 import IcInfoCircle from "@/components/icons/info-circle";
-import clsx from "clsx";
-
-interface Exercise {
-  id: string;
-  title: string;
-  image: string;
-}
+import { clsx } from "clsx";
+import ExerciseCards from "@/components/exercise-cards";
 
 export default function AddBlock() {
   const { mode } = useLocalSearchParams();
@@ -61,23 +55,7 @@ export default function AddBlock() {
     intensityOptions[0],
   );
   const [vmaValue, setVmaValue] = useState<string>("");
-  const [exercises, setExercises] = useState<Exercise[]>([
-    {
-      id: "1",
-      title: "Abmat sit up",
-      image: "https://via.placeholder.com/200",
-    },
-    {
-      id: "2",
-      title: "Abmat sit up",
-      image: "https://via.placeholder.com/200",
-    },
-    {
-      id: "3",
-      title: "Abmat sit up",
-      image: "https://via.placeholder.com/200",
-    },
-  ]);
+  const [exercises, setExercises] = useState<Exercise[]>(mockExercises);
 
   const reference = [
     {
@@ -312,88 +290,11 @@ export default function AddBlock() {
 
         {/* Exercises Section */}
         <View className="gap-3">
-          <Text className="text-sm font-medium text-text">
-            Exercices associés :
-          </Text>
-
           {/* Exercise Cards - Horizontal Scroll */}
-          <View className="relative">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2"
-            >
-              {exercises.map((exercise) => (
-                <View
-                  key={exercise.id}
-                  className="border border-stroke rounded-xl overflow-hidden relative"
-                  style={{ width: 198.51, height: 145.63 }}
-                >
-                  {/* Exercise Image */}
-                  <View className="absolute inset-0 bg-light">
-                    {/* Placeholder for image */}
-                    <View className="w-full h-full bg-light" />
-                  </View>
-
-                  {/* Gradient Overlay */}
-                  <View
-                    className="absolute inset-0"
-                    style={{
-                      backgroundColor: "transparent",
-                    }}
-                  >
-                    <View
-                      className="absolute inset-0"
-                      style={{
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
-                      }}
-                    />
-                  </View>
-
-                  {/* Exercise Title */}
-                  <View className="absolute bottom-0 left-0 right-0 p-3">
-                    <View className="flex-row items-center gap-1">
-                      <Text className="text-xs font-semibold text-white">
-                        {exercise.title}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Close Button */}
-                  <Pressable
-                    onPress={() => removeExercise(exercise.id)}
-                    className="absolute top-3 right-3 w-5 h-5 items-center justify-center"
-                  >
-                    <IcClose size={18} color="white" />
-                  </Pressable>
-
-                  {/* Play Button Overlay */}
-                  <View className="absolute inset-0 items-center justify-center">
-                    <View
-                      className="w-10 h-10 rounded-full items-center justify-center"
-                      style={{
-                        backgroundColor: "rgba(5, 24, 50, 0.15)",
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 0,
-                          height: 0,
-                          marginLeft: 2,
-                          borderLeftWidth: 8,
-                          borderTopWidth: 6,
-                          borderBottomWidth: 6,
-                          borderLeftColor: "white",
-                          borderTopColor: "transparent",
-                          borderBottomColor: "transparent",
-                        }}
-                      />
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+          <ExerciseCards
+            exercises={exercises}
+            onRemoveExercise={(id) => removeExercise(id)}
+          />
 
           {/* Add Exercise Button */}
           <Button

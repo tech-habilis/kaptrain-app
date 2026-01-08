@@ -1,60 +1,16 @@
 import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcCheck from "@/components/icons/check";
-import IcCheckbox from "@/components/icons/checkbox";
 import IcClock from "@/components/icons/clock";
 import IcInfoCircle from "@/components/icons/info-circle";
 import IcLightning from "@/components/icons/lightning";
+import { SessionCard } from "@/components/session/session-card";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ImageBackground, Pressable, ScrollView, View } from "react-native";
-
-const SessionCard = ({
-  title,
-  description,
-  isCompleted,
-  onToggleComplete,
-  isExpanded,
-  onToggleExpand,
-}: {
-  title: string;
-  description: string;
-  isCompleted: boolean;
-  onToggleComplete: () => void;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-}) => {
-  return (
-    <View className="p-3 gap-3 border border-stroke rounded-xl">
-      <Pressable onPress={onToggleExpand}>
-        <View className="flex-row gap-2 items-center">
-          <Pressable onPress={onToggleComplete}>
-            {isCompleted ? (
-              <IcCheck size={24} color={ColorConst.success} />
-            ) : (
-              <IcCheckbox />
-            )}
-          </Pressable>
-          <Text className={"text-base font-semibold flex-1"}>{title}</Text>
-          <View
-            className="transition-transform"
-            style={{
-              transform: [{ rotate: isExpanded ? "-90deg" : "90deg" }],
-            }}
-          >
-            <IcArrowLeft color={ColorConst.subtleText} />
-          </View>
-        </View>
-      </Pressable>
-      {isExpanded && (
-        <Text className="text-subtleText leading-6">{description}</Text>
-      )}
-    </View>
-  );
-};
 
 export default function SessionView() {
   const [expandedCards, setExpandedCards] = useState<{
@@ -65,7 +21,7 @@ export default function SessionView() {
   }>({});
 
   const totalWeek = 4;
-  const [currentWeek, setCurrentWeek] = useState<number>(1);
+  const currentWeek = 1;
 
   const sessionData = [
     {
@@ -157,6 +113,7 @@ export default function SessionView() {
               onToggleComplete={() => toggleCompleted(index)}
               isExpanded={expandedCards[index] || false}
               onToggleExpand={() => toggleExpanded(index)}
+              exercises={[]}
             />
           ))}
         </View>
