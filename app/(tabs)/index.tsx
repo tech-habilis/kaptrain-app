@@ -22,6 +22,8 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { router } from "expo-router";
+import { ROUTE } from "@/constants/route";
 
 const Agenda = () => {
   const sessions = [
@@ -167,7 +169,9 @@ export default function HomeScreen() {
           </View>
 
           <View className="flex-row items-center">
-            <Pressable className="p-2">
+            <Pressable className="p-2" onPress={() => {
+              router.push(ROUTE.UPGRADE_PLAN)
+            }}>
               <IcMessage />
             </Pressable>
             <Pressable

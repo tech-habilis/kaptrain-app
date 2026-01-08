@@ -44,6 +44,8 @@ export const ROUTE_NAME = {
   PAYMENT_CONFIRMED: "payment-confirmed",
   CREATE_SESSION: "create-session",
   ADD_BLOCK: "add-block",
+  SUBSCRIPTION: "subscription",
+  SUBSCRIPTION_CHECKOUT: "subscription-checkout",
 } as const;
 
 /**
@@ -96,4 +98,6 @@ export const ROUTE = {
   PAYMENT_CONFIRMED: `/${ROUTE_NAME.PAYMENT_CONFIRMED}` as const,
   CREATE_SESSION: `/${ROUTE_NAME.CREATE_SESSION}` as const,
   ADD_BLOCK: `/${ROUTE_NAME.ADD_BLOCK}` as const,
+  SUBSCRIPTION: `/${ROUTE_NAME.SUBSCRIPTION}` as const,
+  SUBSCRIPTION_CHECKOUT: `/${ROUTE_NAME.SUBSCRIPTION_CHECKOUT}` as const,
 } as const;
