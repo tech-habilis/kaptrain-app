@@ -12,6 +12,8 @@ import { ColorConst } from "@/constants/theme";
 import { ButtonIcon } from "@/components/button";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
+import IcCheck from "@/components/icons/check";
+import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
 
 export default function Agenda() {
   // Mock data for the calendar - April 2025
@@ -138,17 +140,30 @@ export default function Agenda() {
   // Mock activities for today (April 19, 2025)
   const todayActivities = [
     {
-      title: "Hyrox",
+      title: "Hyrox (programme)",
       sessionTitle: "Hyrox Paris Grand palais",
       coachName: "Par Enguerrand Aucher",
       color: ColorConst.primary,
       icon: <IcHyrox size={16} />,
     },
     {
-      title: "Préparation physique",
+      title: "Préparation physique (individu/programmation)",
       sessionTitle: "Souplesse / flexion cheville",
       coachName: "Par Enguerrand Aucher",
       color: ColorConst.tertiary,
+    },
+    {
+      title: "Préparation physique (perso)",
+      sessionTitle: "Souplesse / flexion cheville",
+      coachName: "Par Enguerrand Aucher",
+      color: ColorConst.tertiary,
+    },
+    {
+      title: "Préparation physique (perso done)",
+      sessionTitle: "Souplesse / flexion cheville",
+      coachName: "Par Enguerrand Aucher",
+      color: ColorConst.tertiary,
+      icon: <IcCheckCircleFilled size={16} />,
     },
   ];
 
@@ -233,12 +248,26 @@ export default function Agenda() {
                 coachName={activity.coachName}
                 borderColor={activity.color}
                 icon={activity.icon}
-                onPress={() =>
+                onLongPress={() =>
                   router.push({
                     pathname: ROUTE.CREATE_SESSION,
                     params: { mode: "edit" },
                   })
                 }
+                onPress={() => {
+                  if (index === 0) {
+                    router.push(ROUTE.SESSION_VIEW);
+                  } else if (index === 1) {
+                    router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
+                  } else if (index === 2) {
+                    router.push(ROUTE.SESSION_VIEW_PERSONAL);
+                  } else if (index === 3) {
+                    router.push({
+                      pathname: ROUTE.SESSION_VIEW_PERSONAL,
+                      params: { status: "done" },
+                    });
+                  }
+                }}
               />
             ))}
           </View>

@@ -14,6 +14,7 @@ interface ActivityCardProps {
   status?: ActivityStatus;
   completedIcon?: React.ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
 }
 
 export function ActivityCard({
@@ -25,10 +26,12 @@ export function ActivityCard({
   status = "pending",
   completedIcon,
   onPress,
+  onLongPress,
 }: ActivityCardProps) {
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       className="bg-white border border-stroke rounded-[14px] flex-row items-center justify-between active:opacity-80"
     >
       <View
