@@ -9,6 +9,7 @@ import IcPencil from "@/components/icons/pencil";
 import { SessionCard } from "@/components/session";
 import Text from "@/components/text";
 import { mockExercises } from "@/constants/mock";
+import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { Exercise } from "@/types";
 import { router } from "expo-router";
@@ -133,9 +134,12 @@ export default function SessionViewIndividualized() {
               <View className="p-3">
                 <IcClock size={32} />
               </View>
-              <View className="p-3">
+              <Pressable
+                className="p-3"
+                onPress={() => router.push(ROUTE.NOTE_HISTORY)}
+              >
                 <IcFile size={32} color={ColorConst.accent} />
-              </View>
+              </Pressable>
             </View>
             <Button type="secondary" text="J’ai terminé" className="flex-1" />
           </View>

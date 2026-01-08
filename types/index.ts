@@ -58,3 +58,15 @@ export interface Exercise {
   title: string;
   image: string;
 }
+
+export interface ISessionNote {
+  title: string;
+  date: string;
+  text: string;
+}
+
+export interface SessionNoteCardProps {
+  sessionTitle: string;
+  date: string;
+  notes: ISessionNote[];
+}

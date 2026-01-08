@@ -7,10 +7,10 @@ import { ColorConst } from "@/constants/theme";
 import { Exercise } from "@/types";
 import ExerciseCards from "../exercise-cards";
 import IcFile from "../icons/file";
-import SessionNote from "../session-note";
 import Button from "../button";
 import IcPlus from "../icons/plus";
 import { clsx } from "clsx";
+import SessionNoteInput from "../session-note-input";
 
 interface SessionCardProps {
   title: string;
@@ -70,7 +70,7 @@ export function SessionCard({
               hidden: exercises.length > 0,
             })}
           />
-          {haveNote && <SessionNote />}
+          {haveNote && <SessionNoteInput />}
         </>
       )}
     </View>

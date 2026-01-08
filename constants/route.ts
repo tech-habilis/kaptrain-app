@@ -46,6 +46,9 @@ export const ROUTE_NAME = {
   ADD_BLOCK: "add-block",
   SUBSCRIPTION: "subscription",
   SUBSCRIPTION_CHECKOUT: "subscription-checkout",
+  SESSION_VIEW_PERSONAL: "session-view-personal",
+  SESSION_VIEW_INDIVIDUALIZED: "session-view-individualized",
+  NOTE_HISTORY: "note-history",
 } as const;
 
 /**
@@ -100,4 +103,7 @@ export const ROUTE = {
   ADD_BLOCK: `/${ROUTE_NAME.ADD_BLOCK}` as const,
   SUBSCRIPTION: `/${ROUTE_NAME.SUBSCRIPTION}` as const,
   SUBSCRIPTION_CHECKOUT: `/${ROUTE_NAME.SUBSCRIPTION_CHECKOUT}` as const,
+  SESSION_VIEW_PERSONAL: `/${ROUTE_NAME.SESSION_VIEW_PERSONAL}` as const,
+  SESSION_VIEW_INDIVIDUALIZED: `/${ROUTE_NAME.SESSION_VIEW_INDIVIDUALIZED}` as const,
+  NOTE_HISTORY: `/${ROUTE_NAME.NOTE_HISTORY}` as const,
 } as const;
