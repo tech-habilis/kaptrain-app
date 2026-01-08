@@ -1,4 +1,8 @@
+import BottomSheetModal, {
+  RawBottomSheetModalType,
+} from "@/components/bottom-sheet-modal";
 import Button from "@/components/button";
+import { Choices } from "@/components/choices";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcCheck from "@/components/icons/check";
 import IcClock from "@/components/icons/clock";
@@ -6,11 +10,21 @@ import IcInfoCircle from "@/components/icons/info-circle";
 import IcLightning from "@/components/icons/lightning";
 import { SessionCard } from "@/components/session/session-card";
 import Text from "@/components/text";
+import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { clsx } from "clsx";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ImageBackground, Pressable, ScrollView, View } from "react-native";
+
+const timers = [
+  { name: "Chronomètre", onPress: () => router.push(ROUTE.SESSION_VIEW) },
+  { name: "Minuteur", onPress: () => router.push(ROUTE.SESSION_VIEW) },
+  { name: "EMOM", onPress: () => router.push(ROUTE.SESSION_VIEW) },
+  { name: "AMRAP", onPress: () => router.push(ROUTE.SESSION_VIEW) },
+  { name: "Tabata", onPress: () => router.push(ROUTE.SESSION_VIEW) },
+  { name: "Personnalisé", onPress: () => router.push(ROUTE.SESSION_VIEW) },
+];
 
 export default function SessionView() {
   const [expandedCards, setExpandedCards] = useState<{
@@ -19,6 +33,9 @@ export default function SessionView() {
   const [completedCards, setCompletedCards] = useState<{
     [key: number]: boolean;
   }>({});
+
+  const showTimersRef = useRef<RawBottomSheetModalType>(null);
+  const resetTimerRef = useRef<RawBottomSheetModalType>(null);
 
   const totalWeek = 4;
   const currentWeek = 1;
@@ -119,11 +136,87 @@ export default function SessionView() {
         </View>
       </ScrollView>
       <View className="px-4 pb-safe absolute bottom-0 left-0 right-0 flex-row items-center p-4 gap-3 bg-white">
-        <View className="p-3">
+        <Pressable
+          className="p-3"
+          onPress={() => showTimersRef.current?.present()}
+        >
           <IcClock size={32} />
-        </View>
+        </Pressable>
         <Button type="secondary" text="J’ai terminé" className="flex-1" />
       </View>
+
+      <BottomSheetModal
+        ref={showTimersRef}
+        name="show-timer-ref"
+        snapPoints={["50%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-lg text-secondary">
+          Ajouter un timer
+        </Text>
+
+        <Choices
+          numColumns={2}
+          data={timers.map((x, index) => ({
+            text: x.name,
+          }))}
+          type="secondary"
+          className="mt-3"
+          itemClassName="bg-secondary"
+          itemTextClassName="text-white"
+          onChange={(choice) => {
+            const timer = timers.find((x) => x.name === choice.text);
+            if (timer) {
+              showTimersRef.current?.dismiss();
+              timer.onPress();
+            }
+          }}
+        />
+
+        <View className="pb-safe flex-row items-center py-4 gap-3 bg-white">
+          <Pressable
+            className="p-3"
+            onPress={() => {
+              showTimersRef.current?.dismiss();
+              resetTimerRef.current?.present()
+            }}
+          >
+            <IcClock color={ColorConst.primary} size={32} />
+          </Pressable>
+          <Button type="secondary" text="J’ai terminé" className="flex-1" />
+        </View>
+      </BottomSheetModal>
+
+      <BottomSheetModal
+        ref={resetTimerRef}
+        name="reset-timer-ref"
+        snapPoints={["32%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-lg text-secondary">
+          Écraser le chrono actuel ?
+        </Text>
+        <Text className="mt-1 text-accent text-base">
+          Lancer un nouveau chrono remplacera celui en cours. Es-tu sûr de
+          vouloir continuer ?
+        </Text>
+
+        <View className="grow" />
+
+        <View className="flex-row items-center pt-6 gap-3 bg-white">
+          <Pressable
+            className="p-3"
+            onPress={() => {
+              resetTimerRef.current?.dismiss();
+              showTimersRef.current?.present()
+            }}
+          >
+            <IcClock color={ColorConst.primary} size={32} />
+          </Pressable>
+          <Button type="secondary" text="Écraser le chrono en cours" className="flex-1" />
+        </View>
+
+      </BottomSheetModal>
     </>
   );
 }
