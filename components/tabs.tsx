@@ -15,6 +15,7 @@ export default function Tabs({
   textClassName = "",
   selectedClassName = "bg-secondary",
   selectedTextClassName = "text-white",
+  selectedStyle,
 }: {
   tabs: TTab[];
   selected: TTab;
@@ -24,6 +25,7 @@ export default function Tabs({
   textClassName?: string;
   selectedClassName?: string;
   selectedTextClassName?: string;
+  selectedStyle?: object;
 }) {
   const [width, setWidth] = useState(0);
 
@@ -45,6 +47,7 @@ export default function Tabs({
           })}
           style={{
             width: width / tabs.length,
+            ...(tab === selected && selectedStyle ? selectedStyle : {}),
           }}
           onPress={() => onSelected(tab)}
         >
