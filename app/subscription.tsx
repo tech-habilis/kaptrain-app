@@ -23,6 +23,7 @@ import IcVerified from "@/components/icons/verified";
 import IcRadioSelected from "@/components/icons/radio-selected";
 import IcRadio from "@/components/icons/radio";
 import IcQuote from "@/components/icons/quote";
+import HighlightedText from "@/components/highlighted-text";
 
 export default function Subscription() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
@@ -62,10 +63,12 @@ export default function Subscription() {
           {/* Hero Content */}
           <View className="px-4 gap-6">
             <View className="gap-3">
-              <View className="w-58 h-1 bg-tertiary rounded-full" />
-              <Text className="text-white text-2xl font-bold">
-                Débloque tout ton potentiel avec Kaptrain Premium
-              </Text>
+              <RawText className="text-white text-2xl font-bold">
+                Débloque tout ton potentiel avec{" "}
+                <HighlightedText className="text-white text-2xl font-bold">
+                  Kaptrain Premium
+                </HighlightedText>
+              </RawText>
               <Text className="text-white/90 text-base">
                 Accède à toutes les fonctionnalités pour t&apos;entraîner plus
                 intelligemment et progresser plus vite.
