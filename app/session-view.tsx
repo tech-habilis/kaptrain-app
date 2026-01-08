@@ -3,12 +3,14 @@ import BottomSheetModal, {
 } from "@/components/bottom-sheet-modal";
 import Button from "@/components/button";
 import { Choices } from "@/components/choices";
+import ConfirmActionModal from "@/components/confirm-action-modal";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcCheck from "@/components/icons/check";
 import IcClock from "@/components/icons/clock";
 import IcInfoCircle from "@/components/icons/info-circle";
 import IcLightning from "@/components/icons/lightning";
 import { SessionCard } from "@/components/session/session-card";
+import TabataCard from "@/components/tabata-card";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
@@ -36,6 +38,7 @@ export default function SessionView() {
 
   const showTimersRef = useRef<RawBottomSheetModalType>(null);
   const resetTimerRef = useRef<RawBottomSheetModalType>(null);
+  const [showDeleteTabata, setShowDeleteTabata] = useState(false);
 
   const totalWeek = 4;
   const currentWeek = 1;
@@ -120,7 +123,14 @@ export default function SessionView() {
           </Text>
         </View>
 
-        <View className="gap-2 px-4 mt-4">
+        <TabataCard
+          className="mx-4 my-6"
+          onClose={() => setShowDeleteTabata(true)}
+          onModify={() => {}}
+          onStart={() => {}}
+        />
+
+        <View className="gap-2 px-4">
           {sessionData.map((session, index) => (
             <SessionCard
               key={index}
@@ -178,7 +188,7 @@ export default function SessionView() {
             className="p-3"
             onPress={() => {
               showTimersRef.current?.dismiss();
-              resetTimerRef.current?.present()
+              resetTimerRef.current?.present();
             }}
           >
             <IcClock color={ColorConst.primary} size={32} />
@@ -208,15 +218,31 @@ export default function SessionView() {
             className="p-3"
             onPress={() => {
               resetTimerRef.current?.dismiss();
-              showTimersRef.current?.present()
+              showTimersRef.current?.present();
             }}
           >
             <IcClock color={ColorConst.primary} size={32} />
           </Pressable>
-          <Button type="secondary" text="Écraser le chrono en cours" className="flex-1" />
+          <Button
+            type="secondary"
+            text="Écraser le chrono en cours"
+            className="flex-1"
+          />
         </View>
-
       </BottomSheetModal>
+
+      <ConfirmActionModal
+        height={300}
+        show={showDeleteTabata}
+        onCancel={() => setShowDeleteTabata(false)}
+        name="confirm-delete-tabata"
+        title="Arrêter le timer ?"
+        message="Tu es sur le point de fermer ton timer en cours. Tu confirmes ?"
+        confirm={{
+          text: "Oui, fermer le timer",
+          isDestructive: false,
+        }}
+      />
     </>
   );
 }
