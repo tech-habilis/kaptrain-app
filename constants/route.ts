@@ -68,6 +68,8 @@ export const ROUTE_NAME = {
   CHANGE_PASSWORD: "change-password",
   INJURIES: "injuries",
   ADD_INJURY: "add-injury",
+  EDIT_INJURY: "edit-injury",
+  EDIT_INJURY_AREA: "edit-injury-area",
   MY_SPORTS: "my-sports",
   MODIFY_MY_SPORTS: "modify-my-sports",
 } as const;
@@ -147,6 +149,8 @@ export const ROUTE = {
   CHANGE_PASSWORD: `/${ROUTE_NAME.CHANGE_PASSWORD}` as const,
   INJURIES: `/${ROUTE_NAME.INJURIES}` as const,
   ADD_INJURY: `/${ROUTE_NAME.ADD_INJURY}` as const,
+  EDIT_INJURY: `/${ROUTE_NAME.EDIT_INJURY}` as const,
+  EDIT_INJURY_AREA: `/${ROUTE_NAME.EDIT_INJURY_AREA}` as const,
   MY_SPORTS: `/${ROUTE_NAME.MY_SPORTS}` as const,
   MODIFY_MY_SPORTS: `/${ROUTE_NAME.MODIFY_MY_SPORTS}` as const,
 } as const;

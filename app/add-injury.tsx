@@ -1,26 +1,20 @@
 import Button from "@/components/button";
-import { Choices } from "@/components/choices";
 import IcArrowLeft from "@/components/icons/arrow-left";
-import IcSearch from "@/components/icons/search";
-import Input from "@/components/input";
-import Tabs from "@/components/tabs";
 import Text from "@/components/text";
 import DatePicker from "@/components/date-picker";
+import InjuryArea from "@/components/injury-area";
+import InjuryForm from "@/components/injury-form";
 import { TChoice } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, TextInput, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { DateType } from "react-native-ui-datepicker";
-import { ColorConst } from "@/constants/theme";
-import { hexToRgba } from "@/utilities/cn";
 
 export default function AddInjury() {
   // Step management
   const [currentStep, setCurrentStep] = useState(1);
 
   // Step 1 - Location
-  const [selectedTab, setSelectedTab] = useState("Liste");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedInjury, setSelectedInjury] = useState<TChoice | undefined>();
 
   // Step 2 - Date
@@ -30,25 +24,6 @@ export default function AddInjury() {
   const [injuryName, setInjuryName] = useState("");
   const [injuryDescription, setInjuryDescription] = useState("");
   const [injuryStatus, setInjuryStatus] = useState<TChoice | undefined>();
-
-  const injuries: TChoice[] = [
-    { text: "Abdominaux" },
-    { text: "Adducteurs" },
-    { text: "Adducteur Droit" },
-    { text: "Adducteur Gauche" },
-    { text: "Avant bras" },
-    { text: "Avant Bras Droit" },
-    { text: "Avant Bras Gauche" },
-    { text: "Biceps" },
-    { text: "Cheville" },
-    { text: "Coude" },
-  ];
-
-  const injuryStatuses: TChoice[] = [{ text: "En cours" }, { text: "Soignée" }];
-
-  const filteredInjuries = injuries.filter((injury) =>
-    injury.text.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   const getPageTitle = () => {
     switch (currentStep) {
@@ -133,43 +108,16 @@ export default function AddInjury() {
             }`}
           />
         </View>
-
-        {/* Tabs - Only show on step 1 */}
-        {currentStep === 1 && (
-          <Tabs
-            tabs={["Liste", "Corps humain"]}
-            selected={selectedTab}
-            onSelected={setSelectedTab}
-            className="mt-4"
-            textClassName="text-base font-bold"
-          />
-        )}
       </View>
 
       {/* Content */}
-      <ScrollView className="flex-1 px-4">
+      <View className="flex-1 px-4">
         {/* Step 1 - Location Selection */}
         {currentStep === 1 && (
-          <>
-            {/* Search */}
-            <Input
-              leftIcon={<IcSearch size={16} />}
-              placeholder="Rechercher"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              className="mb-4"
-            />
-
-            {/* Injury List */}
-            <Choices
-              data={filteredInjuries}
-              selectedChoice={selectedInjury}
-              onChange={setSelectedInjury}
-              type="radio"
-              numColumns={1}
-              itemClassName="py-3"
-            />
-          </>
+          <InjuryArea
+            selectedInjury={selectedInjury}
+            onSelectInjury={setSelectedInjury}
+          />
         )}
 
         {/* Step 2 - Date Selection */}
@@ -177,54 +125,29 @@ export default function AddInjury() {
           <View className="gap-4">
             <DatePicker
               label="Date"
-              labelOnTop
               selectedDate={injuryDate}
               onSelect={setInjuryDate}
               modalTitle="Sélectionner une date"
+              labelOnTop
             />
           </View>
         )}
 
         {/* Step 3 - Description */}
         {currentStep === 3 && (
-          <View className="gap-6">
-            <Input
-              label="Nom de la blessure"
-              placeholder="Blessure Adducteur Droit"
-              value={injuryName}
-              onChangeText={setInjuryName}
-            />
-
-            <View className="gap-2">
-              <Text className="text-accent font-medium text-sm">
-                Décrivez votre blessure
-              </Text>
-              <View className="bg-white border border-stroke rounded-lg px-4 py-4">
-                <TextInput
-                  placeholder="Explique comment la blessure est survenue et en quoi elle te gêne au quotidien"
-                  placeholderTextColor={hexToRgba(ColorConst.subtleText, 0.4)}
-                  value={injuryDescription}
-                  onChangeText={setInjuryDescription}
-                  multiline
-                  textAlignVertical="top"
-                  className="text-base text-text min-h-32"
-                />
-              </View>
-            </View>
-
-            <Choices
-              label="État de la blessure"
-              data={injuryStatuses}
-              selectedChoice={injuryStatus}
-              onChange={setInjuryStatus}
-              type="secondary"
-              itemTextClassName="text-center font-medium"
-            />
-          </View>
+          <InjuryForm
+            mode="create"
+            injuryName={injuryName}
+            onChangeInjuryName={setInjuryName}
+            injuryDescription={injuryDescription}
+            onChangeInjuryDescription={setInjuryDescription}
+            injuryStatus={injuryStatus}
+            onChangeInjuryStatus={setInjuryStatus}
+          />
         )}
 
         <View className="h-32" />
-      </ScrollView>
+      </View>
 
       {/* CTA Button */}
       <View className="absolute bottom-0 left-0 right-0 px-4 pt-8 pb-safe bg-white">
