@@ -62,6 +62,7 @@ export const ROUTE_NAME = {
   CONFIGURE_SHAPE_TRACKING: "configure-shape-tracking",
   CHOOSE_UNIT: "choose-unit",
   APP_LANGUAGE: "app-language",
+  CONTACT_SUPPORT: "contact-support",
 } as const;
 
 /**
@@ -133,4 +134,5 @@ export const ROUTE = {
   CONFIGURE_SHAPE_TRACKING: `/${ROUTE_NAME.CONFIGURE_SHAPE_TRACKING}` as const,
   CHOOSE_UNIT: `/${ROUTE_NAME.CHOOSE_UNIT}` as const,
   APP_LANGUAGE: `/${ROUTE_NAME.APP_LANGUAGE}` as const,
+  CONTACT_SUPPORT: `/${ROUTE_NAME.CONTACT_SUPPORT}` as const,
 } as const;

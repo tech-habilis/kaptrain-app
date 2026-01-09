@@ -120,7 +120,7 @@ export default function Settings() {
     },
     {
       label: "Langue de l'application",
-      onPress: () => router.push(ROUTE.APP_LANGUAGE)
+      onPress: () => router.push(ROUTE.APP_LANGUAGE),
     },
     {
       label: "Notifications d'entraînement",
@@ -142,7 +142,7 @@ export default function Settings() {
     },
     {
       label: "Contacter le support",
-      onPress: () => console.log("Contact support"),
+      onPress: () => router.push(ROUTE.CONTACT_SUPPORT),
     },
     {
       label: "Supprimer mon compte",
