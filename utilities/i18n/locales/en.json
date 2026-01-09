@@ -28,7 +28,8 @@
     "password": "Password",
     "next": "Next",
     "verify": "Verify",
-    "continue": "Continue"
+    "continue": "Continue",
+    "hello": "Hello"
   },
   "error": {
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",

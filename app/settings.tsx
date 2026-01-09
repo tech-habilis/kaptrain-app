@@ -116,11 +116,11 @@ export default function Settings() {
   const appSettings: SettingItemProps[] = [
     {
       label: "Choisir les unités (kg/lb, cm/inch)",
-      onPress: () => console.log("Choose units"),
+      onPress: () => router.push(ROUTE.CHOOSE_UNIT),
     },
     {
       label: "Langue de l'application",
-      onPress: () => console.log("App language"),
+      onPress: () => router.push(ROUTE.APP_LANGUAGE)
     },
     {
       label: "Notifications d'entraînement",
