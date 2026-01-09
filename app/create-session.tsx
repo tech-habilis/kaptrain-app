@@ -128,7 +128,7 @@ const SessionBlock = ({
       <ButtonIcon
         size="large"
         type="primary"
-        className="bg-[#E32828]/10 h-full rounded-md"
+        className="bg-error/10 h-full rounded-md"
         onPress={() => {
           setShowMenu(false);
           onClickDelete();

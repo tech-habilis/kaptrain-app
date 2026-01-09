@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, View, TextInput } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Slider } from "@/components/slider";
-import Input from "@/components/input";
+
 
 const Stepper = ({ current, total }: { current: number; total: number }) => {
   return (

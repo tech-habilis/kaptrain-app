@@ -170,7 +170,7 @@ export default function HomeScreen() {
 
           <View className="flex-row items-center">
             <Pressable className="p-2" onPress={() => {
-              router.push(ROUTE.UPGRADE_PLAN)
+              router.push(ROUTE.SUBSCRIPTION)
             }}>
               <IcMessage />
             </Pressable>

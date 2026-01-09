@@ -47,12 +47,14 @@ export const Chip = ({
   type,
   leftIcon,
   onLeftSidePress,
-  className = ''
+  className = "",
+  textClassName = "",
 }: ChipVariants & {
   text: string;
   leftIcon?: ReactNode;
   onLeftSidePress?: (isClose: boolean) => void;
   className?: string;
+  textClassName?: string;
 }) => {
   const renderLeftSide = () => {
     if (type === "selected") {
@@ -73,7 +75,7 @@ export const Chip = ({
   return (
     <View className={cn(chip({ size, type }), className)}>
       {renderLeftSide()}
-      <Text className={chipText({ type })}>{text}</Text>
+      <Text className={cn(chipText({ type }), textClassName)}>{text}</Text>
     </View>
   );
 };
