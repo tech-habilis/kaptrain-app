@@ -62,7 +62,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isFirstOpen, isLoggedIn } = useSession();
+  const { isFirstOpen, isLoggedIn, showCompleteProfileForm } = useSession();
 
   return (
     <Stack
@@ -72,7 +72,9 @@ function RootNavigator() {
     >
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE_1} />
+        <Stack.Protected guard={showCompleteProfileForm}>
+          <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE_1} />
+        </Stack.Protected>
 
         <Stack.Screen name={ROUTE_NAME.TABS} />
       </Stack.Protected>

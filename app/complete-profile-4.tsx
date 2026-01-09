@@ -1,6 +1,7 @@
 import Button from "@/components/button";
 import { Chip } from "@/components/chip";
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcBasketball from "@/components/icons/basketball";
 import IcBodybuilding from "@/components/icons/bodybuilding";
@@ -100,8 +101,11 @@ export default function CompleteProfile4() {
         </View>
 
         <RawText className="text-subtleText mt-2">
-          {selectedChoices.length.toString()} {t("completeProfile.step4.selected")}{" "}
-          {selectedChoices.length === 5 ? t("completeProfile.step4.limitReached") : null}
+          {selectedChoices.length.toString()}{" "}
+          {t("completeProfile.step4.selected")}{" "}
+          {selectedChoices.length === 5
+            ? t("completeProfile.step4.limitReached")
+            : null}
         </RawText>
 
         <View className="flex-row gap-4 mt-6 items-center">
@@ -128,7 +132,9 @@ export default function CompleteProfile4() {
       </View>
       <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">completeProfile.step4.progress</Text>
+          <Text className="text-subtleText">
+            completeProfile.step4.progress
+          </Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View

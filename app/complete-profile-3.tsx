@@ -1,5 +1,6 @@
 import Button from "@/components/button";
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
@@ -59,7 +60,9 @@ export default function CompleteProfile3() {
       </View>
       <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">completeProfile.step3.progress</Text>
+          <Text className="text-subtleText">
+            completeProfile.step3.progress
+          </Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View

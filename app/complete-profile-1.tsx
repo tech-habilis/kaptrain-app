@@ -1,5 +1,6 @@
 import Button from "@/components/button";
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import IcPlus from "@/components/icons/plus";
 import IcUser from "@/components/icons/user";
 import Input from "@/components/input";
@@ -37,14 +38,25 @@ export default function CompleteProfile1() {
         </View>
 
         <View className="gap-6 mt-6">
-          <Input label="completeProfile.step1.firstName" placeholder="completeProfile.step1.firstNamePlaceholder" />
+          <Input
+            label="completeProfile.step1.firstName"
+            placeholder="completeProfile.step1.firstNamePlaceholder"
+          />
 
-          <Input label="completeProfile.step1.lastName" placeholder="completeProfile.step1.lastNamePlaceholder" />
+          <Input
+            label="completeProfile.step1.lastName"
+            placeholder="completeProfile.step1.lastNamePlaceholder"
+          />
 
-          <Input label="completeProfile.step1.birthDate" placeholder="completeProfile.step1.birthDatePlaceholder" />
+          <Input
+            label="completeProfile.step1.birthDate"
+            placeholder="completeProfile.step1.birthDatePlaceholder"
+          />
 
           <View className="mb-28">
-            <Text className="text-accent font-medium text-sm">completeProfile.step1.gender</Text>
+            <Text className="text-accent font-medium text-sm">
+              completeProfile.step1.gender
+            </Text>
             <Choices
               data={[
                 {
@@ -66,7 +78,9 @@ export default function CompleteProfile1() {
       </ScrollView>
       <View className="flex-row gap-6 pb-safe items-center justify-between px-4 py-6 bg-white">
         <View className="gap-2 grow">
-          <Text className="text-subtleText">completeProfile.step1.progress</Text>
+          <Text className="text-subtleText">
+            completeProfile.step1.progress
+          </Text>
           <View className="flex-row gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
               <View

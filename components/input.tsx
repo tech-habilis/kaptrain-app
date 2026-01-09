@@ -42,6 +42,9 @@ export default function Input({
   onRightIconPress,
   type,
   unit,
+  keyboardType,
+  returnKeyType,
+  inputClassName = "",
   ...props
 }: TextInputProps &
   ComponentProps<typeof inputWrapper> & {
@@ -50,16 +53,13 @@ export default function Input({
     rightIcon?: ReactNode;
     onRightIconPress?: () => void;
     unit?: string;
+    inputClassName?: string;
   }) {
   const { t } = useTranslation();
 
   const renderLeftSide = () => {
     if (leftIcon) {
-      return (
-        <View className="">
-          {leftIcon}
-        </View>
-      );
+      return <View className="">{leftIcon}</View>;
     }
 
     return null;
@@ -93,9 +93,11 @@ export default function Input({
       <View className={cn(inputWrapper({ type }))}>
         {renderLeftSide()}
         <TextInput
-          className={cn(input({ type }))}
+          className={cn(input({ type }), inputClassName)}
           placeholderTextColor={ColorConst.subtleText}
           placeholder={placeholder ? t(placeholder) : undefined}
+          keyboardType={keyboardType || type === "unit" ? "decimal-pad" : undefined}
+          returnKeyType={returnKeyType || type === "unit" ? "done" : undefined}
           {...props}
         />
         {renderRightSide()}

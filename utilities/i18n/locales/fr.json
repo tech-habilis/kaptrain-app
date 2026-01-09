@@ -19,9 +19,9 @@
   },
   "menu": {
     "home": "Accueil",
-    "profile": "Profil",
-    "tips": "Conseils",
-    "articles": "Articles"
+    "library": "Bibliothèque",
+    "agenda": "Agenda",
+    "profile": "Profil"
   },
   "common": {
     "helloWorld": "Bonjour tout le monde ! Ceci est un message de test pour ceux qui ont essayé la fonctionnalité de langue. Bien que les utilisateurs de cette application n'utilisent probablement que l'anglais, qui sait s'ils utilisent le français ou le japonais ?",
