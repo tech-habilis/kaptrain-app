@@ -7,6 +7,7 @@ import IcCheckbox from "./icons/checkbox";
 import IcRadio from "./icons/radio";
 import IcRadioSelected from "./icons/radio-selected";
 import { TChoice } from "@/types";
+import { clsx } from "clsx";
 
 const choiceWrapper = tv({
   base: "rounded-lg px-2 py-4 justify-center items-center",
@@ -19,7 +20,7 @@ const choiceWrapper = tv({
     },
     selected: {
       true: "border-2 border-primary bg-light",
-      false: "border border-stroke",
+      false: "border-2 border-stroke",
     },
   },
   defaultVariants: {
@@ -127,9 +128,16 @@ export const Choice = ({
       onPress={onPress}
     >
       {renderLeftSide(choice)}
-      <Text className={cn(choiceText({ type, selected }), textClassName)}>
-        {choice.text}
-      </Text>
+      <View className="w-[85%]">
+        <Text className={cn(choiceText({ type, selected }), textClassName)}>
+          {choice.text}
+        </Text>
+        {type === "radio" && choice.secondaryText && (
+          <Text className="text-sm text-subtleText">
+            {choice.secondaryText}
+          </Text>
+        )}
+      </View>
       {renderRightSide(choice)}
     </Pressable>
   );
@@ -147,6 +155,8 @@ export const Choices = ({
   className = "",
   numColumns = 1,
   itemClassName = "",
+  activeItemClassName = "",
+  inactiveItemClassName = "",
   itemTextClassName = "",
 }: {
   label?: string;
@@ -159,8 +169,10 @@ export const Choices = ({
   className?: string;
   numColumns?: number;
   itemClassName?: string;
+  activeItemClassName?: string;
+  inactiveItemClassName?: string;
   itemTextClassName?: string;
-} & ChoiceVariants) => {
+} & Omit<ChoiceVariants, "selected">) => {
   return (
     <View className={cn("gap-2", className)}>
       {label !== undefined && (
@@ -176,7 +188,10 @@ export const Choices = ({
         renderItem={({ item }) => (
           <Choice
             type={type}
-            className={itemClassName}
+            className={clsx(itemClassName, {
+              [activeItemClassName]: selectedChoice?.text === item.text,
+              [inactiveItemClassName]: selectedChoice?.text !== item.text,
+            })}
             choice={item}
             textClassName={itemTextClassName}
             selected={

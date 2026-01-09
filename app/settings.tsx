@@ -103,7 +103,7 @@ export default function Settings() {
   const trainingSettings: SettingItemProps[] = [
     {
       label: "Configurer mon ressenti",
-      onPress: () => console.log("Configure feeling"),
+      onPress: () => router.push(ROUTE.CONFIGURE_FEELING),
     },
     {
       label: "Suivi de forme au démarrage",

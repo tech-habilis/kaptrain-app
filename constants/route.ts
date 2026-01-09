@@ -58,6 +58,7 @@ export const ROUTE_NAME = {
   NOTIFICATIONS: "notifications",
   SETTINGS: "settings",
   EDIT_PROFILE: "edit-profile",
+  CONFIGURE_FEELING: "configure-feeling",
 } as const;
 
 /**
@@ -125,4 +126,5 @@ export const ROUTE = {
   NOTIFICATIONS: `/${ROUTE_NAME.NOTIFICATIONS}` as const,
   SETTINGS: `/${ROUTE_NAME.SETTINGS}` as const,
   EDIT_PROFILE: `/${ROUTE_NAME.EDIT_PROFILE}` as const,
+  CONFIGURE_FEELING: `/${ROUTE_NAME.CONFIGURE_FEELING}` as const,
 } as const;
