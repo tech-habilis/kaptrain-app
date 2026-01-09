@@ -82,7 +82,7 @@ export default function ProfileScreen() {
           </View>
 
           <View className="flex-row items-center">
-            <Pressable className="p-2" onPress={() => undefined}>
+            <Pressable className="p-2" onPress={() => router.push(ROUTE.SETTINGS)}>
               <IcCog color="white" />
             </Pressable>
           </View>

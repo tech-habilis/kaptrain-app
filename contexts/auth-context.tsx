@@ -24,6 +24,7 @@ import { TSession } from "@/types";
 import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
 import { appScheme } from "@/constants/misc";
+import { AuthError } from "@supabase/auth-js";
 
 type TEmailSignIn = {
   email: string;
@@ -42,7 +43,7 @@ type TAuthContext = {
   signInWithGoogle: () => void;
   signInWithEmail: (payload: TEmailSignIn) => void;
   signUpWithEmail: (payload: TEmailSignUp) => void;
-  signOut: () => void;
+  signOut: () => Promise<[{ error: AuthError | null }, null]>;
   deleteAccount: () => void;
   setSession: (value: TSession | null) => void;
   setFirstOpenTimestamp: () => void;
@@ -63,7 +64,7 @@ const AuthContext = createContext<TAuthContext>({
   signInWithGoogle: () => {},
   signInWithEmail: () => {},
   signUpWithEmail: () => {},
-  signOut: () => {},
+  signOut: () => Promise.resolve([{ error: null }, null]),
   deleteAccount: () => {},
   setSession: () => {},
   setFirstOpenTimestamp: () => {},
@@ -223,8 +224,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const signOut = async () => {
     setSession(null);
-
-    await Promise.all([supabase.auth.signOut(), GoogleSignin.signOut()]);
+    return await Promise.all([supabase.auth.signOut(), GoogleSignin.signOut()]);
   };
 
   const signUpWithEmail = async ({
