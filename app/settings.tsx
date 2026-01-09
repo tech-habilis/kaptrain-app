@@ -5,11 +5,11 @@ import IcLogout from "@/components/icons/logout";
 import Toggle from "@/components/toggle";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
+import { ROUTE } from "@/constants/route";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSession } from "@/contexts/auth-context";
-import { router } from "expo-router";
-import { ROUTE } from "@/constants/route";
 
 interface SettingItemProps {
   label: string;
@@ -71,7 +71,7 @@ export default function Settings() {
   const profileSettings: SettingItemProps[] = [
     {
       label: "Modifier mon profil",
-      onPress: () => console.log("Edit profile"),
+      onPress: () => router.push(ROUTE.EDIT_PROFILE),
     },
     {
       label: "Changer mon mot de passe",
