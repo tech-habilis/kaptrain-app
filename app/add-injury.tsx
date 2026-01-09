@@ -3,6 +3,7 @@ import { Choices } from "@/components/choices";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcSearch from "@/components/icons/search";
 import Input from "@/components/input";
+import ManMuscleMap from "@/components/man-muscle-map";
 import Tabs from "@/components/tabs";
 import Text from "@/components/text";
 import { TChoice } from "@/types";
@@ -29,7 +30,7 @@ export default function AddInjury() {
   ];
 
   const filteredInjuries = injuries.filter((injury) =>
-    injury.text.toLowerCase().includes(searchQuery.toLowerCase())
+    injury.text.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -48,7 +49,7 @@ export default function AddInjury() {
         </View>
 
         {/* Stepper */}
-        <View className="flex-row gap-2 mt-4 px-2">
+        <View className="flex-row gap-2 my-4 px-2">
           <View className="flex-1 h-2 rounded-full bg-secondary" />
           <View className="flex-1 h-2 rounded-full bg-light" />
           <View className="flex-1 h-2 rounded-full bg-light" />
@@ -67,23 +68,33 @@ export default function AddInjury() {
 
       {/* Content */}
       <ScrollView className="flex-1 px-4">
-        {/* Search */}
-        <Input
-          leftIcon={<IcSearch size={16} />}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          className="mb-4"
-        />
+        {selectedTab === "Liste" ? (
+          <>
+            {/* Search */}
+            <Input
+              leftIcon={<IcSearch size={16} />}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              className="mb-4"
+            />
 
-        {/* Injury List */}
-        <Choices
-          data={filteredInjuries}
-          selectedChoice={selectedInjury}
-          onChange={setSelectedInjury}
-          type="radio"
-          numColumns={1}
-          itemClassName="py-3"
-        />
+            {/* Injury List */}
+            <Choices
+              data={filteredInjuries}
+              selectedChoice={selectedInjury}
+              onChange={setSelectedInjury}
+              type="radio"
+              numColumns={1}
+              itemClassName="py-3"
+            />
+          </>
+        ) : (
+            <View className="items-center">
+              <ManMuscleMap />
+              <Text className="text-sm text-subtleText font-medium mt-6">Zone de la blessure</Text>
+              <Text className="text-text font-semibold text-base">Aucune zone sélectionnée</Text>
+            </View>
+        )}
 
         <View className="h-32" />
       </ScrollView>
