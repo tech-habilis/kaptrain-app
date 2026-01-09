@@ -63,6 +63,7 @@ export const ROUTE_NAME = {
   CHOOSE_UNIT: "choose-unit",
   APP_LANGUAGE: "app-language",
   CONTACT_SUPPORT: "contact-support",
+  TERM_OF_USE: "term-of-use",
 } as const;
 
 /**
@@ -135,4 +136,5 @@ export const ROUTE = {
   CHOOSE_UNIT: `/${ROUTE_NAME.CHOOSE_UNIT}` as const,
   APP_LANGUAGE: `/${ROUTE_NAME.APP_LANGUAGE}` as const,
   CONTACT_SUPPORT: `/${ROUTE_NAME.CONTACT_SUPPORT}` as const,
+  TERM_OF_USE: `/${ROUTE_NAME.TERM_OF_USE}` as const,
 } as const;

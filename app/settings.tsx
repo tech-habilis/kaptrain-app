@@ -134,7 +134,7 @@ export default function Settings() {
   const otherSettings: SettingItemProps[] = [
     {
       label: "Conditions d'utilisation",
-      onPress: () => console.log("Terms of use"),
+      onPress: () => router.push(ROUTE.TERM_OF_USE)
     },
     {
       label: "Politique de confidentialité",
