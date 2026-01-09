@@ -59,6 +59,7 @@ export const ROUTE_NAME = {
   SETTINGS: "settings",
   EDIT_PROFILE: "edit-profile",
   CONFIGURE_FEELING: "configure-feeling",
+  CONFIGURE_SHAPE_TRACKING: "configure-shape-tracking",
 } as const;
 
 /**
@@ -127,4 +128,5 @@ export const ROUTE = {
   SETTINGS: `/${ROUTE_NAME.SETTINGS}` as const,
   EDIT_PROFILE: `/${ROUTE_NAME.EDIT_PROFILE}` as const,
   CONFIGURE_FEELING: `/${ROUTE_NAME.CONFIGURE_FEELING}` as const,
+  CONFIGURE_SHAPE_TRACKING: `/${ROUTE_NAME.CONFIGURE_SHAPE_TRACKING}` as const,
 } as const;

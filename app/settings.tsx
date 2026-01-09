@@ -13,6 +13,7 @@ import { useSession } from "@/contexts/auth-context";
 import DeleteAccountModal, {
   DeleteAccountModalRef,
 } from "@/components/delete-account-modal";
+import ConfirmActionModal from "@/components/confirm-action-modal";
 
 interface SettingItemProps {
   label: string;
@@ -70,6 +71,7 @@ const SettingSection = ({ title, items }: SettingSectionProps) => {
 
 export default function Settings() {
   const [trainingNotifications, setTrainingNotifications] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { signOut } = useSession();
 
   const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
@@ -107,7 +109,7 @@ export default function Settings() {
     },
     {
       label: "Suivi de forme au démarrage",
-      onPress: () => console.log("Startup form tracking"),
+      onPress: () => router.push(ROUTE.CONFIGURE_SHAPE_TRACKING),
     },
   ];
 
@@ -174,12 +176,24 @@ export default function Settings() {
             text="Se déconnecter"
             type="secondary"
             size="large"
-            onPress={handleLogout}
+            onPress={() => setShowLogoutModal(true)}
             leftIcon={<IcLogout color={ColorConst.secondary} />}
             className="mt-4"
           />
         </View>
       </ScrollView>
+
+      <ConfirmActionModal
+        name="confirm-logout-modal"
+        title="Se déconnecter ?"
+        message="Tu vas quitter ta session. Tu pourras te reconnecter à tout moment."
+        onCancel={() => setShowLogoutModal(false)}
+        confirm={{
+          text: "Se déconnecter",
+          onPress: handleLogout,
+        }}
+        show={showLogoutModal}
+      />
 
       {/* Delete Account Modal */}
       <DeleteAccountModal

@@ -22,6 +22,7 @@ export default function ConfirmActionModal({
   confirm: {
     text: string;
     isDestructive?: boolean;
+    onPress?: () => void;
   };
   show: boolean;
   height?: number | string;
@@ -64,6 +65,7 @@ export default function ConfirmActionModal({
         textClassName={clsx({
           "text-error": confirm.isDestructive,
         })}
+        onPress={confirm.onPress}
       />
     </BottomSheetModal>
   );
