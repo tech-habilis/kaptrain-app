@@ -5,10 +5,12 @@ import IcChat from "@/components/icons/chat";
 import IcPlus from "@/components/icons/plus";
 import Input from "@/components/input";
 import Text from "@/components/text";
+import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import cn from "@/utilities/cn";
+import { router } from "expo-router";
 import { useState } from "react";
-import { View, Image } from "react-native";
+import { View, Image, Pressable } from "react-native";
 
 const CoachCard = ({ className = "" }: { className?: string }) => {
   return (
@@ -62,7 +64,11 @@ export default function MyCoach() {
         />
       </View>
 
-      <SingleFab className="mb-safe" icon={<IcChat />} onPress={() => {}} />
+      <SingleFab
+        className="mb-safe"
+        icon={<IcChat />}
+        onPress={() => router.push(ROUTE.MESSAGING)}
+      />
     </BasicScreen>
   );
 }
