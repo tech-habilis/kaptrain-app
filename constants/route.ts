@@ -51,6 +51,8 @@ export const ROUTE_NAME = {
   NOTE_HISTORY: "note-history",
   MODIFY_TIMER: "modify-timer",
   TIMER_EXPANDED: "timer-expanded",
+  SESSION_ENDED_FORM: "session-ended-form",
+  SESSION_EVALUATION: "session-evaluation",
 } as const;
 
 /**
@@ -111,4 +113,6 @@ export const ROUTE = {
   NOTE_HISTORY: `/${ROUTE_NAME.NOTE_HISTORY}` as const,
   MODIFY_TIMER: `/${ROUTE_NAME.MODIFY_TIMER}` as const,
   TIMER_EXPANDED: `/${ROUTE_NAME.TIMER_EXPANDED}` as const,
+  SESSION_ENDED_FORM: `/${ROUTE_NAME.SESSION_ENDED_FORM}` as const,
+  SESSION_EVALUATION: `/${ROUTE_NAME.SESSION_EVALUATION}` as const,
 } as const;

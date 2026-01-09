@@ -11,6 +11,8 @@ import IcPause from "./icons/pause";
 import CircularProgress from "./charts/circular-progress";
 import { useTabataTimer, type TimerState } from "@/hooks/use-tabata-timer";
 import { TabataTheme } from "@/constants/tabata-theme";
+import { router } from "expo-router";
+import { ROUTE } from "@/constants/route";
 
 interface TabataCardProps {
   /**
@@ -249,7 +251,7 @@ export default function TabataCard({
           size="small"
           onPress={
             state === "completed"
-              ? undefined
+              ? () => router.push(ROUTE.SESSION_ENDED_FORM)
               : state === "running"
                 ? pauseTimer
                 : state === "paused"

@@ -26,7 +26,8 @@ export const Slider = ({
   hideStep = false,
   hideThumb = false,
   gradientClassName,
-  baseClassName = ""
+  baseClassName = "",
+  thumbClassName = ""
 }: {
   title: string;
   leftLabel: string;
@@ -43,6 +44,7 @@ export const Slider = ({
   hideThumb?: boolean;
   gradientClassName?: string;
   baseClassName?: string;
+  thumbClassName?: string;
 }) => {
   const [isLayoutReady, setIsLayoutReady] = useState(false);
   const sliderWidth = useSharedValue(0);
@@ -202,6 +204,7 @@ export const Slider = ({
                     className={cn(
                       "absolute size-6 rounded-full left-0 bg-white border-4",
                       reverseGradient ? "border-secondary" : "border-primary",
+                      thumbClassName
                     )}
                     style={[thumbStyle]}
                   />

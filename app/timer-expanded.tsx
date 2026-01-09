@@ -5,6 +5,7 @@ import IcPause from "@/components/icons/pause";
 import { IcReset } from "@/components/icons/repeat";
 import Tabs from "@/components/tabs";
 import Text from "@/components/text";
+import { ROUTE } from "@/constants/route";
 import { TabataTheme } from "@/constants/tabata-theme";
 import { useTabataTimer } from "@/hooks/use-tabata-timer";
 import { clsx } from "clsx";
@@ -151,7 +152,7 @@ export default function TimerExpanded() {
           size="large"
           onPress={
             state === "completed"
-              ? undefined
+              ? () => router.push(ROUTE.SESSION_ENDED_FORM)
               : state === "running"
                 ? pause
                 : state === "paused"
