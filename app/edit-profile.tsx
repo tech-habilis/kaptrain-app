@@ -4,11 +4,13 @@ import Input from "@/components/input";
 import Toggle from "@/components/toggle";
 import IcCalendar from "@/components/icons/calendar";
 import IcPencil from "@/components/icons/pencil";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import Text from "@/components/text";
+import PhotoResizeModal, { PhotoResizeModalRef } from "@/components/photo-resize-modal";
 
 export default function EditProfile() {
+  const photoResizeModalRef = useRef<PhotoResizeModalRef>(null);
   const [firstName, setFirstName] = useState("Marie");
   const [lastName, setLastName] = useState("Patouillet");
   const [birthDate, setBirthDate] = useState("07/08/1988");
@@ -17,6 +19,8 @@ export default function EditProfile() {
   const [isWheelchair, setIsWheelchair] = useState(false);
   const [weight, setWeight] = useState("63,0 kg");
   const [practiceLevel, setPracticeLevel] = useState("Expert");
+  const [profileImage] = useState(require("@/assets/images/sample-avatar.png"));
+  // TODO: Add setProfileImage when implementing actual photo upload
 
   const handleSave = () => {
     // TODO: Implement save profile logic
@@ -26,6 +30,22 @@ export default function EditProfile() {
   const handleDeleteAccount = () => {
     // TODO: Implement delete account logic
     console.log("Deleting account...");
+  };
+
+  const handleEditPhoto = () => {
+    // TODO: Implement photo picker logic
+    // For now, just open the resize modal with the current image
+    photoResizeModalRef.current?.present();
+  };
+
+  const handlePhotoConfirm = (croppedImage?: any) => {
+    // TODO: Update profile image with cropped image
+    // setProfileImage(croppedImage);
+    console.log("Photo confirmed:", croppedImage);
+  };
+
+  const handlePhotoCancel = () => {
+    console.log("Photo resize cancelled");
   };
 
   return (
@@ -42,12 +62,12 @@ export default function EditProfile() {
           {/* Profile Image */}
           <View className="relative">
             <Image
-              source={require("@/assets/images/sample-avatar.png")}
+              source={profileImage}
               className="size-30 rounded-[18.5px]"
             />
             <Pressable
               className="absolute -right-2 -bottom-2 bg-white rounded-[9px] items-center justify-center border-2 border-stroke p-1"
-              onPress={() => console.log("Edit photo")}
+              onPress={handleEditPhoto}
             >
               <IcPencil size={24} />
             </Pressable>
@@ -115,6 +135,14 @@ export default function EditProfile() {
           className="mb-6"
         />
       </View>
+
+      {/* Photo Resize Modal */}
+      <PhotoResizeModal
+        ref={photoResizeModalRef}
+        imageSource={profileImage}
+        onConfirm={handlePhotoConfirm}
+        onCancel={handlePhotoCancel}
+      />
     </BasicScreen>
   );
 }
