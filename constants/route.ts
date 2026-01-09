@@ -55,6 +55,7 @@ export const ROUTE_NAME = {
   SESSION_EVALUATION: "session-evaluation",
   MY_COACH: "my-coach",
   MESSAGING: "messaging",
+  NOTIFICATIONS: "notifications",
 } as const;
 
 /**
@@ -119,4 +120,5 @@ export const ROUTE = {
   SESSION_EVALUATION: `/${ROUTE_NAME.SESSION_EVALUATION}` as const,
   MY_COACH: `/${ROUTE_NAME.MY_COACH}` as const,
   MESSAGING: `/${ROUTE_NAME.MESSAGING}` as const,
+  NOTIFICATIONS: `/${ROUTE_NAME.NOTIFICATIONS}` as const,
 } as const;

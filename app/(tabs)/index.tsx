@@ -176,7 +176,7 @@ export default function HomeScreen() {
             </Pressable>
             <Pressable
               className="p-2"
-              onPress={() => setHaveUnread(!haveUnread)}
+              onPress={() => router.push(ROUTE.NOTIFICATIONS)}
             >
               <IcBell haveUnread={haveUnread} />
             </Pressable>
