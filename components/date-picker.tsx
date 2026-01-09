@@ -19,6 +19,7 @@ interface DatePickerProps {
   minDate?: DateType;
   maxDate?: DateType;
   locale?: string;
+  labelOnTop?: boolean;
 }
 
 export default function DatePicker({
@@ -31,6 +32,7 @@ export default function DatePicker({
   minDate,
   maxDate,
   locale = "fr",
+  labelOnTop = false,
 }: DatePickerProps) {
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
   const [tempDate, setTempDate] = useState<DateType>(selectedDate);
@@ -52,17 +54,20 @@ export default function DatePicker({
 
   return (
     <>
-      <Button
-        text={selectedDate ? formatDisplayDate(selectedDate) : label}
-        type="secondaryV2"
-        className={cn("justify-between", className)}
-        textClassName="font-normal text-base"
-        rightIcon={<IcCalendar />}
-        onPress={() => {
-          setTempDate(selectedDate);
-          bottomSheetModalRef.current?.present();
-        }}
-      />
+      <View>
+        {labelOnTop && <Text className="text-sm text-accent mb-3">{label}</Text>}
+        <Button
+          text={selectedDate ? formatDisplayDate(selectedDate) : label}
+          type="secondaryV2"
+          className={cn("justify-between", className)}
+          textClassName="font-normal text-base"
+          rightIcon={<IcCalendar />}
+          onPress={() => {
+            setTempDate(selectedDate);
+            bottomSheetModalRef.current?.present();
+          }}
+        />
+      </View>
 
       <BottomSheetModal
         ref={bottomSheetModalRef}
@@ -70,8 +75,8 @@ export default function DatePicker({
         snapPoints={["70%"]}
         className="pb-safe pt-6"
         detached
-        bottomInset={Dimensions.get('screen').height * 0.20}
-        style={{marginHorizontal: 16}}
+        bottomInset={Dimensions.get("screen").height * 0.2}
+        style={{ marginHorizontal: 16 }}
         withHandle={false}
       >
         {modalTitle && (
