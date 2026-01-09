@@ -10,9 +10,6 @@ import Text from "@/components/text";
 import PhotoResizeModal, {
   PhotoResizeModalRef,
 } from "@/components/photo-resize-modal";
-import GenderSelectModal, {
-  GenderSelectModalRef,
-} from "@/components/gender-select-modal";
 import DeleteAccountModal, {
   DeleteAccountModalRef,
 } from "@/components/delete-account-modal";
@@ -21,7 +18,6 @@ import { TChoice } from "@/types";
 
 export default function EditProfile() {
   const photoResizeModalRef = useRef<PhotoResizeModalRef>(null);
-  const genderSelectModalRef = useRef<GenderSelectModalRef>(null);
   const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
   const [firstName, setFirstName] = useState("Marie");
   const [lastName, setLastName] = useState("Patouillet");
@@ -29,12 +25,22 @@ export default function EditProfile() {
   const [height, setHeight] = useState("169 cm");
   const [isWheelchair, setIsWheelchair] = useState(false);
   const [weight, setWeight] = useState("63,0 kg");
-  const [practiceLevel, setPracticeLevel] = useState("Expert");
   const [profileImage] = useState(require("@/assets/images/sample-avatar.png"));
   const genders: TChoice[] = ["Femme", "Homme", "Non Binaire"].map((x) => ({
     text: x,
   }));
   const [gender, setGender] = useState(genders[0]);
+
+  const practiceLevels: TChoice[] = [
+    { text: "Débutant", secondaryText: "1 à 2h par semaine" },
+    { text: "Intermédiaire", secondaryText: "3 à 4h par semaine" },
+    { text: "Avancé", secondaryText: "5 à 7h par semaine" },
+    { text: "Confirmé", secondaryText: "8 à 11h par semaine" },
+    { text: "Expert", secondaryText: "+ de 12h par semaine" },
+  ];
+
+  const [practiceLevel, setPracticeLevel] = useState(practiceLevels[0]);
+
   // TODO: Add setProfileImage when implementing actual photo upload
 
   const handleSave = () => {
@@ -129,10 +135,15 @@ export default function EditProfile() {
 
             <Input label="Poids" value={weight} onChangeText={setWeight} />
 
-            <Input
+            <Dropdown
               label="Niveau de pratique"
-              value={practiceLevel}
-              onChangeText={setPracticeLevel}
+              modalTitle="Niveau de pratique"
+              selectedOption={practiceLevel}
+              options={practiceLevels}
+              onSelect={setPracticeLevel}
+              type="input"
+              modalHeight="60%"
+              itemType="secondary"
             />
 
             {/* Delete Account Button */}
@@ -141,7 +152,7 @@ export default function EditProfile() {
               type="secondary"
               size="large"
               onPress={handleDeleteAccountPress}
-              className="bg-[#FDFAFA] border-2 border-error2 mt-4"
+              className="bg-[#FDFAFA] border-2 border-error2 mt-4 android:mb-2"
               textClassName="text-error2"
             />
           </View>

@@ -10,8 +10,9 @@ import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSession } from "@/contexts/auth-context";
-import GenderSelectModal, { GenderSelectModalRef } from "@/components/gender-select-modal";
-import DeleteAccountModal, { DeleteAccountModalRef } from "@/components/delete-account-modal";
+import DeleteAccountModal, {
+  DeleteAccountModalRef,
+} from "@/components/delete-account-modal";
 
 interface SettingItemProps {
   label: string;
@@ -23,14 +24,21 @@ interface SettingItemProps {
   };
 }
 
-const SettingItem = ({ label, onPress, showArrow = true, toggle }: SettingItemProps) => {
+const SettingItem = ({
+  label,
+  onPress,
+  showArrow = true,
+  toggle,
+}: SettingItemProps) => {
   return (
     <Pressable
       onPress={onPress}
       disabled={!onPress && !toggle}
       className="flex-row items-center justify-between py-2"
     >
-      <Text className={`text-base font-semibold text-secondary ${toggle ? "flex-1" : ""}`}>
+      <Text
+        className={`text-base font-semibold text-secondary ${toggle ? "flex-1" : ""}`}
+      >
         {label}
       </Text>
       {toggle ? (
@@ -62,26 +70,14 @@ const SettingSection = ({ title, items }: SettingSectionProps) => {
 
 export default function Settings() {
   const [trainingNotifications, setTrainingNotifications] = useState(false);
-  const [gender, setGender] = useState("Femme");
-  const { signOut, } = useSession();
-  
-  const genderSelectModalRef = useRef<GenderSelectModalRef>(null);
+  const { signOut } = useSession();
+
   const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
 
   const handleLogout = async () => {
     // TODO: add loading state
     await signOut();
     router.replace(ROUTE.LANDING);
-  };
-
-  const handleGenderSelect = () => {
-    genderSelectModalRef.current?.present();
-  };
-
-  const handleGenderChange = (newGender: string) => {
-    setGender(newGender);
-    console.log("Gender changed to:", newGender);
-    // TODO: Update gender in backend
   };
 
   const handleDeleteAccountPress = () => {
@@ -101,10 +97,6 @@ export default function Settings() {
     {
       label: "Changer mon mot de passe",
       onPress: () => console.log("Change password"),
-    },
-    {
-      label: "Genre",
-      onPress: handleGenderSelect,
     },
   ];
 
@@ -164,9 +156,18 @@ export default function Settings() {
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-8 mt-6">
-          <SettingSection title="Paramètres de profil" items={profileSettings} />
-          <SettingSection title="Paramètres d'entrainement" items={trainingSettings} />
-          <SettingSection title="Paramètres d'application" items={appSettings} />
+          <SettingSection
+            title="Paramètres de profil"
+            items={profileSettings}
+          />
+          <SettingSection
+            title="Paramètres d'entrainement"
+            items={trainingSettings}
+          />
+          <SettingSection
+            title="Paramètres d'application"
+            items={appSettings}
+          />
           <SettingSection title="Autres paramètres" items={otherSettings} />
 
           <Button
@@ -179,13 +180,6 @@ export default function Settings() {
           />
         </View>
       </ScrollView>
-
-      {/* Gender Select Modal */}
-      <GenderSelectModal
-        ref={genderSelectModalRef}
-        currentGender={gender}
-        onSelect={handleGenderChange}
-      />
 
       {/* Delete Account Modal */}
       <DeleteAccountModal

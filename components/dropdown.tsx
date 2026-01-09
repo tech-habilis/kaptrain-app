@@ -23,6 +23,7 @@ interface DropdownProps {
   alwaysShowLabel?: boolean;
   type?: "default" | "input";
   modalHeight?: string | number;
+  itemType?: ComponentProps<typeof Choices>["type"];
 }
 
 export default function Dropdown({
@@ -39,6 +40,7 @@ export default function Dropdown({
   type = "default",
   alwaysShowLabel = false,
   modalHeight = "65%",
+  itemType = 'radio',
 }: DropdownProps) {
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
 
@@ -113,7 +115,7 @@ export default function Dropdown({
             data={options}
             selectedChoice={selectedOption}
             onChange={handleSelect}
-            type="radio"
+            type={itemType}
           />
         </View>
       </BottomSheetModal>
