@@ -4,6 +4,8 @@ import { Chip } from "@/components/chip";
 import IcArrowRight from "@/components/icons/arrow-right";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
+import { ROUTE } from "@/constants/route";
+import { router } from "expo-router";
 import { View } from "react-native";
 
 const InjuryCard = ({
@@ -93,7 +95,12 @@ export default function ContactSupport() {
           ))}
         </View>
 
-        <Button text="Ajouter une blessure" type="secondary" className="mb-6" />
+        <Button
+          text="Ajouter une blessure"
+          type="secondary"
+          className="mb-6"
+          onPress={() => router.push(ROUTE.ADD_INJURY)}
+        />
       </View>
     </BasicScreen>
   );
