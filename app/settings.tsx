@@ -98,7 +98,7 @@ export default function Settings() {
     },
     {
       label: "Changer mon mot de passe",
-      onPress: () => console.log("Change password"),
+      onPress: () => router.push(ROUTE.CHANGE_PASSWORD),
     },
   ];
 
@@ -138,7 +138,7 @@ export default function Settings() {
     },
     {
       label: "Politique de confidentialité",
-      onPress: () => console.log("Privacy policy"),
+      onPress: () => router.push(ROUTE.PRIVACY_POLICY)
     },
     {
       label: "Contacter le support",
