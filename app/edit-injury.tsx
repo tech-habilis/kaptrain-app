@@ -2,6 +2,7 @@ import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import Text from "@/components/text";
 import InjuryForm from "@/components/injury-form";
+import ConfirmActionModal from "@/components/confirm-action-modal";
 import { TChoice } from "@/types";
 import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";
@@ -13,6 +14,7 @@ export default function EditInjury() {
   const [injuryDescription, setInjuryDescription] = useState("");
   const [injuryStatus, setInjuryStatus] = useState<TChoice | undefined>();
   const [injuryArea, setInjuryArea] = useState("Adducteur Droit");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleSubmit = () => {
     // Submit form
@@ -31,6 +33,12 @@ export default function EditInjury() {
 
   const isSubmitDisabled = () => {
     return !injuryName || !injuryDescription || !injuryStatus;
+  };
+
+  const handleDeleteInjury = () => {
+    console.log("Deleting injury");
+    setShowDeleteModal(false);
+    router.back();
   };
 
   return (
@@ -66,8 +74,13 @@ export default function EditInjury() {
         <View className="h-32" />
       </ScrollView>
 
-      {/* CTA Button */}
-      <View className="absolute bottom-0 left-0 right-0 px-4 pt-8 pb-safe bg-white">
+      {/* CTA Buttons */}
+      <View className="absolute bottom-0 left-0 right-0 px-4 pt-8 pb-safe bg-white gap-3">
+        <Button
+          text="Supprimer ma blessure"
+          type="tertiary"
+          onPress={() => setShowDeleteModal(true)}
+        />
         <Button
           text="Enregistrer"
           type="primary"
@@ -75,6 +88,20 @@ export default function EditInjury() {
           disabled={isSubmitDisabled()}
         />
       </View>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmActionModal
+        name="delete-injury-modal"
+        title="Supprimer cette blessure ?"
+        message="Cette action est définitive. Tu perdras l'historique lié à cette blessure (date, détails, évolution…)."
+        show={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+        confirm={{
+          text: "Confirmer et supprimer",
+          isDestructive: true,
+          onPress: handleDeleteInjury,
+        }}
+      />
     </View>
   );
 }
