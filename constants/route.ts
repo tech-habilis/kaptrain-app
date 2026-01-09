@@ -66,6 +66,9 @@ export const ROUTE_NAME = {
   TERM_OF_USE: "term-of-use",
   PRIVACY_POLICY: "privacy-policy",
   CHANGE_PASSWORD: "change-password",
+  INJURIES: "injuries",
+  MY_SPORTS: "my-sports",
+  MODIFY_MY_SPORTS: "modify-my-sports",
 } as const;
 
 /**
@@ -141,4 +144,7 @@ export const ROUTE = {
   TERM_OF_USE: `/${ROUTE_NAME.TERM_OF_USE}` as const,
   PRIVACY_POLICY: `/${ROUTE_NAME.PRIVACY_POLICY}` as const,
   CHANGE_PASSWORD: `/${ROUTE_NAME.CHANGE_PASSWORD}` as const,
+  INJURIES: `/${ROUTE_NAME.INJURIES}` as const,
+  MY_SPORTS: `/${ROUTE_NAME.MY_SPORTS}` as const,
+  MODIFY_MY_SPORTS: `/${ROUTE_NAME.MODIFY_MY_SPORTS}` as const,
 } as const;

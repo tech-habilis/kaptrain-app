@@ -11,20 +11,16 @@ import Text from "@/components/text";
 import { mockWeeklyTracking } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
-import { useSession } from "@/contexts/auth-context";
-import i18n, { changeLanguage } from "@/utilities/i18n";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { View, Image, ImageBackground, Pressable } from "react-native";
 
 const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mes sports",
-    onPress: () => {},
+    onPress: () => router.push(ROUTE.MY_SPORTS),
   },
   {
     icon: <IcLightning size={24} />,
@@ -39,7 +35,7 @@ const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mes blessure(s)",
-    onPress: () => {},
+    onPress: () => router.push(ROUTE.INJURIES),
   },
   {
     icon: <IcLightning size={24} />,
@@ -49,15 +45,6 @@ const profileMenu = [
 ];
 
 export default function ProfileScreen() {
-  const { signOut, session } = useSession();
-  const { t } = useTranslation();
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
-
-  const onLangClick = (lang: string) => {
-    setCurrentLanguage(lang);
-    changeLanguage(lang);
-  };
-
   return (
     <View className="flex-1">
       <StatusBar style="light" />
@@ -82,7 +69,10 @@ export default function ProfileScreen() {
           </View>
 
           <View className="flex-row items-center">
-            <Pressable className="p-2" onPress={() => router.push(ROUTE.SETTINGS)}>
+            <Pressable
+              className="p-2"
+              onPress={() => router.push(ROUTE.SETTINGS)}
+            >
               <IcCog color="white" />
             </Pressable>
           </View>
