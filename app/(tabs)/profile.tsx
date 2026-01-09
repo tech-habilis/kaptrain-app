@@ -7,17 +7,13 @@ import IcCog from "@/components/icons/cog";
 import IcDashedCircle from "@/components/icons/dashed-circle";
 import IcLightning from "@/components/icons/lightning";
 import IcLightningFilled from "@/components/icons/lightning-filled";
-import IcSmiley from "@/components/icons/smiley";
-import { LanguageItem } from "@/components/language-item";
 import Text from "@/components/text";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { mockWeeklyTracking } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { useSession } from "@/contexts/auth-context";
 import i18n, { changeLanguage } from "@/utilities/i18n";
-import { Button } from "@react-navigation/elements";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -33,7 +29,7 @@ const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mon coach",
-    onPress: () => {},
+    onPress: () => router.push(ROUTE.MY_COACH),
   },
   {
     icon: <IcLightning size={24} />,
@@ -61,37 +57,6 @@ export default function ProfileScreen() {
     setCurrentLanguage(lang);
     changeLanguage(lang);
   };
-
-  const weeklyTracking = [
-    {
-      text: "Lun",
-      doing: false,
-    },
-    {
-      text: "Mar",
-      doing: true,
-    },
-    {
-      text: "Mer",
-      doing: true,
-    },
-    {
-      text: "Jeu",
-      doing: true,
-    },
-    {
-      text: "Ven",
-      doing: true,
-    },
-    {
-      text: "Sam",
-      doing: false,
-    },
-    {
-      text: "Dim",
-      doing: false,
-    },
-  ];
 
   return (
     <View className="flex-1">
@@ -130,7 +95,7 @@ export default function ProfileScreen() {
         </Text>
 
         <View className="flex-row gap-1 mt-2">
-          {weeklyTracking.map((x, index) => (
+          {mockWeeklyTracking.map((x, index) => (
             <View
               key={index}
               className={clsx(
@@ -171,16 +136,17 @@ export default function ProfileScreen() {
 
       <View className="pt-6 px-4 gap-2">
         {profileMenu.map((x, index) => (
-          <View
+          <Pressable
             key={index}
             className="bg-white p-4 flex-row items-center  rounded-2xl gap-1.5 border border-stroke"
+            onPress={x.onPress}
           >
             {x.icon}
             <Text className="text-text text-base font-bold flex-1">
               {x.text}
             </Text>
             <IcArrowRight />
-          </View>
+          </Pressable>
         ))}
       </View>
 

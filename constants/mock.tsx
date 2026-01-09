@@ -246,3 +246,35 @@ export const mockExercises: Exercise[] = [
     image: "https://via.placeholder.com/200",
   },
 ];
+
+
+export const mockWeeklyTracking = [
+  {
+    text: "Lun",
+    doing: false,
+  },
+  {
+    text: "Mar",
+    doing: true,
+  },
+  {
+    text: "Mer",
+    doing: true,
+  },
+  {
+    text: "Jeu",
+    doing: true,
+  },
+  {
+    text: "Ven",
+    doing: true,
+  },
+  {
+    text: "Sam",
+    doing: false,
+  },
+  {
+    text: "Dim",
+    doing: false,
+  },
+];

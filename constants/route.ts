@@ -53,6 +53,7 @@ export const ROUTE_NAME = {
   TIMER_EXPANDED: "timer-expanded",
   SESSION_ENDED_FORM: "session-ended-form",
   SESSION_EVALUATION: "session-evaluation",
+  MY_COACH: "my-coach",
 } as const;
 
 /**
@@ -115,4 +116,5 @@ export const ROUTE = {
   TIMER_EXPANDED: `/${ROUTE_NAME.TIMER_EXPANDED}` as const,
   SESSION_ENDED_FORM: `/${ROUTE_NAME.SESSION_ENDED_FORM}` as const,
   SESSION_EVALUATION: `/${ROUTE_NAME.SESSION_EVALUATION}` as const,
+  MY_COACH: `/${ROUTE_NAME.MY_COACH}` as const,
 } as const;
