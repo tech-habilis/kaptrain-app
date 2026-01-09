@@ -100,6 +100,8 @@ export default function TabataCard({
     resume: resumeTimer,
     reset: resetTimer,
     totalSeconds,
+    phaseTabs,
+    currentPhaseTab,
   } = useTabataTimer({
     effortSeconds,
     restSeconds,
@@ -108,9 +110,6 @@ export default function TabataCard({
     initialState,
     onStarted,
   });
-
-  const phaseTabs = [`Effort ${effortSeconds}s`, `Rest ${restSeconds}s`];
-  const currentPhaseTab = phaseTabs[phase === "effort" ? 0 : 1];
 
   // Get theme colors based on phase
   const phaseTheme = TabataTheme[phase];
@@ -123,18 +122,12 @@ export default function TabataCard({
         className,
       )}
       style={{
-        backgroundColor:
-          ["paused", "running"].includes(state)
-            ? phaseTheme.cardBackgroundColor
-            : state === "completed"
-              ? TabataTheme.completed.backgroundColor
-              : TabataTheme.default.backgroundColor,
-        borderColor:
-          ["paused", "running"].includes(state)
-            ? phaseTheme.borderColor
-            : state === "completed"
-              ? TabataTheme.completed.borderColor
-              : TabataTheme.default.borderColor,
+        backgroundColor: ["paused", "running"].includes(state)
+          ? phaseTheme.cardBackgroundColor
+          : TabataTheme.default.backgroundColor,
+        borderColor: ["paused", "running"].includes(state)
+          ? phaseTheme.borderColor
+          : TabataTheme.default.borderColor,
       }}
     >
       {/* Header Section */}

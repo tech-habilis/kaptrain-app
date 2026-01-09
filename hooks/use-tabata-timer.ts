@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
-export type TimerState = "default" | "starting" | "running" | "paused" | "completed";
+export type TimerState =
+  | "default"
+  | "starting"
+  | "running"
+  | "paused"
+  | "completed";
 export type TimerPhase = "effort" | "rest";
 
 export interface UseTabataTimerOptions {
@@ -125,6 +130,21 @@ export interface UseTabataTimerReturn {
    * Whether the timer is paused
    */
   isPaused: boolean;
+
+  /**
+   * Array of phase tabs
+   */
+  phaseTabs: string[];
+
+  /**
+   * Current phase tab
+   */
+  currentPhaseTab: string;
+
+  /**
+   * Start the timer without a countdown
+   */
+  startWithoutCountdown: () => void;
 }
 
 const COUNTDOWN_TO_START = 5;
@@ -141,13 +161,16 @@ export function useTabataTimer({
   onRoundChange,
 }: UseTabataTimerOptions): UseTabataTimerReturn {
   const [state, setState] = useState<TimerState>(initialState);
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(effortSeconds);
+  const [remainingSeconds, setRemainingSeconds] =
+    useState<number>(effortSeconds);
   const [round, setRound] = useState<number>(initialRound);
   const [phase, setPhase] = useState<TimerPhase>("effort");
   const [startingIn, setStartingIn] = useState(COUNTDOWN_TO_START);
 
   const mainIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
   const startingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const minutes = Math.floor(remainingSeconds / 60);
@@ -155,7 +178,14 @@ export function useTabataTimer({
   const formattedMinutes = minutes.toString().padStart(2, "0");
   const formattedSeconds = seconds.toString().padStart(2, "0");
 
-  const totalSeconds = phase === "effort" ? effortSeconds : restSeconds;
+  const totalSeconds =
+    state === "completed"
+      ? 0
+      : phase === "effort"
+        ? effortSeconds
+        : restSeconds;
+  const phaseTabs = [`Effort ${effortSeconds}s`, `Rest ${restSeconds}s`];
+  const currentPhaseTab = phaseTabs[phase === "effort" ? 0 : 1];
 
   const clearCountdown = () => {
     setStartingIn(COUNTDOWN_TO_START);
@@ -182,6 +212,17 @@ export function useTabataTimer({
         setRemainingSeconds((prev) => prev - 1);
       }, 1000);
     }, COUNTDOWN_TO_START * 1000);
+  };
+
+  const startWithoutCountdown = () => {
+    setState("running");
+    onStarted?.();
+    clearCountdown();
+
+    // Start the main timer interval
+    mainIntervalRef.current = setInterval(() => {
+      setRemainingSeconds((prev) => prev - 1);
+    }, 1000);
   };
 
   const pause = () => {
@@ -305,6 +346,9 @@ export function useTabataTimer({
     resume,
     reset,
     totalSeconds,
-    isPaused: state === "paused"
+    isPaused: state === "paused",
+    phaseTabs,
+    currentPhaseTab,
+    startWithoutCountdown,
   };
 }

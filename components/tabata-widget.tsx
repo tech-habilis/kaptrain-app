@@ -7,6 +7,8 @@ import { TabataTheme } from "@/constants/tabata-theme";
 import CircularProgress from "./charts/circular-progress";
 import IcClose from "./icons/close";
 import { useState } from "react";
+import { router } from "expo-router";
+import { ROUTE } from "@/constants/route";
 
 interface TabataWidgetProps {
   /**
@@ -77,7 +79,8 @@ export default function TabataWidget({
   if (!show) return <View className="pt-safe" />;
 
   return (
-    <View
+    <Pressable
+      onPress={() => router.push(ROUTE.TIMER_EXPANDED)}
       className="w-full pt-safe mb-4"
       style={{
         backgroundColor: phaseTheme.backgroundColor,
@@ -126,6 +129,6 @@ export default function TabataWidget({
           </Pressable>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }

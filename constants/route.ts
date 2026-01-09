@@ -49,7 +49,8 @@ export const ROUTE_NAME = {
   SESSION_VIEW_PERSONAL: "session-view-personal",
   SESSION_VIEW_INDIVIDUALIZED: "session-view-individualized",
   NOTE_HISTORY: "note-history",
-  MODIFY_TIMER: "modify-timer"
+  MODIFY_TIMER: "modify-timer",
+  TIMER_EXPANDED: "timer-expanded",
 } as const;
 
 /**
@@ -105,7 +106,9 @@ export const ROUTE = {
   SUBSCRIPTION: `/${ROUTE_NAME.SUBSCRIPTION}` as const,
   SUBSCRIPTION_CHECKOUT: `/${ROUTE_NAME.SUBSCRIPTION_CHECKOUT}` as const,
   SESSION_VIEW_PERSONAL: `/${ROUTE_NAME.SESSION_VIEW_PERSONAL}` as const,
-  SESSION_VIEW_INDIVIDUALIZED: `/${ROUTE_NAME.SESSION_VIEW_INDIVIDUALIZED}` as const,
+  SESSION_VIEW_INDIVIDUALIZED:
+    `/${ROUTE_NAME.SESSION_VIEW_INDIVIDUALIZED}` as const,
   NOTE_HISTORY: `/${ROUTE_NAME.NOTE_HISTORY}` as const,
   MODIFY_TIMER: `/${ROUTE_NAME.MODIFY_TIMER}` as const,
+  TIMER_EXPANDED: `/${ROUTE_NAME.TIMER_EXPANDED}` as const,
 } as const;
