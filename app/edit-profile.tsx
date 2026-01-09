@@ -7,19 +7,34 @@ import IcPencil from "@/components/icons/pencil";
 import { useRef, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import Text from "@/components/text";
-import PhotoResizeModal, { PhotoResizeModalRef } from "@/components/photo-resize-modal";
+import PhotoResizeModal, {
+  PhotoResizeModalRef,
+} from "@/components/photo-resize-modal";
+import GenderSelectModal, {
+  GenderSelectModalRef,
+} from "@/components/gender-select-modal";
+import DeleteAccountModal, {
+  DeleteAccountModalRef,
+} from "@/components/delete-account-modal";
+import Dropdown from "@/components/dropdown";
+import { TChoice } from "@/types";
 
 export default function EditProfile() {
   const photoResizeModalRef = useRef<PhotoResizeModalRef>(null);
+  const genderSelectModalRef = useRef<GenderSelectModalRef>(null);
+  const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
   const [firstName, setFirstName] = useState("Marie");
   const [lastName, setLastName] = useState("Patouillet");
   const [birthDate, setBirthDate] = useState("07/08/1988");
-  const [gender, setGender] = useState("Femme");
   const [height, setHeight] = useState("169 cm");
   const [isWheelchair, setIsWheelchair] = useState(false);
   const [weight, setWeight] = useState("63,0 kg");
   const [practiceLevel, setPracticeLevel] = useState("Expert");
   const [profileImage] = useState(require("@/assets/images/sample-avatar.png"));
+  const genders: TChoice[] = ["Femme", "Homme", "Non Binaire"].map((x) => ({
+    text: x,
+  }));
+  const [gender, setGender] = useState(genders[0]);
   // TODO: Add setProfileImage when implementing actual photo upload
 
   const handleSave = () => {
@@ -27,9 +42,13 @@ export default function EditProfile() {
     console.log("Saving profile...");
   };
 
-  const handleDeleteAccount = () => {
-    // TODO: Implement delete account logic
-    console.log("Deleting account...");
+  const handleDeleteAccountPress = () => {
+    deleteAccountModalRef.current?.present();
+  };
+
+  const handleDeleteAccountConfirm = () => {
+    console.log("Account deletion confirmed");
+    // TODO: Implement account deletion logic
   };
 
   const handleEditPhoto = () => {
@@ -61,10 +80,7 @@ export default function EditProfile() {
         <View className="gap-6 items-center">
           {/* Profile Image */}
           <View className="relative">
-            <Image
-              source={profileImage}
-              className="size-30 rounded-[18.5px]"
-            />
+            <Image source={profileImage} className="size-30 rounded-[18.5px]" />
             <Pressable
               className="absolute -right-2 -bottom-2 bg-white rounded-[9px] items-center justify-center border-2 border-stroke p-1"
               onPress={handleEditPhoto}
@@ -91,7 +107,15 @@ export default function EditProfile() {
               onRightIconPress={() => console.log("Open date picker")}
             />
 
-            <Input label="Genre" value={gender} onChangeText={setGender} />
+            <Dropdown
+              type="input"
+              label="Genre"
+              modalTitle="Genre"
+              options={genders}
+              selectedOption={gender}
+              onSelect={setGender}
+              modalHeight="45%"
+            />
 
             <Input label="Taille" value={height} onChangeText={setHeight} />
 
@@ -116,7 +140,7 @@ export default function EditProfile() {
               text="Supprimer mon compte"
               type="secondary"
               size="large"
-              onPress={handleDeleteAccount}
+              onPress={handleDeleteAccountPress}
               className="bg-[#FDFAFA] border-2 border-error2 mt-4"
               textClassName="text-error2"
             />
@@ -142,6 +166,12 @@ export default function EditProfile() {
         imageSource={profileImage}
         onConfirm={handlePhotoConfirm}
         onCancel={handlePhotoCancel}
+      />
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        ref={deleteAccountModalRef}
+        onConfirm={handleDeleteAccountConfirm}
       />
     </BasicScreen>
   );
