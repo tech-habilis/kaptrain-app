@@ -11,10 +11,14 @@ export default function BasicScreen({
   title,
   description,
   headerClassName = "",
+  rightIcon,
+  onRightIconPress,
 }: PropsWithChildren & {
   title: string;
   description?: string;
   headerClassName?: string;
+  rightIcon?: React.ReactNode;
+  onRightIconPress?: () => void;
 }) {
   return (
     <View className="flex-1 bg-white">
@@ -28,6 +32,11 @@ export default function BasicScreen({
           <Text className="text-lg font-bold text-secondary flex-1">
             {title}
           </Text>
+          {rightIcon && (
+            <Pressable onPress={onRightIconPress} className="p-2">
+              {rightIcon}
+            </Pressable>
+          )}
         </View>
 
         {description && (

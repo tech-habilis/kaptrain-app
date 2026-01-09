@@ -6,7 +6,7 @@ import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
 const InjuryCard = ({
   title,
@@ -86,12 +86,16 @@ export default function ContactSupport() {
         </Text>
         <View className="gap-3 flex-1">
           {injuries.map((injury, index) => (
-            <InjuryCard
+            <Pressable
               key={index}
-              title={injury.title}
-              date={injury.date}
-              chips={injury.chips}
-            />
+              onPress={() => router.push(ROUTE.INJURY_VIEW)}
+            >
+              <InjuryCard
+                title={injury.title}
+                date={injury.date}
+                chips={injury.chips}
+              />
+            </Pressable>
           ))}
         </View>
 
