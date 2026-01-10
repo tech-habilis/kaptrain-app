@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 
 export type TSession = {
   accessToken?: string | null;
@@ -70,3 +70,10 @@ export interface SessionNoteCardProps {
   date: string;
   notes: ISessionNote[];
 }
+
+export type BasicIconProps = {
+  size?: number;
+  color?: string;
+};
+
+export type BasicIcon = ({ size, color }: BasicIconProps) => JSX.Element;

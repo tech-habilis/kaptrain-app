@@ -74,6 +74,9 @@ export const ROUTE_NAME = {
   PHYSIOLOGICAL_DATA: "physiological-data",
   MY_SPORTS: "my-sports",
   MODIFY_MY_SPORTS: "modify-my-sports",
+  SPORT_DETAIL: "sport-detail",
+  ADD_SPORT_OBJECTIVE: "add-sport-objective",
+  MODIFY_SPORT_OBJECTIVE: "modify-sport-objective",
 } as const;
 
 /**
@@ -157,4 +160,7 @@ export const ROUTE = {
   PHYSIOLOGICAL_DATA: `/${ROUTE_NAME.PHYSIOLOGICAL_DATA}` as const,
   MY_SPORTS: `/${ROUTE_NAME.MY_SPORTS}` as const,
   MODIFY_MY_SPORTS: `/${ROUTE_NAME.MODIFY_MY_SPORTS}` as const,
+  SPORT_DETAIL: `/${ROUTE_NAME.SPORT_DETAIL}` as const,
+  ADD_SPORT_OBJECTIVE: `/${ROUTE_NAME.ADD_SPORT_OBJECTIVE}` as const,
+  MODIFY_SPORT_OBJECTIVE: `/${ROUTE_NAME.MODIFY_SPORT_OBJECTIVE}` as const,
 } as const;
