@@ -8,6 +8,9 @@ import BasicScreen from "@/components/basic-screen";
 import cn from "@/utilities/cn";
 import IcClockRound from "@/components/icons/clock-round";
 import IcArrowRight from "@/components/icons/arrow-right";
+import ObjectiveDetailModal from "@/components/objective-detail-modal";
+import { useRef, useState } from "react";
+import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 
 type ObjectiveData = {
   id: string;
@@ -52,16 +55,15 @@ const MOCK_RECORDS: RecordData[] = [
   { id: "4", label: "Haltérophilie - Arraché", value: "70 kg" },
 ];
 
-function ObjectiveCard({ objective }: { objective: ObjectiveData }) {
+function ObjectiveCard({
+  objective,
+  onOpen,
+}: {
+  objective: ObjectiveData;
+  onOpen: () => void;
+}) {
   return (
-    <Pressable
-      onPress={() =>
-        router.push({
-          pathname: ROUTE.MODIFY_SPORT_OBJECTIVE,
-          params: { id: objective.id },
-        })
-      }
-    >
+    <Pressable onPress={onOpen}>
       <View className="bg-white border border-stroke rounded-xl p-3">
         <View className="flex flex-col gap-2">
           {/* Category and Date/Status Row */}
@@ -102,6 +104,34 @@ export default function SportDetailScreen() {
   const params = useLocalSearchParams();
   const sportName = (params.name as string) || "Course à pied";
 
+  const objectiveModalRef = useRef<BottomSheetModalType>(null);
+  const [selectedObjective, setSelectedObjective] =
+    useState<ObjectiveData | null>(null);
+
+  const handleOpenObjective = (objective: ObjectiveData) => {
+    setSelectedObjective(objective);
+    objectiveModalRef.current?.present();
+  };
+
+  const handleDelete = () => {
+    console.log("Deleting objective:", selectedObjective?.id);
+    // TODO: Implement delete logic
+  };
+
+  const handleMarkComplete = () => {
+    console.log("Marking objective as complete:", selectedObjective?.id);
+    // TODO: Implement mark complete logic
+  };
+
+  const handleEdit = () => {
+    if (selectedObjective) {
+      router.push({
+        pathname: ROUTE.MODIFY_SPORT_OBJECTIVE,
+        params: { id: selectedObjective.id },
+      });
+    }
+  };
+
   return (
     <BasicScreen title={sportName} headerClassName="bg-light">
       <ScrollView className="flex-1 px-4 pb-32 pt-6">
@@ -110,7 +140,11 @@ export default function SportDetailScreen() {
           <Text className="text-accent text-sm mb-2">Mes objectifs</Text>
           <View className="flex flex-col gap-2">
             {MOCK_OBJECTIVES.map((objective) => (
-              <ObjectiveCard key={objective.id} objective={objective} />
+              <ObjectiveCard
+                key={objective.id}
+                objective={objective}
+                onOpen={() => handleOpenObjective(objective)}
+              />
             ))}
             {/* Add Objective Button */}
             <Pressable
@@ -150,6 +184,18 @@ export default function SportDetailScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Objective Detail Modal */}
+      {selectedObjective && (
+        <ObjectiveDetailModal
+          ref={objectiveModalRef}
+          sportName={sportName}
+          objective={selectedObjective}
+          onDelete={handleDelete}
+          onMarkComplete={handleMarkComplete}
+          onEdit={handleEdit}
+        />
+      )}
     </BasicScreen>
   );
 }
