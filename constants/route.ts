@@ -71,6 +71,7 @@ export const ROUTE_NAME = {
   EDIT_INJURY: "edit-injury",
   EDIT_INJURY_AREA: "edit-injury-area",
   INJURY_VIEW: "injury-view",
+  PHYSIOLOGICAL_DATA: "physiological-data",
   MY_SPORTS: "my-sports",
   MODIFY_MY_SPORTS: "modify-my-sports",
 } as const;
@@ -153,6 +154,7 @@ export const ROUTE = {
   EDIT_INJURY: `/${ROUTE_NAME.EDIT_INJURY}` as const,
   EDIT_INJURY_AREA: `/${ROUTE_NAME.EDIT_INJURY_AREA}` as const,
   INJURY_VIEW: `/${ROUTE_NAME.INJURY_VIEW}` as const,
+  PHYSIOLOGICAL_DATA: `/${ROUTE_NAME.PHYSIOLOGICAL_DATA}` as const,
   MY_SPORTS: `/${ROUTE_NAME.MY_SPORTS}` as const,
   MODIFY_MY_SPORTS: `/${ROUTE_NAME.MODIFY_MY_SPORTS}` as const,
 } as const;

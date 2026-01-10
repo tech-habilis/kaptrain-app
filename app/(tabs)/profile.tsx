@@ -40,7 +40,7 @@ const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mes données physiologiques",
-    onPress: () => {},
+    onPress: () => router.push(ROUTE.PHYSIOLOGICAL_DATA)
   },
 ];
 
