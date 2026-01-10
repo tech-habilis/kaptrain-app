@@ -16,6 +16,7 @@ const choiceWrapper = tv({
       default: "",
       secondary: "flex-row items-center px-4",
       multipleChoice: "flex-row items-center px-3",
+      multipleChoiceWithoutIcon: "flex-row items-center px-3",
       radio: "flex-row items-center px-4",
     },
     selected: {
@@ -36,6 +37,7 @@ const choiceText = tv({
       default: "",
       secondary: "text-base font-bold",
       multipleChoice: "",
+      multipleChoiceWithoutIcon: "text-center",
       radio: "text-base font-medium",
     },
     selected: {
@@ -49,7 +51,7 @@ const choiceText = tv({
       className: "text-secondary",
     },
     {
-      type: "multipleChoice",
+      type: ["multipleChoice", "multipleChoiceWithoutIcon"],
       className: "text-text",
     },
     {
@@ -110,6 +112,8 @@ export const Choice = ({
         </View>
       );
     }
+
+    // multipleChoiceWithoutIcon doesn't render any icon
 
     if (type === "radio") {
       return (
@@ -195,12 +199,15 @@ export const Choices = ({
             choice={item}
             textClassName={itemTextClassName}
             selected={
-              (type === "multipleChoice"
+              (type === "multipleChoice" || type === "multipleChoiceWithoutIcon"
                 ? selectedChoices?.map((x) => x.text)?.includes(item.text)
                 : item.text === selectedChoice?.text) || false
             }
             onPress={() => {
-              if (type === "multipleChoice") {
+              if (
+                type === "multipleChoice" ||
+                type === "multipleChoiceWithoutIcon"
+              ) {
                 const nonNullSelectedChoices = selectedChoices || [];
                 const isSelecting = !selectedChoices?.includes(item);
 

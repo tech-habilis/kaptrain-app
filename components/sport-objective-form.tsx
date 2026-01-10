@@ -31,7 +31,7 @@ type ObjectiveFormProps = {
   onSubmit?: (data: {
     type: ObjectiveType;
     title: string;
-    date: string | null;
+    date: DateType | null;
     selectedSports: string[];
   }) => void;
   onDelete?: () => void;
@@ -102,8 +102,8 @@ export default function ObjectiveForm({
     initialValues?.date ? "specific" : "none",
   );
   const [date, setDate] = useState(initialValues?.date);
-  const [selectedSports, setSelectedSports] = useState<string[]>(
-    initialValues?.selectedSports || [],
+  const [selectedSports, setSelectedSports] = useState<TChoice[]>(
+    initialValues?.selectedSports?.map((name) => ({ text: name })) || [],
   );
 
   const handleSubmit = () => {
@@ -111,7 +111,7 @@ export default function ObjectiveForm({
       type: objectiveType,
       title,
       date: dateOption === "specific" ? date : null,
-      selectedSports,
+      selectedSports: selectedSports.map((s) => s.text),
     });
     router.back();
   };
@@ -129,10 +129,10 @@ export default function ObjectiveForm({
         title={mode === "add" ? "Ajouter un objectif" : "Modifier un objectif"}
         headerClassName="bg-white"
       >
-        <ScrollView className="flex-1 px-4 pt-6 pb-48">
+        <ScrollView className="flex-1 px-4" contentContainerClassName={mode === 'edit' ? 'mb-safe pb-52' : ''}>
           {/* Type d'objectif */}
           <View className="mb-8">
-            <Text className="text-accent text-sm mb-2">Type d'objectif</Text>
+            <Text className="text-accent text-sm mb-2">Type d&apos;objectif</Text>
             <View className="flex flex-row gap-2">
               {OBJECTIVE_TYPES.map(({ key, label, icon }) => (
                 <TypeChoiceBox
@@ -199,16 +199,14 @@ export default function ObjectiveForm({
           </View>
 
           {/* Sports */}
-          <View className="mb-8">
-            <Choices
-              label="A quel(s) sport(s) voulez-vous associer l'objectif ?"
-              data={SPORTS_CHOICES}
-              type="multipleChoice"
-              selectedChoices={selectedSports}
-              onChangeMultiple={setSelectedSports}
-              numColumns={2}
-            />
-          </View>
+          <Choices
+            label="A quel(s) sport(s) voulez-vous associer l'objectif ?"
+            data={SPORTS_CHOICES}
+            type="multipleChoiceWithoutIcon"
+            selectedChoices={selectedSports}
+            onChangeMultiple={setSelectedSports}
+            numColumns={2}
+          />
         </ScrollView>
 
         {/* CTA */}
@@ -219,6 +217,7 @@ export default function ObjectiveForm({
                 type="tertiary"
                 text="Supprimer l'objectif"
                 onPress={handleDelete}
+                size="large"
               />
             )}
 
@@ -231,6 +230,7 @@ export default function ObjectiveForm({
                   ? "Ajouter l'objectif"
                   : "Enregistrer les modifications"
               }
+              size="large"
             />
           </View>
         </View>

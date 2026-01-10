@@ -1,11 +1,9 @@
-import { Stack, useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { View, ScrollView, Pressable } from "react-native";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { ROUTE } from "@/constants/route";
-import IcCalendar from "@/components/icons/calendar";
 import IcPlus from "@/components/icons/plus";
-import IcChevronDown from "@/components/icons/chevron-down";
 import BasicScreen from "@/components/basic-screen";
 import cn from "@/utilities/cn";
 import IcClockRound from "@/components/icons/clock-round";

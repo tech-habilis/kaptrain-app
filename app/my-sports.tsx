@@ -5,7 +5,6 @@ import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import IcArrowRight from "@/components/icons/arrow-right";
 import IcCycling from "@/components/icons/cycling";
-import IcCalendar from "@/components/icons/calendar";
 import IcLightning from "@/components/icons/lightning";
 import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
@@ -24,7 +23,7 @@ type ObjectiveCard = {
   title: string;
 };
 
-type SportCard = {
+type SportCardData = {
   id: string;
   name: string;
   icon: React.ReactNode;
@@ -34,7 +33,7 @@ type SportCard = {
 };
 
 // Using IcLightning as placeholder for: running, volleyball, tennis
-const MOCK_SPORTS: SportCard[] = [
+const MOCK_SPORTS: SportCardData[] = [
   {
     id: "1",
     name: "Course à pied",
@@ -86,7 +85,7 @@ const MOCK_SPORTS: SportCard[] = [
   },
 ];
 
-function SportCard({ sport }: { sport: SportCard }) {
+function SportCard({ sport }: { sport: SportCardData }) {
   const hasRecords = sport.records && sport.records.length > 0;
   const hasObjectives = sport.objectives && sport.objectives.length > 0;
 

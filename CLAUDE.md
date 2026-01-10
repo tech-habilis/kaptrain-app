@@ -366,6 +366,7 @@ Language preference persisted in secure storage. Fallback: French.
 
 **1. Always Run Lint After Editing Files**
 - **After every file edit**, run: `pnpm lint --fix path/to/file.tsx`
+- For Expo projects, `pnpm lint` already includes TypeScript type checking
 - If `--fix` doesn't resolve the errors, fix them manually
 - This prevents accumulating linting errors and maintains code quality
 
