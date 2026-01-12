@@ -1,19 +1,50 @@
 import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import Text from "@/components/text";
-import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text as RawText, Pressable } from "react-native";
 import { cn } from "tailwind-variants";
+import { OTPInput } from "input-otp-native";
+import { useSession } from "@/contexts/auth-context";
 
 const OTP_LENGTH = 6;
+const OTP_RESEND_DELAY = 60; // 60 seconds
+
+function Box({
+  isActive,
+  char,
+  onActive,
+}: {
+  isActive: boolean;
+  char: string | null;
+  onActive: () => void;
+}) {
+  useEffect(() => {
+    if (isActive) {
+      onActive();
+    }
+  }, [isActive, onActive]);
+
+  return (
+    <View
+      className={cn(
+        "border-2 justify-center items-center rounded-lg size-13",
+        isActive ? "border-secondary" : "border-stroke",
+      )}
+    >
+      <Text className={cn("text-[24px] text-secondary font-bold")}>
+        {char ?? ""}
+      </Text>
+    </View>
+  );
+}
 
 export default function VerifyEmail() {
+  const { verifyEmail } = useSession();
   const [otp, setOtp] = useState("");
-  const [countdown, setCountdown] = useState(418);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [countdown, setCountdown] = useState(OTP_RESEND_DELAY);
 
   const countdownRef = useRef<number | null>(null);
 
@@ -27,6 +58,7 @@ export default function VerifyEmail() {
   }, [countdown]);
 
   const email = "example@example.com";
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const startCountDown = useCallback(() => {
     countdownRef.current = setInterval(() => {
@@ -49,7 +81,7 @@ export default function VerifyEmail() {
   }, [startCountDown]);
 
   return (
-    <View className="py-safe px-4 flex-1">
+    <View className="py-safe px-4 flex-1 bg-white">
       <StatusBar style="dark" />
       <Pressable className="py-4" onPress={router.back}>
         <IcArrowLeft />
@@ -61,21 +93,24 @@ export default function VerifyEmail() {
       <Text className="text-text font-medium">{email}</Text>
 
       {/* otp boxes */}
-      <View className="flex-row gap-2 mt-8">
-        {Array.from({length: OTP_LENGTH}).map((_, index) => (
-          <View
-            key={index}
-            className={cn(
-              "border-2 size-12 justify-center items-center rounded-lg",
-              index === activeIndex ? "border-secondary" : "border-stroke",
-            )}
-          >
-            <Text className={cn("text-[32px] text-secondary font-bold")}>
-              {otp[index] || ""}
-            </Text>
+      <OTPInput
+        returnKeyType={activeIndex === OTP_LENGTH - 1 ? 'done' : undefined}
+        value={otp}
+        onChange={setOtp}
+        maxLength={OTP_LENGTH}
+        render={({ slots }) => (
+          <View className="flex-row gap-2 mt-8">
+            {slots.map((slot, index) => (
+              <Box
+                key={index}
+                isActive={slot.isActive}
+                char={slot.char}
+                onActive={() => setActiveIndex(index)}
+              />
+            ))}
           </View>
-        ))}
-      </View>
+        )}
+      />
 
       <View className="mt-8 gap-1">
         <Text className="text-subtleText">verifyEmail.didntReceiveCode</Text>
@@ -91,11 +126,9 @@ export default function VerifyEmail() {
 
       <Button
         text="common.verify"
-        onPress={() => {
-          router.dismissAll();
-          router.replace(ROUTE.EMAIL_VERIFIED);
-        }}
-        className="mb-6"
+        onPress={() => verifyEmail(email, otp)}
+        className="mb-6 mt-6"
+        disabled={otp.length !== OTP_LENGTH}
       />
     </View>
   );

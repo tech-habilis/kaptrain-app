@@ -48,6 +48,7 @@ type TAuthContext = {
   setSession: (value: TSession | null) => void;
   setFirstOpenTimestamp: () => void;
   setProfileCompleted: () => void;
+  verifyEmail: (email: string, otp: string) => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -68,7 +69,8 @@ const AuthContext = createContext<TAuthContext>({
   deleteAccount: () => {},
   setSession: () => {},
   setFirstOpenTimestamp: () => {},
-  setProfileCompleted: () => {},
+  setProfileCompleted: () => { },
+  verifyEmail: (email: string, otp: string) => { },
 
   session: null,
   isLoadingSession: false,
@@ -156,16 +158,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setLoggingInWith("google");
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
-      console.log('google signIn', response)
+      console.log("google signIn", response);
       if (isSuccessResponse(response)) {
         const { data } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: response.data.idToken || "",
         });
 
-        console.log('supabase google sign in', data)
+        console.log("supabase google sign in", data);
         setSession(supabaseUtils.toLocalSession(data.session));
-        router.replace(ROUTE.ROOT)
+        router.replace(ROUTE.ROOT);
       } else {
         // sign in was cancelled by user
       }
@@ -273,6 +275,22 @@ export function SessionProvider({ children }: PropsWithChildren) {
     toast.error("This feature is not yet implemented.");
   };
 
+  const verifyEmail = async (email: string, otp: string) => {
+    const result = await supabase.auth.verifyOtp({
+      token: otp,
+      email,
+      type: "email",
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+    } else {
+      toast.success("OTP verified successfully");
+      router.dismissAll();
+      router.replace(ROUTE.EMAIL_VERIFIED);
+    }
+  };
+
   useEffect(() => {
     AppleAuthentication.isAvailableAsync().then((supported) => {
       setCanSignInWithApple(supported);
@@ -326,6 +344,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
           const timestamp = Date.now();
           setProfileCompletedAt(timestamp.toString());
         },
+        verifyEmail,
 
         session,
         isLoadingSession:

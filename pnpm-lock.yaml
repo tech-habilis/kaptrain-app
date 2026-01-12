@@ -92,6 +92,9 @@ importers:
       i18next:
         specifier: ^25.6.3
         version: 25.6.3(typescript@5.9.3)
+      input-otp-native:
+        specifier: ^0.5.0
+        version: 0.5.0(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -2917,6 +2920,12 @@ packages:
 
   inline-style-prefixer@7.0.1:
     resolution: {integrity: sha512-lhYo5qNTQp3EvSSp3sRvXMbVQTLrvGV6DycRMJ5dm2BLMiJ30wpXKdDdgX+GmJZ5uQMucwRKHamXSst3Sj/Giw==}
+
+  input-otp-native@0.5.0:
+    resolution: {integrity: sha512-awRjlhFfI/xdcklbQ6sar5bLlZDooqY+isYk+2Um7yTiiyjrDmwE0fba2BPz++ELePgmE0zyQFh96sQruxUKig==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
 
   internal-slot@1.1.0:
     resolution: {integrity: sha512-4gd7VpWNQNB4UKKCFFVcp1AVv+FMOgs9NKzjHKusc8jTMhd5eL1NqQqOpE0KzMds804/yHlglp3uxgluOqAPLw==}
@@ -8068,6 +8077,11 @@ snapshots:
   inline-style-prefixer@7.0.1:
     dependencies:
       css-in-js-utils: 3.1.0
+
+  input-otp-native@0.5.0(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
 
   internal-slot@1.1.0:
     dependencies:
