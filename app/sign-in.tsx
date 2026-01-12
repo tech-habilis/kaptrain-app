@@ -107,6 +107,8 @@ export default function SignIn() {
           type="secondaryV2"
           className="flex-1"
           leftIcon={<IcGoogle size={20} />}
+          loading={loggingInWith === "google"}
+          disabled={isLoggingIn}
         />
         {canSignInWithApple && (
           <Button
@@ -115,6 +117,8 @@ export default function SignIn() {
             type="secondaryV2"
             className="flex-1"
             leftIcon={<IcApple size={20} />}
+            loading={loggingInWith === "apple"}
+            disabled={isLoggingIn}
           />
         )}
       </View>

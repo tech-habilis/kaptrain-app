@@ -10,7 +10,15 @@ import { OTPInput } from "input-otp-native";
 import { useSession } from "@/contexts/auth-context";
 import { ROUTE } from "@/constants/route";
 
-const OTP_LENGTH = 8;
+/**
+ * The length of the OTP code.
+ * Supabase requires at least 6 digits.
+ */
+const OTP_LENGTH = 6;
+
+/**
+ * Supabase default: 60 seconds
+ */
 const OTP_RESEND_DELAY = 60; // 60 seconds
 
 function Box({
