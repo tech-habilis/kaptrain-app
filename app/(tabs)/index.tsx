@@ -148,7 +148,6 @@ const Agenda = () => {
 
 export default function HomeScreen() {
   const { session } = useSession();
-  console.log(session);
   const [haveUnread, setHaveUnread] = useState(true);
 
   return (
@@ -164,7 +163,7 @@ export default function HomeScreen() {
           <View className="gap-1.5 flex-1">
             <RawText className="text-white text-xl font-bold" numberOfLines={1}>
               <Text>common.hello</Text>{" "}
-              {session?.user?.name || session?.user?.email || ""} !
+              {session?.user?.name?.split(" ")?.[0] || ""} !
             </RawText>
             <Chip
               text="Forme excellente"
