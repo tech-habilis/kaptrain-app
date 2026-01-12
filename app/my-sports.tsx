@@ -101,7 +101,7 @@ function SportCard({ sport }: { sport: SportCardData }) {
       }
     >
       {/* Header */}
-      <View className="flex-row items-center justify-between mb-3">
+      <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5 flex-1">
           {sport.icon}
           <Text className="text-text text-base font-semibold">
@@ -113,7 +113,7 @@ function SportCard({ sport }: { sport: SportCardData }) {
 
       {/* Records Section */}
       {hasRecords && (
-        <View className="mb-3">
+        <View className="mt-3">
           <Text className="text-accent text-sm mb-1.5">
             Derniers records
           </Text>
@@ -137,7 +137,7 @@ function SportCard({ sport }: { sport: SportCardData }) {
 
       {/* Objectives Section */}
       {hasObjectives && (
-        <View>
+        <View className="mt-3">
           <Text className="text-accent text-sm mb-1.5">
             Objectif(s) personnel
           </Text>
@@ -187,7 +187,7 @@ export default function MySportsScreen() {
           </ScrollView>
 
           {/* CTA */}
-          <View className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-8 bg-gradient-to-t from-light via-light to-transparent">
+          <View className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-8 bg-linear-to-t from-light via-light to-transparent">
             <Button
               text="Modifier mes sports"
               onPress={() => router.push(ROUTE.MODIFY_MY_SPORTS)}

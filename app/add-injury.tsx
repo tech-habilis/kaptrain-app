@@ -7,7 +7,7 @@ import InjuryForm from "@/components/injury-form";
 import { TChoice } from "@/types";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { DateType } from "react-native-ui-datepicker";
 
 export default function AddInjury() {

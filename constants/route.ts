@@ -77,6 +77,10 @@ export const ROUTE_NAME = {
   SPORT_DETAIL: "sport-detail",
   ADD_SPORT_OBJECTIVE: "add-sport-objective",
   MODIFY_SPORT_OBJECTIVE: "modify-sport-objective",
+  MY_RECORDS: "my-records",
+  RECORD_DETAIL: "record-detail",
+  RECORD_DETAIL_ITEM: "record-detail-item",
+  ADD_RECORD: "add-record",
 } as const;
 
 /**
@@ -163,4 +167,8 @@ export const ROUTE = {
   SPORT_DETAIL: `/${ROUTE_NAME.SPORT_DETAIL}` as const,
   ADD_SPORT_OBJECTIVE: `/${ROUTE_NAME.ADD_SPORT_OBJECTIVE}` as const,
   MODIFY_SPORT_OBJECTIVE: `/${ROUTE_NAME.MODIFY_SPORT_OBJECTIVE}` as const,
+  MY_RECORDS: `/${ROUTE_NAME.MY_RECORDS}` as const,
+  RECORD_DETAIL: `/${ROUTE_NAME.RECORD_DETAIL}` as const,
+  RECORD_DETAIL_ITEM: `/${ROUTE_NAME.RECORD_DETAIL_ITEM}` as const,
+  ADD_RECORD: `/${ROUTE_NAME.ADD_RECORD}` as const,
 } as const;

@@ -1,6 +1,6 @@
 import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
-import { Chip } from "@/components/chip";
+
 import IcArrowRight from "@/components/icons/arrow-right";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";

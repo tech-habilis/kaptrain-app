@@ -5,53 +5,13 @@ import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import IcClose from "@/components/icons/close";
 import IcSearch from "@/components/icons/search";
-import IcCheckboxSelected from "@/components/icons/checkbox-selected";
-import IcCheckbox from "@/components/icons/checkbox";
-import IcLightning from "@/components/icons/lightning";
-import IcCrossfit from "@/components/icons/crossfit";
-import IcCycling from "@/components/icons/cycling";
-import IcRowing from "@/components/icons/rowing";
-import IcBasketball from "@/components/icons/basketball";
-import IcBodybuilding from "@/components/icons/bodybuilding";
-import IcYoga from "@/components/icons/yoga";
 import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
 import Input from "@/components/input";
-import cn from "@/utilities/cn";
+import { ALL_SPORTS } from "@/constants/mock";
+import SportOptionItem from "@/components/sport-option-item";
 
 const MAX_SPORTS = 5;
-
-type SportOption = {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-};
-
-// Using IcLightning as placeholder for athletics
-const ALL_SPORTS: SportOption[] = [
-  {
-    id: "athletics",
-    name: "Athlétisme",
-    icon: <IcLightning size={24} color={ColorConst.accent} />,
-  },
-  { id: "rowing", name: "Aviron", icon: <IcRowing size={24} /> },
-  { id: "basketball", name: "Basketball", icon: <IcBasketball size={24} /> },
-  { id: "crossfit", name: "Crossfit", icon: <IcCrossfit size={24} /> },
-  { id: "cycling", name: "Cyclisme", icon: <IcCycling size={24} /> },
-  {
-    id: "bodybuilding",
-    name: "Musculation",
-    icon: <IcBodybuilding size={24} />,
-  },
-  { id: "yoga", name: "Yoga", icon: <IcYoga size={24} /> },
-  { id: "basketball-2", name: "Basketball", icon: <IcBasketball size={24} /> },
-  { id: "wheelchair-basketball", name: "Basket fauteuil", icon: null },
-  { id: "beach-volleyball", name: "Beach volley", icon: null },
-  { id: "biathlon", name: "Biathlon", icon: null },
-  { id: "bmx", name: "BMX", icon: null },
-  { id: "boccia", name: "Boccia", icon: null },
-  { id: "boxing", name: "Boxe", icon: null },
-];
 
 const INITIAL_SELECTED_SPORTS = [
   "athletics",
@@ -75,43 +35,6 @@ function SelectedSportChip({
         <IcClose size={12} color={ColorConst.light} />
       </Pressable>
     </View>
-  );
-}
-
-function SportOptionItem({
-  sport,
-  isSelected,
-  isDisabled,
-  onPress,
-}: {
-  sport: SportOption;
-  isSelected: boolean;
-  isDisabled: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={isDisabled && !isSelected}
-      className={cn(
-        "h-12 flex-row items-center justify-between px-3 rounded-lg",
-        isSelected
-          ? "bg-light border-2 border-primary"
-          : "bg-white border border-stroke",
-      )}
-    >
-      <View className="flex-row items-center gap-1.5 flex-1">
-        {sport.icon && <View className="shrink-0">{sport.icon}</View>}
-        <Text className="text-text text-base font-medium">{sport.name}</Text>
-      </View>
-      <View className="shrink-0">
-        {isSelected ? (
-          <IcCheckboxSelected size={24} />
-        ) : (
-          <IcCheckbox size={24} />
-        )}
-      </View>
-    </Pressable>
   );
 }
 
@@ -180,7 +103,6 @@ export default function ModifyMySportsScreen() {
             <View className="flex-row gap-3 items-center mb-6">
               <Input
                 className="flex-1"
-                placeholder="Rechercher un sport"
                 leftIcon={<IcSearch size={16} />}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -211,7 +133,7 @@ export default function ModifyMySportsScreen() {
           </ScrollView>
 
           {/* CTA */}
-          <View className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-8 bg-gradient-to-t from-white via-white to-transparent">
+          <View className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-8 bg-linear-to-t from-white via-white to-transparent">
             <Button
               text="Modifier mes sports"
               onPress={() => router.back()}

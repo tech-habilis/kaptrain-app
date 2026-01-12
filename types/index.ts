@@ -77,3 +77,9 @@ export type BasicIconProps = {
 };
 
 export type BasicIcon = ({ size, color }: BasicIconProps) => JSX.Element;
+
+export type SportOption = {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+};

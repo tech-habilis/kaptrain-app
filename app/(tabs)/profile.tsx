@@ -30,7 +30,7 @@ const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mes records",
-    onPress: () => {},
+    onPress: () => router.push(ROUTE.MY_RECORDS),
   },
   {
     icon: <IcLightning size={24} />,

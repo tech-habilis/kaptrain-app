@@ -129,10 +129,15 @@ export default function ObjectiveForm({
         title={mode === "add" ? "Ajouter un objectif" : "Modifier un objectif"}
         headerClassName="bg-white"
       >
-        <ScrollView className="flex-1 px-4" contentContainerClassName={mode === 'edit' ? 'mb-safe pb-52' : ''}>
+        <ScrollView
+          className="flex-1 px-4"
+          contentContainerClassName="mb-safe pb-52"
+        >
           {/* Type d'objectif */}
           <View className="mb-8">
-            <Text className="text-accent text-sm mb-2">Type d&apos;objectif</Text>
+            <Text className="text-accent text-sm mb-2">
+              Type d&apos;objectif
+            </Text>
             <View className="flex flex-row gap-2">
               {OBJECTIVE_TYPES.map(({ key, label, icon }) => (
                 <TypeChoiceBox
@@ -212,14 +217,12 @@ export default function ObjectiveForm({
         {/* CTA */}
         <View className="absolute bottom-0 left-0 right-0 px-4 pb-safe pt-6 bg-white">
           <View className="flex flex-col gap-2">
-            {mode === "edit" && (
-              <Button
-                type="tertiary"
-                text="Supprimer l'objectif"
-                onPress={handleDelete}
-                size="large"
-              />
-            )}
+            <Button
+              type="tertiary"
+              text={mode === "edit" ? "Supprimer l'objectif" : "Annuler"}
+              onPress={handleDelete}
+              size="large"
+            />
 
             <Button
               className="mb-6"
