@@ -1,5 +1,6 @@
 import Button from "@/components/button";
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import Line from "@/components/line";
 import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";

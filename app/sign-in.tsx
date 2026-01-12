@@ -76,7 +76,7 @@ export default function SignIn() {
             showPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
           }
           onRightIconPress={() => setShowPassword((prev) => !prev)}
-          keyboardType={showPassword ? "visible-password" : "default"}
+          keyboardType={showPassword ? "visible-password" : undefined}
         />
         <ButtonLink
           href={ROUTE.FORGOT_PASSWORD}

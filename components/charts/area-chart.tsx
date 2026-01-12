@@ -26,6 +26,7 @@ export interface AreaChartProps {
   lineWidth?: number;
   gradientTopColor?: string;
   gradientBottomColor?: string;
+  fillColor?: string;
   textColor?: string;
   renderXAxisLabel?: (label: string, index: number) => ReactNode;
   withCurvedLines?: boolean;
@@ -37,11 +38,12 @@ export default function AreaChart({
   width,
   height = 200,
   minY = 0,
-  maxY = 10,
+  maxY,
   lineColor = ColorConst.secondary,
   lineWidth = 4,
   gradientTopColor = "#3A7CF5",
   gradientBottomColor = "#FFFFFF",
+  fillColor,
   textColor = ColorConst.tertiary,
   renderXAxisLabel,
   withCurvedLines = true,
@@ -55,6 +57,11 @@ export default function AreaChart({
     return <View />;
   }
 
+  // Auto-calculate maxY from data if not provided
+  // Add 10% padding to the top so the line doesn't reach the absolute top
+  const dataMaxY = Math.max(...data.map((item) => item.y), 10);
+  const calculatedMaxY = maxY ?? Math.ceil(dataMaxY * 1.1);
+
   const padding = {
     top: 20,
     right: 10,
@@ -67,7 +74,7 @@ export default function AreaChart({
   // Calculate positions
   const xStep =
     data.length > 1 ? innerChartWidth / (data.length - 1) : innerChartWidth;
-  const yRange = maxY - minY;
+  const yRange = calculatedMaxY - minY;
 
   const points = data.map((item, index) => {
     const x = padding.left + index * xStep;
@@ -158,23 +165,25 @@ export default function AreaChart({
       }}
     >
       <Svg width={chartWidth} height={height}>
-        <Defs>
-          <LinearGradient
-            id="areaGradient"
-            x1="0"
-            y1={padding.top}
-            x2="0"
-            y2={padding.top + chartHeight}
-            gradientUnits="userSpaceOnUse"
-          >
-            <Stop offset="0%" stopColor={gradientTopColor} stopOpacity="0.15" />
-            <Stop
-              offset="100%"
-              stopColor={gradientBottomColor}
-              stopOpacity="0.15"
-            />
-          </LinearGradient>
-        </Defs>
+        {!fillColor && (
+          <Defs>
+            <LinearGradient
+              id="areaGradient"
+              x1="0"
+              y1={padding.top}
+              x2="0"
+              y2={padding.top + chartHeight}
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop offset="0%" stopColor={gradientTopColor} stopOpacity="0.15" />
+              <Stop
+                offset="100%"
+                stopColor={gradientBottomColor}
+                stopOpacity="0.15"
+              />
+            </LinearGradient>
+          </Defs>
+        )}
 
         {/* Y-axis grid lines and labels */}
         <G>
@@ -205,8 +214,11 @@ export default function AreaChart({
           ))}
         </G>
 
-        {/* Area fill with gradient */}
-        <Path d={areaPathClosed} fill="url(#areaGradient)" />
+        {/* Area fill with gradient or solid color */}
+        <Path 
+          d={areaPathClosed} 
+          fill={fillColor ? fillColor : "url(#areaGradient)"} 
+        />
 
         {/* Top line */}
         <Path
