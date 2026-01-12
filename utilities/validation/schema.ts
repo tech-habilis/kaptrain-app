@@ -31,5 +31,16 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "validation.confirmPasswordRequired"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "validation.passwordMismatch",
+    path: ["confirmPassword"],
+  });
+
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

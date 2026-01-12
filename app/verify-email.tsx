@@ -9,17 +9,7 @@ import { cn } from "tailwind-variants";
 import { OTPInput } from "input-otp-native";
 import { useSession } from "@/contexts/auth-context";
 import { ROUTE } from "@/constants/route";
-
-/**
- * The length of the OTP code.
- * Supabase requires at least 6 digits.
- */
-const OTP_LENGTH = 6;
-
-/**
- * Supabase default: 60 seconds
- */
-const OTP_RESEND_DELAY = 60; // 60 seconds
+import Config from "@/constants/config";
 
 function Box({
   isActive,
@@ -42,7 +32,7 @@ function Box({
         "border-2 justify-center items-center rounded-lg aspect-square",
         isActive ? "border-secondary" : "border-stroke",
       )}
-      style={{ width: 300 / OTP_LENGTH }}
+      style={{ width: 300 / Config.OTP_LENGTH }}
     >
       <Text className={cn("text-[24px] text-secondary font-bold")}>
         {char ?? ""}
@@ -56,7 +46,7 @@ export default function VerifyEmail() {
 
   const { verifyEmail, resendEmailVerification } = useSession();
   const [otp, setOtp] = useState("");
-  const [countdown, setCountdown] = useState(OTP_RESEND_DELAY);
+  const [countdown, setCountdown] = useState(Config.OTP_RESEND_DELAY);
 
   const countdownRef = useRef<number | null>(null);
 
@@ -111,10 +101,10 @@ export default function VerifyEmail() {
 
       {/* otp boxes */}
       <OTPInput
-        returnKeyType={activeIndex === OTP_LENGTH - 1 ? "done" : undefined}
+        returnKeyType={activeIndex === Config.OTP_LENGTH - 1 ? "done" : undefined}
         value={otp}
         onChange={setOtp}
-        maxLength={OTP_LENGTH}
+        maxLength={Config.OTP_LENGTH}
         render={({ slots }) => (
           <View className="flex-row gap-2 mt-8">
             {slots.map((slot, index) => (
@@ -149,7 +139,7 @@ export default function VerifyEmail() {
         text="common.verify"
         onPress={() => verifyEmail(email, otp)}
         className="mb-6 mt-6"
-        disabled={otp.length !== OTP_LENGTH}
+        disabled={otp.length !== Config.OTP_LENGTH}
       />
     </View>
   );

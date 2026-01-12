@@ -7,6 +7,7 @@ import {
   createContext,
   PropsWithChildren,
   use,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -50,6 +51,9 @@ type TAuthContext = {
   setProfileCompleted: () => void;
   verifyEmail: (email: string, otp: string) => void;
   resendEmailVerification: (email: string) => void;
+  resetPassword: (email: string) => void;
+  verifyPasswordResetOtp: (email: string, otp: string) => void;
+  updatePassword: (newPassword: string) => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -59,6 +63,8 @@ type TAuthContext = {
   loggingInWith: TSignInMethod | null;
   isFirstOpen: boolean;
   showCompleteProfileForm: boolean;
+  isResettingPassword: boolean;
+  isUpdatingPassword: boolean;
 };
 
 const AuthContext = createContext<TAuthContext>({
@@ -73,6 +79,9 @@ const AuthContext = createContext<TAuthContext>({
   setProfileCompleted: () => {},
   verifyEmail: (email: string, otp: string) => {},
   resendEmailVerification: (email: string) => {},
+  resetPassword: (email: string) => {},
+  verifyPasswordResetOtp: (email: string, otp: string) => {},
+  updatePassword: (newPassword: string) => {},
 
   session: null,
   isLoadingSession: false,
@@ -82,6 +91,8 @@ const AuthContext = createContext<TAuthContext>({
   loggingInWith: null,
   isFirstOpen: false,
   showCompleteProfileForm: false,
+  isResettingPassword: false,
+  isUpdatingPassword: false,
 });
 
 export function useSession() {
@@ -102,6 +113,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isLoggingIn = loggingInWith !== null;
   const [canSignInWithApple, setCanSignInWithApple] = useState(false);
   const [fetchingSession, setFetchingSession] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [
     [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
     setFirstOpenTimestamp,
@@ -313,6 +326,69 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    setIsResettingPassword(true);
+    const result = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: appScheme + ROUTE_NAME.RESET_PASSWORD,
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+      setIsResettingPassword(false);
+    } else {
+      setIsResettingPassword(false);
+      router.push({ pathname: ROUTE.PASSWORD_RESET_SENT, params: { email } });
+    }
+  };
+
+  const verifyPasswordResetOtp = async (email: string, otp: string) => {
+    setIsResettingPassword(true);
+    const result = await supabase.auth.verifyOtp({
+      token: otp,
+      email,
+      type: "email",
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+      setIsResettingPassword(false);
+      return { error: result.error };
+    } else {
+      setSession(supabaseUtils.toLocalSession(result.data.session));
+      setIsResettingPassword(false);
+      router.push(ROUTE.RESET_PASSWORD);
+      return { error: null };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    setIsUpdatingPassword(true);
+    const result = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (result.error) {
+      setIsUpdatingPassword(false);
+    } else {
+      setIsUpdatingPassword(false);
+      router.dismissAll();
+      router.push(ROUTE.PASSWORD_CHANGED);
+    }
+  };
+
+  const fetchSession = useCallback(async () => {
+    setFetchingSession(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+    if (error) {
+      console.error("Error fetching session:", error);
+    }
+    setSession(supabaseUtils.toLocalSession(session));
+    setFetchingSession(false);
+  }, [setSession]);
+
   useEffect(() => {
     AppleAuthentication.isAvailableAsync().then((supported) => {
       setCanSignInWithApple(supported);
@@ -321,18 +397,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   // Fetch the session once, and subscribe to auth state changes
   useEffect(() => {
-    const fetchSession = async () => {
-      setFetchingSession(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Error fetching session:", error);
-      }
-      setSession(supabaseUtils.toLocalSession(session));
-      setFetchingSession(false);
-    };
     fetchSession();
 
     const {
@@ -346,7 +410,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setSession]);
+  }, [fetchSession, setSession]);
 
   return (
     <AuthContext.Provider
@@ -368,6 +432,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
         },
         verifyEmail,
         resendEmailVerification,
+        resetPassword,
+        verifyPasswordResetOtp,
+        updatePassword,
 
         session,
         isLoadingSession:
@@ -381,6 +448,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
         loggingInWith,
         isFirstOpen,
         showCompleteProfileForm: profileCompletedAt === null,
+        isResettingPassword,
+        isUpdatingPassword,
       }}
     >
       {children}

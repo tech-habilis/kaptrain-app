@@ -97,7 +97,7 @@ export default function Input({
       )}
       <View
         className={clsx(inputWrapper({ type }), {
-          "border-error2": error !== undefined,
+          "border-error2": !!error,
         })}
       >
         {renderLeftSide()}
