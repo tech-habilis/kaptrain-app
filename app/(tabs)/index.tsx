@@ -21,10 +21,11 @@ import {
   Pressable,
   ScrollView,
   View,
-  Text as RawText
+  Text as RawText,
 } from "react-native";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
+import { useSession } from "@/contexts/auth-context";
 
 const Agenda = () => {
   const sessions = [
@@ -146,6 +147,8 @@ const Agenda = () => {
 };
 
 export default function HomeScreen() {
+  const { session } = useSession();
+  console.log(session);
   const [haveUnread, setHaveUnread] = useState(true);
 
   return (
@@ -159,8 +162,9 @@ export default function HomeScreen() {
           />
 
           <View className="gap-1.5 flex-1">
-            <RawText className="text-white text-xl font-bold">
-              <Text>common.hello</Text> Marie !
+            <RawText className="text-white text-xl font-bold" numberOfLines={1}>
+              <Text>common.hello</Text>{" "}
+              {session?.user?.name || session?.user?.email || ""} !
             </RawText>
             <Chip
               text="Forme excellente"
@@ -170,9 +174,12 @@ export default function HomeScreen() {
           </View>
 
           <View className="flex-row items-center">
-            <Pressable className="p-2" onPress={() => {
-              router.push(ROUTE.MESSAGING)
-            }}>
+            <Pressable
+              className="p-2"
+              onPress={() => {
+                router.push(ROUTE.MESSAGING);
+              }}
+            >
               <IcMessage />
             </Pressable>
             <Pressable

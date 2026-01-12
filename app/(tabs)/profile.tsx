@@ -11,6 +11,7 @@ import Text from "@/components/text";
 import { mockWeeklyTracking } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
+import { useSession } from "@/contexts/auth-context";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -40,11 +41,12 @@ const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mes données physiologiques",
-    onPress: () => router.push(ROUTE.PHYSIOLOGICAL_DATA)
+    onPress: () => router.push(ROUTE.PHYSIOLOGICAL_DATA),
   },
 ];
 
 export default function ProfileScreen() {
+  const { session } = useSession();
   return (
     <View className="flex-1">
       <StatusBar style="light" />
@@ -56,8 +58,8 @@ export default function ProfileScreen() {
           />
 
           <View className="gap-1.5 flex-1">
-            <Text className="text-white text-xl font-bold">
-              Marie Patouillet
+            <Text className="text-white text-xl font-bold" numberOfLines={1}>
+              {session?.user?.name || session?.user?.email || "User"}
             </Text>
             <Pressable onPress={() => router.push(ROUTE.SUBSCRIPTION)}>
               <Chip

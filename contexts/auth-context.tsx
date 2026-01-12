@@ -306,6 +306,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     if (result.error) {
       toast.error(result.error.message);
     } else {
+      setSession(supabaseUtils.toLocalSession(result.data.session));
       toast.success("OTP verified successfully");
       router.dismissAll();
       router.push(ROUTE.EMAIL_VERIFIED);

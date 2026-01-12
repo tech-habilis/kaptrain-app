@@ -2,14 +2,11 @@ import Button from "@/components/button";
 import IcCheckVerified from "@/components/icons/check-verified";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
-import { useSession } from "@/contexts/auth-context";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, View } from "react-native";
 
 export default function EmailVerified() {
-  const { setSession } = useSession();
-
   return (
     <ImageBackground
       source={require("../assets/images/mail-verified.png")}
@@ -33,17 +30,6 @@ export default function EmailVerified() {
           className="w-full mb-6"
           text="emailVerified.completeProfile"
           onPress={() => {
-            setSession({
-              accessToken: "MOCK_ACCESS_TOKEN",
-              refreshToken: "MOCK_REFRESH_TOKEN",
-              user: {
-                id: "MOCK_USER_ID",
-                email: "MOCK_EMAIL",
-                name: "MOCK_NAME",
-                avatarUrl: null,
-              },
-            });
-
             router.replace(ROUTE.COMPLETE_PROFILE_1);
           }}
         />
