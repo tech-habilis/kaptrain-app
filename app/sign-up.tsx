@@ -7,7 +7,7 @@ import { useState } from "react";
 import { View, ImageBackground, Text as RawText } from "react-native";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
-import Input from "@/components/input";
+import Input, { PasswordInput } from "@/components/input";
 import IcEye from "@/components/icons/eye";
 import IcEyeOff from "@/components/icons/eye-off";
 import { Trans } from "react-i18next";
@@ -19,8 +19,6 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <View className="w-full h-full flex bg-white">
@@ -54,31 +52,19 @@ export default function SignIn() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <Input
+        <PasswordInput
           label="signUp.createPassword"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword}
           placeholder="common.password"
           className="mt-6"
-          rightIcon={
-            showPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
-          }
-          onRightIconPress={() => setShowPassword((prev) => !prev)}
-          keyboardType={showPassword ? "visible-password" : "default"}
         />
-        <Input
+        <PasswordInput
           label="signUp.confirmPassword"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
-          secureTextEntry={!showConfirmPassword}
           placeholder="signUp.confirmPasswordPlaceholder"
           className="mt-6"
-          rightIcon={
-            showConfirmPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
-          }
-          onRightIconPress={() => setShowConfirmPassword((prev) => !prev)}
-          keyboardType={showConfirmPassword ? "visible-password" : "default"}
         />
 
         <View className="grow" />

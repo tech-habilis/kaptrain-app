@@ -2,7 +2,7 @@ import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
 import IcEye from "@/components/icons/eye";
 import IcEyeOff from "@/components/icons/eye-off";
-import Input from "@/components/input";
+import Input, { PasswordInput } from "@/components/input";
 import { useState } from "react";
 import { View } from "react-native";
 
@@ -11,50 +11,29 @@ export default function ContactSupport() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [showPasswordVisibility, setShowPasswordVisibility] = useState(false);
-  const [showNewPasswordVisibility, setShowNewPasswordVisibility] =
-    useState(false);
-  const [showConfirmPasswordVisibility, setShowConfirmPasswordVisibility] =
-    useState(false);
-
   return (
     <BasicScreen
       title="Modifier mon mot de passe"
       description="Pour sécuriser ton compte, choisis un mot de passe fort et unique. Tu peux le changer ici à tout moment."
     >
       <View className="pt-6 px-4 gap-8 flex-1 pb-safe">
-        <Input
+        <PasswordInput
           value={password}
           onChangeText={setPassword}
           label="Mot de passe actuel"
           placeholder="Écris ton mot de passe actuel"
-          secureTextEntry={!showPasswordVisibility}
-          rightIcon={showPasswordVisibility ? <IcEye /> : <IcEyeOff />}
-          onRightIconPress={() =>
-            setShowPasswordVisibility(!showPasswordVisibility)
-          }
         />
-        <Input
+        <PasswordInput
           value={newPassword}
           onChangeText={setNewPassword}
           label="Crée un nouveau mot de passe"
           placeholder="Au moins 8 caractères"
-          secureTextEntry={!showNewPasswordVisibility}
-          rightIcon={showNewPasswordVisibility ? <IcEye /> : <IcEyeOff />}
-          onRightIconPress={() =>
-            setShowNewPasswordVisibility(!showNewPasswordVisibility)
-          }
         />
-        <Input
+        <PasswordInput
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           label="Confirme ton mot de passe"
           placeholder="Répéte le mot de passe"
-          secureTextEntry={!showConfirmPasswordVisibility}
-          rightIcon={showConfirmPasswordVisibility ? <IcEye /> : <IcEyeOff />}
-          onRightIconPress={() =>
-            setShowConfirmPasswordVisibility(!showConfirmPasswordVisibility)
-          }
         />
 
         <View className="grow" />

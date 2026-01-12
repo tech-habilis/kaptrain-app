@@ -5,12 +5,15 @@ import { ROUTE } from "@/constants/route";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text as RawText } from "react-native";
+import { View, Text as RawText, Pressable } from "react-native";
 import { cn } from "tailwind-variants";
 
+const OTP_LENGTH = 6;
+
 export default function VerifyEmail() {
-  const [otp, setOtp] = useState(["8", "2", "2", ""]);
+  const [otp, setOtp] = useState("");
   const [countdown, setCountdown] = useState(418);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const countdownRef = useRef<number | null>(null);
 
@@ -24,8 +27,6 @@ export default function VerifyEmail() {
   }, [countdown]);
 
   const email = "example@example.com";
-  const OTP_LENGTH = otp.length;
-  const activeIndex = OTP_LENGTH - 1;
 
   const startCountDown = useCallback(() => {
     countdownRef.current = setInterval(() => {
@@ -50,9 +51,9 @@ export default function VerifyEmail() {
   return (
     <View className="py-safe px-4 flex-1">
       <StatusBar style="dark" />
-      <View className="py-4">
+      <Pressable className="py-4" onPress={router.back}>
         <IcArrowLeft />
-      </View>
+      </Pressable>
       <Text className="text-2xl text-secondary font-bold mt-2">
         verifyEmail.checkMyEmail
       </Text>
@@ -61,16 +62,16 @@ export default function VerifyEmail() {
 
       {/* otp boxes */}
       <View className="flex-row gap-2 mt-8">
-        {otp.map((value, index) => (
+        {Array.from({length: OTP_LENGTH}).map((_, index) => (
           <View
             key={index}
             className={cn(
-              "border-2 size-20 justify-center items-center rounded-lg",
+              "border-2 size-12 justify-center items-center rounded-lg",
               index === activeIndex ? "border-secondary" : "border-stroke",
             )}
           >
             <Text className={cn("text-[32px] text-secondary font-bold")}>
-              {value}
+              {otp[index] || ""}
             </Text>
           </View>
         ))}

@@ -156,13 +156,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setLoggingInWith("google");
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
+      console.log('google signIn', response)
       if (isSuccessResponse(response)) {
         const { data } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: response.data.idToken || "",
         });
 
+        console.log('supabase google sign in', data)
         setSession(supabaseUtils.toLocalSession(data.session));
+        router.replace(ROUTE.ROOT)
       } else {
         // sign in was cancelled by user
       }
