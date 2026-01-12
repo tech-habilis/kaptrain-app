@@ -35,6 +35,18 @@
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",
     "emailAndPasswordRequired": "Email and password are required."
   },
+  "validation": {
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordUppercase": "Password must contain at least 1 uppercase letter",
+    "passwordNumber": "Password must contain at least 1 number",
+    "passwordSpecial": "Password must contain at least 1 special character",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email address",
+    "confirmPasswordRequired": "Please confirm your password",
+    "currentPasswordRequired": "Current password is required",
+    "passwordMismatch": "Passwords do not match"
+  },
   "signUp": {
     "noAccountSignUp": "No account?\nSign up",
     "alreadyHaveAccount": "Already have an account?",

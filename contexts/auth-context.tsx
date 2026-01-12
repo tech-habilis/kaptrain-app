@@ -49,6 +49,7 @@ type TAuthContext = {
   setFirstOpenTimestamp: () => void;
   setProfileCompleted: () => void;
   verifyEmail: (email: string, otp: string) => void;
+  resendEmailVerification: (email: string) => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -69,8 +70,9 @@ const AuthContext = createContext<TAuthContext>({
   deleteAccount: () => {},
   setSession: () => {},
   setFirstOpenTimestamp: () => {},
-  setProfileCompleted: () => { },
-  verifyEmail: (email: string, otp: string) => { },
+  setProfileCompleted: () => {},
+  verifyEmail: (email: string, otp: string) => {},
+  resendEmailVerification: (email: string) => {},
 
   session: null,
   isLoadingSession: false,
@@ -261,13 +263,32 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
 
     if (!session) {
-      router.push(ROUTE.VERIFY_EMAIL);
+      router.push({
+        pathname: ROUTE.VERIFY_EMAIL,
+        params: { email },
+      });
       setLoggingInWith(null);
       return;
     }
 
     setSession(supabaseUtils.toLocalSession(session));
     setLoggingInWith(null);
+  };
+
+  const resendEmailVerification = async (email: string) => {
+    const result = await supabase.auth.resend({
+      email,
+      type: "signup",
+      options: {
+        emailRedirectTo: appScheme + ROUTE_NAME.SIGN_IN, // will redirect to appSheme://sign-in
+      },
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+    } else {
+      toast.success("OTP resent successfully");
+    }
   };
 
   const deleteAccount = async () => {
@@ -287,7 +308,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     } else {
       toast.success("OTP verified successfully");
       router.dismissAll();
-      router.replace(ROUTE.EMAIL_VERIFIED);
+      router.push(ROUTE.EMAIL_VERIFIED);
     }
   };
 
@@ -345,6 +366,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
           setProfileCompletedAt(timestamp.toString());
         },
         verifyEmail,
+        resendEmailVerification,
 
         session,
         isLoadingSession:

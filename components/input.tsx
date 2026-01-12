@@ -8,6 +8,7 @@ import Text from "./text";
 import { useTranslation } from "react-i18next";
 import IcEye from "./icons/eye";
 import IcEyeOff from "./icons/eye-off";
+import clsx from "clsx";
 
 const inputWrapper = tv({
   base: "bg-white border border-stroke rounded-lg text-text flex flex-row gap-4 justify-between items-center",
@@ -47,6 +48,7 @@ export default function Input({
   keyboardType,
   returnKeyType,
   inputClassName = "",
+  error,
   ...props
 }: TextInputProps &
   ComponentProps<typeof inputWrapper> & {
@@ -56,6 +58,7 @@ export default function Input({
     onRightIconPress?: () => void;
     unit?: string;
     inputClassName?: string;
+    error?: string;
   }) {
   const { t } = useTranslation();
 
@@ -92,7 +95,11 @@ export default function Input({
       {label && (
         <Text className="text-accent font-medium text-sm">{label}</Text>
       )}
-      <View className={cn(inputWrapper({ type }))}>
+      <View
+        className={clsx(inputWrapper({ type }), {
+          "border-error2": error !== undefined,
+        })}
+      >
         {renderLeftSide()}
         <TextInput
           className={cn(input({ type }), inputClassName)}
@@ -110,6 +117,7 @@ export default function Input({
         />
         {renderRightSide()}
       </View>
+      {error && <Text className="text-error2 text-xs">{error}</Text>}
     </View>
   );
 }

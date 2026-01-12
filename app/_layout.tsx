@@ -51,8 +51,8 @@ export default function RootLayout() {
           <GestureHandlerRootView className="flex-1">
             <BottomSheetModalProvider>
               <SplashScreenController onFinishRender={<RootNavigator />} />
+              <Toasts />
             </BottomSheetModalProvider>
-            <Toasts />
           </GestureHandlerRootView>
         </SafeAreaListener>
         <StatusBar style="auto" />
