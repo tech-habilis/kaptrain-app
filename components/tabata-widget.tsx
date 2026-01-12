@@ -9,6 +9,7 @@ import IcClose from "./icons/close";
 import { useState } from "react";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
+import IcPlay from "./icons/play";
 
 interface TabataWidgetProps {
   /**
@@ -122,7 +123,7 @@ export default function TabataWidget({
           <Pressable
             onPress={state === "default" ? start : isPaused ? resume : pause}
           >
-            <IcPause size={32} />
+            {isPaused ? <IcPause size={32} /> : <IcPlay size={32} />}
           </Pressable>
           <Pressable onPress={close}>
             <IcClose size={32} />
