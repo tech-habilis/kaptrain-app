@@ -41,7 +41,11 @@ app-example
 
 # generated native folders
 /ios
+# ci scripts for ios should be in git
+!/ios/ci_scripts/*
+
 /android
+
 
 build-*.apk
 
