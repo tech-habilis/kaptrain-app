@@ -137,24 +137,42 @@ export function SessionProvider({ children }: PropsWithChildren) {
         ],
       });
 
-      const fullName = (
-        (credential.fullName?.givenName || "") +
-        " " +
-        (credential.fullName?.familyName || "")
-      ).trim();
 
-      setSession({
-        accessToken: credential.identityToken,
-        refreshToken: credential.authorizationCode,
-        user: {
-          id: credential.user,
-          email: credential.email,
-          name: fullName.length > 0 ? fullName : null,
-          avatarUrl: null,
-        },
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: "apple",
+        token: credential.identityToken!,
       });
 
-      router.replace("/");
+      if (error) {
+        toast.error(error.message);
+        setLoggingInWith(null);
+        return;
+      }
+
+      // Apple only provides the user's name the first time they sign in
+      // If it's available, update the user metadata with it
+      if (credential.fullName) {
+        const nameParts = [];
+        if (credential.fullName.givenName)
+          nameParts.push(credential.fullName.givenName);
+        if (credential.fullName.middleName)
+          nameParts.push(credential.fullName.middleName);
+        if (credential.fullName.familyName)
+          nameParts.push(credential.fullName.familyName);
+        const fullName = nameParts.join(" ");
+        await supabase.auth.updateUser({
+          data: {
+            name: fullName,
+            display_name: fullName,
+            first_name: credential.fullName.givenName,
+            last_name: credential.fullName.familyName,
+          },
+        });
+      }
+
+      setSession(supabaseUtils.toLocalSession(data.session));
+      router.replace(ROUTE.ROOT);
     } catch (e: any) {
       if (e.code === "ERR_REQUEST_CANCELED") {
         // handle that the user canceled the sign-in flow
@@ -162,6 +180,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       } else {
         // handle other errors
         console.error(e);
+        toast.error("Failed to sign in with Apple: " + e.message);
       }
     } finally {
       setLoggingInWith(null);
@@ -173,14 +192,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setLoggingInWith("google");
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
-      console.log("google signIn", response);
       if (isSuccessResponse(response)) {
         const { data } = await supabase.auth.signInWithIdToken({
           provider: "google",
           token: response.data.idToken || "",
         });
 
-        console.log("supabase google sign in", data);
         setSession(supabaseUtils.toLocalSession(data.session));
         router.replace(ROUTE.ROOT);
       } else {
