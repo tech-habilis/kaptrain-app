@@ -1,4 +1,4 @@
-import { FlatList, Pressable, View } from "react-native";
+import { FlatList, Pressable, View, ViewStyle } from "react-native";
 import Text from "./text";
 import { tv, VariantProps } from "tailwind-variants";
 import cn from "@/utilities/cn";
@@ -8,6 +8,7 @@ import IcRadio from "./icons/radio";
 import IcRadioSelected from "./icons/radio-selected";
 import { TChoice } from "@/types";
 import { clsx } from "clsx";
+import { useState } from "react";
 
 const choiceWrapper = tv({
   base: "rounded-lg px-2 py-4 justify-center items-center",
@@ -74,6 +75,7 @@ export const Choice = ({
   selected = false,
   onPress,
   type,
+  style,
 }: {
   choice: TChoice;
   className?: string;
@@ -81,6 +83,7 @@ export const Choice = ({
   selected: boolean;
   onPress: () => void;
   type: ChoiceVariants["type"];
+  style?: ViewStyle;
 }) => {
   const renderLeftSide = (choice: TChoice) => {
     if (choice.leftIcon) {
@@ -130,9 +133,10 @@ export const Choice = ({
     <Pressable
       className={cn(choiceWrapper({ selected, type }), "flex-1", className)}
       onPress={onPress}
+      style={style}
     >
       {renderLeftSide(choice)}
-      <View className="w-[85%]">
+      <View className="max-w-[85%]">
         <Text className={cn(choiceText({ type, selected }), textClassName)}>
           {choice.text}
         </Text>
@@ -177,27 +181,33 @@ export const Choices = ({
   inactiveItemClassName?: string;
   itemTextClassName?: string;
 } & Omit<ChoiceVariants, "selected">) => {
+  const [width, setWidth] = useState(0);
+  const gap = numColumns > 1 ? 8 : 0;
+  const itemWidth = (width - gap) / numColumns;
+
   return (
-    <View className={cn("gap-2", className)}>
+    <View
+      className={cn("gap-2", className)}
+      onLayout={(event) => {
+        setWidth(event.nativeEvent.layout.width);
+      }}
+    >
       {label !== undefined && (
         <Text className="text-accent font-medium text-sm">{label}</Text>
       )}
 
-      <FlatList
-        key={`choices-${numColumns || ""}`}
-        numColumns={numColumns}
-        columnWrapperClassName="gap-2"
-        contentContainerClassName="gap-2 mt-2"
-        data={data}
-        renderItem={({ item }) => (
+      <View className="gap-2 mt-2">
+        {data.map((item, index) => (
           <Choice
+            key={index}
             type={type}
             className={clsx(itemClassName, {
               [activeItemClassName]: selectedChoice?.text === item.text,
               [inactiveItemClassName]: selectedChoice?.text !== item.text,
             })}
-            choice={item}
             textClassName={itemTextClassName}
+            style={{ width: itemWidth }}
+            choice={item}
             selected={
               (type === "multipleChoice" || type === "multipleChoiceWithoutIcon"
                 ? selectedChoices?.map((x) => x.text)?.includes(item.text)
@@ -231,9 +241,8 @@ export const Choices = ({
               onChange?.(item);
             }}
           />
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
+        ))}
+      </View>
     </View>
   );
 };

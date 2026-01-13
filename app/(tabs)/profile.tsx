@@ -142,7 +142,7 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      <SingleFab onPress={() => undefined} icon={<IcChat size={32} />} />
+      <SingleFab onPress={() => router.push(ROUTE.COMPLETE_PROFILE)} icon={<IcChat size={32} />} />
     </View>
   );
 }

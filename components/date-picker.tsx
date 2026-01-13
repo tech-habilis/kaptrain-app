@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { ComponentProps, useRef, useState } from "react";
 import { Dimensions, View } from "react-native";
 import Button from "./button";
 import BottomSheetModal from "./bottom-sheet-modal";
@@ -8,18 +8,18 @@ import Text from "./text";
 import DateTimePicker, { DateType } from "react-native-ui-datepicker";
 import dayjs from "dayjs";
 import cn from "@/utilities/cn";
+import Input from "./input";
 
-interface DatePickerProps {
-  label: string;
+type DatePickerProps = ComponentProps<typeof Input> & {
   selectedDate?: DateType;
   onSelect: (date: DateType) => void;
-  className?: string;
   modalTitle?: string;
   modalDescription?: string;
   minDate?: DateType;
   maxDate?: DateType;
   locale?: string;
-  labelOnTop?: boolean;
+  error?: string;
+  showIcon?: boolean;
 }
 
 export default function DatePicker({
@@ -32,7 +32,9 @@ export default function DatePicker({
   minDate,
   maxDate,
   locale = "fr",
-  labelOnTop = false,
+  error,
+  showIcon = true,
+  ...inputProps
 }: DatePickerProps) {
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
   const [tempDate, setTempDate] = useState<DateType>(selectedDate);
@@ -48,24 +50,39 @@ export default function DatePicker({
   };
 
   const formatDisplayDate = (date: DateType) => {
-    if (!date) return label;
+    if (!date) return undefined;
     return dayjs(date).format("DD/MM/YYYY");
+  };
+
+  const showDatepicker = () => {
+    setTempDate(selectedDate);
+    bottomSheetModalRef.current?.present();
   };
 
   return (
     <>
-      <View>
-        {labelOnTop && <Text className="text-sm text-accent mb-3">{label}</Text>}
-        <Button
+      <View className={cn("flex flex-col gap-2", className)}>
+        {/*<Button
           text={selectedDate ? formatDisplayDate(selectedDate) : label}
           type="secondaryV2"
-          className={cn("justify-between", className)}
+          className={clsx("justify-between", {
+            "border-error2": !!error
+          })}
           textClassName="font-normal text-base"
           rightIcon={<IcCalendar />}
           onPress={() => {
             setTempDate(selectedDate);
             bottomSheetModalRef.current?.present();
           }}
+        />*/}
+        <Input
+          label={label}
+          rightIcon={showIcon ? <IcCalendar /> : null}
+          value={formatDisplayDate(selectedDate)}
+          error={error}
+          asPressable
+          onPress={showDatepicker}
+          {...inputProps}
         />
       </View>
 

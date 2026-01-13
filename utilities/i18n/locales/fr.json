@@ -45,7 +45,15 @@
     "emailInvalid": "Adresse email invalide",
     "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
     "currentPasswordRequired": "Le mot de passe actuel est requis",
-    "passwordMismatch": "Les mots de passe ne correspondent pas"
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameRequired": "Le nom est requis",
+    "birthDateRequired": "La date de naissance est requise",
+    "genderRequired": "Le genre est requis",
+    "weightRequired": "Le poids est requis",
+    "sportLevelRequired": "Le niveau de sport est requis",
+    "atLeastOneSportRequired": "Veuillez sélectionner au moins un sport",
+    "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports"
   },
   "landing": {
     "text1": "L'Expertise de haut niveau,",

@@ -30,7 +30,7 @@ export default function EmailVerified() {
           className="w-full mb-6"
           text="emailVerified.completeProfile"
           onPress={() => {
-            router.replace(ROUTE.COMPLETE_PROFILE_1);
+            router.replace(ROUTE.COMPLETE_PROFILE);
           }}
         />
       </View>
