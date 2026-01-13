@@ -95,6 +95,7 @@ It provides a quick overview of:
 ### Cards
 
 1. **Répartition d’activité**
+
    - Donut chart by sport
    - Percentages per activity
 
