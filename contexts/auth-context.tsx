@@ -21,6 +21,7 @@ import {
 import { router } from "expo-router";
 import { toast } from "@/components/toast";
 import { supabase, supabaseUtils } from "@/utilities/supabase";
+import { getUserProfile } from "@/utilities/supabase/profile";
 import { TSession } from "@/types";
 import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
@@ -48,7 +49,6 @@ type TAuthContext = {
   deleteAccount: () => void;
   setSession: (value: TSession | null) => void;
   setFirstOpenTimestamp: () => void;
-  setProfileCompleted: () => void;
   verifyEmail: (email: string, otp: string) => void;
   resendEmailVerification: (email: string) => void;
   resetPassword: (email: string) => void;
@@ -65,6 +65,7 @@ type TAuthContext = {
   showCompleteProfileForm: boolean;
   isResettingPassword: boolean;
   isUpdatingPassword: boolean;
+  isCheckingProfileCompletion: boolean;
 };
 
 const AuthContext = createContext<TAuthContext>({
@@ -76,7 +77,6 @@ const AuthContext = createContext<TAuthContext>({
   deleteAccount: () => {},
   setSession: () => {},
   setFirstOpenTimestamp: () => {},
-  setProfileCompleted: () => {},
   verifyEmail: (email: string, otp: string) => {},
   resendEmailVerification: (email: string) => {},
   resetPassword: (email: string) => {},
@@ -93,6 +93,7 @@ const AuthContext = createContext<TAuthContext>({
   showCompleteProfileForm: false,
   isResettingPassword: false,
   isUpdatingPassword: false,
+  isCheckingProfileCompletion: false,
 });
 
 export function useSession() {
@@ -115,6 +116,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [fetchingSession, setFetchingSession] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] = useState(false);
+  const [showCompleteProfileForm, setShowCompleteProfileForm] = useState(false);
   const [
     [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
     setFirstOpenTimestamp,
@@ -122,10 +125,26 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isFirstOpen =
     !isLoadingFirstOpenTimestamp && firstOpenTimestamp === null;
 
-  const [
-    [isLoadingProfileCompletedAt, profileCompletedAt],
-    setProfileCompletedAt,
-  ] = useStorageState(STORAGE_KEY.PROFILE_COMPLETED_AT);
+  // Function to check if user has completed onboarding
+  const checkProfileCompletion = useCallback(async (userId: string) => {
+    if (!userId) {
+      setShowCompleteProfileForm(true);
+      return;
+    }
+
+    setIsCheckingProfileCompletion(true);
+    try {
+      const profile = await getUserProfile(userId);
+      // Show complete profile form if onboarding_date is not set
+      setShowCompleteProfileForm(!profile.onboarding_date);
+    } catch (error) {
+      console.error("Error checking profile completion:", error);
+      // If error fetching profile, assume not completed and show the form
+      setShowCompleteProfileForm(true);
+    } finally {
+      setIsCheckingProfileCompletion(false);
+    }
+  }, []);
 
   const signInWithApple = async () => {
     try {
@@ -429,6 +448,15 @@ export function SessionProvider({ children }: PropsWithChildren) {
     };
   }, [fetchSession, setSession]);
 
+  // Check profile completion when session user ID changes
+  useEffect(() => {
+    if (session?.user?.id) {
+      checkProfileCompletion(session.user.id);
+    } else {
+      setShowCompleteProfileForm(false);
+    }
+  }, [session?.user?.id, checkProfileCompletion]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -443,10 +471,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
           const timestamp = Date.now();
           setFirstOpenTimestamp(timestamp.toString());
         },
-        setProfileCompleted: () => {
-          const timestamp = Date.now();
-          setProfileCompletedAt(timestamp.toString());
-        },
         verifyEmail,
         resendEmailVerification,
         resetPassword,
@@ -458,15 +482,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
           isLoadingSession ||
           fetchingSession ||
           isLoadingFirstOpenTimestamp ||
-          isLoadingProfileCompletedAt,
+          isCheckingProfileCompletion,
         isLoggingIn,
         isLoggedIn: !!session?.accessToken,
         canSignInWithApple,
         loggingInWith,
         isFirstOpen,
-        showCompleteProfileForm: profileCompletedAt === null,
+        showCompleteProfileForm,
         isResettingPassword,
         isUpdatingPassword,
+        isCheckingProfileCompletion,
       }}
     >
       {children}

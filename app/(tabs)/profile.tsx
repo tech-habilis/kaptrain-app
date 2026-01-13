@@ -12,6 +12,7 @@ import { mockWeeklyTracking } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { useSession } from "@/contexts/auth-context";
+import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -47,6 +48,7 @@ const profileMenu = [
 
 export default function ProfileScreen() {
   const { session } = useSession();
+  const { setCurrentStep } = useCompleteProfileStore();
   return (
     <View className="flex-1">
       <StatusBar style="light" />
@@ -142,7 +144,13 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      <SingleFab onPress={() => router.push(ROUTE.COMPLETE_PROFILE)} icon={<IcChat size={32} />} />
+      <SingleFab
+        onPress={() => {
+          setCurrentStep(1);
+          router.push(ROUTE.COMPLETE_PROFILE);
+        }}
+        icon={<IcChat size={32} />}
+      />
     </View>
   );
 }

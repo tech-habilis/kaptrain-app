@@ -13,45 +13,56 @@ import Input from "@/components/input";
 import { ColorConst } from "@/constants/theme";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { Pressable, ScrollView, View , Text as RawText } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, ScrollView, View, Text as RawText } from "react-native";
 
 export function Step4() {
   const { t } = useTranslation();
   const { formData, updateStep4 } = useCompleteProfileStore();
 
-  const choices: TChoice[] = [
-    {
-      text: "sports.athletics",
-      leftIcon: <IcCycling />,
-    },
-    {
-      text: "sports.rowing",
-      leftIcon: <IcRowing />,
-    },
-    {
-      text: "sports.basketball",
-      leftIcon: <IcBasketball />,
-    },
-    {
-      text: "sports.crossfit",
-      leftIcon: <IcCrossfit />,
-    },
-    {
-      text: "sports.cycling",
-      leftIcon: <IcCycling />,
-    },
-    {
-      text: "sports.bodybuilding",
-      leftIcon: <IcBodybuilding />,
-    },
-    {
-      text: "sports.yoga",
-      leftIcon: <IcYoga />,
-    },
-  ];
+  const choices: TChoice[] = useMemo(
+    () => [
+      {
+        text: "sports.athletics",
+        leftIcon: <IcCycling />,
+      },
+      {
+        text: "sports.rowing",
+        leftIcon: <IcRowing />,
+      },
+      {
+        text: "sports.basketball",
+        leftIcon: <IcBasketball />,
+      },
+      {
+        text: "sports.crossfit",
+        leftIcon: <IcCrossfit />,
+      },
+      {
+        text: "sports.cycling",
+        leftIcon: <IcCycling />,
+      },
+      {
+        text: "sports.bodybuilding",
+        leftIcon: <IcBodybuilding />,
+      },
+      {
+        text: "sports.yoga",
+        leftIcon: <IcYoga />,
+      },
+    ],
+    [],
+  );
 
   const [search, setSearch] = useState<string>("");
+
+  const filteredChoices = useMemo(
+    () =>
+      choices.filter((x) =>
+        x.text.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [choices, search],
+  );
 
   const selectedChoices = choices.filter((c) =>
     formData.selectedSports?.includes(c.text),
@@ -74,9 +85,8 @@ export function Step4() {
             text={choice.text}
             type="selected"
             onLeftSidePress={() => {
-              const updatedSports = formData.selectedSports?.filter(
-                (s) => s !== choice.text,
-              ) || [];
+              const updatedSports =
+                formData.selectedSports?.filter((s) => s !== choice.text) || [];
               updateStep4({ selectedSports: updatedSports });
             }}
           />
@@ -99,6 +109,7 @@ export function Step4() {
           className="flex-1"
           value={search}
           onChangeText={setSearch}
+          autoCapitalize="none"
         />
         <Pressable onPress={clearSearch}>
           <IcClose color={ColorConst.accent} />
@@ -107,7 +118,7 @@ export function Step4() {
 
       <ScrollView className="mt-4">
         <Choices
-          data={choices}
+          data={filteredChoices}
           type="multipleChoice"
           selectedChoices={selectedChoices}
           onChangeMultiple={(newChoices) => {

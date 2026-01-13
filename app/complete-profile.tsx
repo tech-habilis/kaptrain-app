@@ -9,9 +9,11 @@ import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
 import cn from "@/utilities/cn";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
+import { useSession } from "@/contexts/auth-context";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { useEffect } from "react";
 import { BlurView } from "expo-blur";
 import { toast } from "@/components/toast";
 
@@ -44,10 +46,55 @@ const STEP_CONFIG = {
 };
 
 export default function CompleteProfile() {
-  const { currentStep, nextStep, previousStep, validateStep, formData } =
-    useCompleteProfileStore();
+  const { session } = useSession();
+  const {
+    currentStep,
+    nextStep,
+    previousStep,
+    validateStep,
+    formData,
+    saveStep,
+    isSaving,
+    isLoading,
+    loadProfileData,
+  } = useCompleteProfileStore();
 
   const config = STEP_CONFIG[currentStep as keyof typeof STEP_CONFIG];
+
+  // Load existing profile data on mount
+  useEffect(() => {
+    if (session?.user?.id) {
+      loadProfileData(session.user.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
+
+  const handleContinue = async () => {
+    if (!validateStep(currentStep)) {
+      return;
+    }
+
+    if (!session?.user?.id) {
+      toast.error("User session not found");
+      return;
+    }
+
+    // Save to Supabase
+    const saved = await saveStep(currentStep, session.user.id);
+    if (!saved) {
+      // Save failed, don't proceed
+      return;
+    }
+
+    // Proceed to next step or complete
+    if (currentStep < 5) {
+      nextStep();
+    } else {
+      // All steps completed, navigate to profile completed
+      router.dismissAll();
+      router.replace(ROUTE.PROFILE_COMPLETED);
+    }
+  };
 
   const isStepComplete = () => {
     switch (currentStep) {
@@ -71,18 +118,6 @@ export default function CompleteProfile() {
     }
   };
 
-  const handleContinue = () => {
-    if (validateStep(currentStep)) {
-      if (currentStep < 5) {
-        nextStep();
-      } else {
-        // All steps completed, navigate to profile completed
-        router.dismissAll();
-        router.replace(ROUTE.PROFILE_COMPLETED);
-      }
-    }
-  };
-
   const handleBack = () => {
     if (currentStep > 1) {
       previousStep();
@@ -96,7 +131,7 @@ export default function CompleteProfile() {
       case 1:
         return <Step1 />;
       case 2:
-        return <Step2 />;
+        return <Step2 continueToNextStep={handleContinue} />;
       case 3:
         return <Step3 />;
       case 4:
@@ -104,7 +139,9 @@ export default function CompleteProfile() {
       case 5:
         return (
           <Step5
-            onConnectWithCoach={() => toast.info("feature coming soon")}
+            onConnectWithCoach={() => {
+              // Handled internally in Step5 - shows "feature coming soon"
+            }}
             onContinueWithoutCoach={handleContinue}
           />
         );
@@ -117,59 +154,71 @@ export default function CompleteProfile() {
     <>
       <View className="pt-safe px-4 flex-1 bg-white">
         <StatusBar style="dark" />
-        {currentStep > 1 && (
-          <Pressable className="pb-4" onPress={handleBack}>
-            <IcArrowLeft />
-          </Pressable>
-        )}
-        <Text
-          className={cn(
-            "text-secondary font-bold",
-            currentStep === 1 ? "text-2xl" : "text-2xl mt-2",
-          )}
-        >
-          {config.title}
-        </Text>
-        <Text className="text-subtleText mt-1">{config.description}</Text>
-
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="mb-safe pb-8"
-          showsVerticalScrollIndicator={false}
-        >
-          {renderStep()}
-        </ScrollView>
-      </View>
-      <View className="absolute bottom-0 left-0 right-0 pb-safe px-4 pt-8">
-        <BlurView
-          intensity={2}
-          className="absolute inset-0 bg-linear-to-t from-white from-66% to-transparent"
-        />
-        <View className="flex-row android:mb-6 gap-6 items-center justify-between">
-          <View className="gap-2 grow">
-            <Text className="text-subtleText">{config.progress}</Text>
-            <View className="flex-row gap-1">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <View
-                  key={index}
-                  className={cn(
-                    "flex-1 h-2 rounded-full",
-                    index < currentStep ? "bg-secondary" : "bg-stroke",
-                  )}
-                />
-              ))}
-            </View>
+        {isLoading ? (
+          <View className="flex-1 justify-center items-center gap-4">
+            <ActivityIndicator size="large" />
+            <Text className="text-subtleText">Loading profile data...</Text>
           </View>
-          {currentStep < Object.keys(STEP_CONFIG).length && (
-            <Button
-              text="common.continue"
-              className="grow"
-              onPress={handleContinue}
-              disabled={!isStepComplete()}
-            />
-          )}
-        </View>
+        ) : (
+          <>
+            {currentStep > 1 && (
+              <Pressable className="pb-4" onPress={handleBack}>
+                <IcArrowLeft />
+              </Pressable>
+            )}
+            <Text
+              className={cn(
+                "text-secondary font-bold",
+                currentStep === 1 ? "text-2xl" : "text-2xl mt-2",
+              )}
+            >
+              {config.title}
+            </Text>
+            <Text className="text-subtleText mt-1">{config.description}</Text>
+
+            <ScrollView
+              className="flex-1"
+              contentContainerClassName="mb-safe pb-8"
+              showsVerticalScrollIndicator={false}
+            >
+              {renderStep()}
+            </ScrollView>
+          </>
+        )}
       </View>
+      {!isLoading && (
+        <View className="absolute bottom-0 left-0 right-0 pb-safe px-4 pt-8">
+          <BlurView
+            intensity={2}
+            className="absolute inset-0 bg-linear-to-t from-white from-66% to-transparent"
+          />
+          <View className="flex-row android:mb-6 gap-6 items-center justify-between">
+            <View className="gap-2 grow">
+              <Text className="text-subtleText">{config.progress}</Text>
+              <View className="flex-row gap-1">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <View
+                    key={index}
+                    className={cn(
+                      "flex-1 h-2 rounded-full",
+                      index < currentStep ? "bg-secondary" : "bg-stroke",
+                    )}
+                  />
+                ))}
+              </View>
+            </View>
+            {currentStep < Object.keys(STEP_CONFIG).length && (
+              <Button
+                text="common.continue"
+                className="grow"
+                onPress={handleContinue}
+                disabled={!isStepComplete() || isSaving}
+                loading={isSaving}
+              />
+            )}
+          </View>
+        </View>
+      )}
     </>
   );
 }

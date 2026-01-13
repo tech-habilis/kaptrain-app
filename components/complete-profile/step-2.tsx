@@ -4,7 +4,7 @@ import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 
-export function Step2() {
+export function Step2({ continueToNextStep}: { continueToNextStep: () => void; }) {
   const { t } = useTranslation();
   const { formData, errors, updateStep2 } = useCompleteProfileStore();
   const [weightInput, setWeightInput] = useState(formData.weight?.toString() || "");
@@ -50,6 +50,7 @@ export function Step2() {
         onPress={() => {
           updateStep2({ preferNotToAnswer: true, weight: undefined });
           setWeightInput("");
+          continueToNextStep();
         }}
       />
     </>
