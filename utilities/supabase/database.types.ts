@@ -25,7 +25,9 @@ export type Database = {
           email: string
           first_name: string | null
           gender: string | null
+          height: number | null
           id: string
+          in_wheelchair: boolean | null
           is_active: boolean | null
           last_login: string | null
           last_name: string | null
@@ -47,7 +49,9 @@ export type Database = {
           email: string
           first_name?: string | null
           gender?: string | null
+          height?: number | null
           id: string
+          in_wheelchair?: boolean | null
           is_active?: boolean | null
           last_login?: string | null
           last_name?: string | null
@@ -69,7 +73,9 @@ export type Database = {
           email?: string
           first_name?: string | null
           gender?: string | null
+          height?: number | null
           id?: string
+          in_wheelchair?: boolean | null
           is_active?: boolean | null
           last_login?: string | null
           last_name?: string | null

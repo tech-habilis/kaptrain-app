@@ -8,11 +8,12 @@ import { Choices } from "./choices";
 import Text from "./text";
 import { TChoice } from "@/types";
 import Input from "./input";
+import { useTranslation } from "react-i18next";
 
 interface DropdownProps {
   label: string;
   options: TChoice[];
-  selectedOption: TChoice;
+  selectedOption?: TChoice;
   onSelect: (option: TChoice) => void;
   className?: string;
   textClassName?: string;
@@ -40,31 +41,32 @@ export default function Dropdown({
   type = "default",
   alwaysShowLabel = false,
   modalHeight = "65%",
-  itemType = 'radio',
+  itemType = "radio",
 }: DropdownProps) {
+  const { t } = useTranslation();
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
 
   const handleSelect = (option: TChoice) => {
     onSelect(option);
-    setTimeout(() => bottomSheetModalRef.current?.dismiss(), 300)
+    setTimeout(() => bottomSheetModalRef.current?.dismiss(), 300);
   };
 
   const renderShownText = () => {
-    if (alwaysShowLabel && selectedOption.text !== undefined) {
+    if (alwaysShowLabel && selectedOption?.text !== undefined) {
       return (
         <View className="gap-1">
           <Text className="text-subtleText text-xs">{label}</Text>
           <Text className="text-sm font-semibold text-text">
-            {selectedOption.text}
+            {selectedOption?.text}
           </Text>
         </View>
       );
     }
 
-    if (selectedOption.text !== undefined) {
+    if (selectedOption?.text !== undefined) {
       return (
         <Text className="text-sm font-semibold text-text">
-          {selectedOption.text}
+          {selectedOption?.text}
         </Text>
       );
     }
@@ -89,7 +91,7 @@ export default function Dropdown({
         <Input
           readOnly
           label={label}
-          value={selectedOption.text || ""}
+          value={t(selectedOption?.text || "")}
           onPress={() => bottomSheetModalRef.current?.present()}
         />
       )}
@@ -109,7 +111,7 @@ export default function Dropdown({
           </Text>
         )}
 
-        <View className="mt-4 pb-safe">
+        <View className="mt-4 pb-safe flex-1">
           <Choices
             numColumns={1}
             data={options}

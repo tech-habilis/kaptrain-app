@@ -2,46 +2,166 @@ import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
 import Input from "@/components/input";
 import Toggle from "@/components/toggle";
-import IcCalendar from "@/components/icons/calendar";
 import IcPencil from "@/components/icons/pencil";
-import { useRef, useState } from "react";
-import { Image, Pressable, ScrollView, View } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  View,
+  Alert,
+} from "react-native";
 import Text from "@/components/text";
 import DeleteAccountModal, {
   DeleteAccountModalRef,
 } from "@/components/delete-account-modal";
 import Dropdown from "@/components/dropdown";
 import { TChoice } from "@/types";
+import DatePicker from "@/components/date-picker";
+import { useEditProfileStore } from "@/stores/edit-profile-store";
+import { useSession } from "@/contexts/auth-context";
+import { StatusBar } from "expo-status-bar";
+import * as ImagePicker from "expo-image-picker";
+import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
+import { toast } from "@/components/toast";
 
 export default function EditProfile() {
+  const { t } = useTranslation();
+  const { session } = useSession();
   const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
-  const [firstName, setFirstName] = useState("Marie");
-  const [lastName, setLastName] = useState("Patouillet");
-  const [birthDate, setBirthDate] = useState("07/08/1988");
-  const [height, setHeight] = useState("169 cm");
-  const [isWheelchair, setIsWheelchair] = useState(false);
-  const [weight, setWeight] = useState("63,0 kg");
-  const [profileImage] = useState(require("@/assets/images/sample-avatar.png"));
-  const genders: TChoice[] = ["Femme", "Homme", "Non Binaire"].map((x) => ({
-    text: x,
-  }));
-  const [gender, setGender] = useState(genders[0]);
+  const [isPickerLoading, setIsPickerLoading] = useState(false);
 
-  const practiceLevels: TChoice[] = [
-    { text: "Débutant", secondaryText: "1 à 2h par semaine" },
-    { text: "Intermédiaire", secondaryText: "3 à 4h par semaine" },
-    { text: "Avancé", secondaryText: "5 à 7h par semaine" },
-    { text: "Confirmé", secondaryText: "8 à 11h par semaine" },
-    { text: "Expert", secondaryText: "+ de 12h par semaine" },
+  const {
+    profile,
+    isLoading,
+    isSaving,
+    localAvatarUri,
+    loadProfile,
+    setFirstName,
+    setLastName,
+    setBirthDate,
+    setGender,
+    setHeight,
+    setInWheelchair,
+    setWeight,
+    setSportLevel,
+    setLocalAvatarUri,
+    saveProfile,
+    firstName,
+    lastName,
+    birthDate,
+    gender,
+    height,
+    inWheelchair,
+    weight,
+    sportLevel,
+  } = useEditProfileStore();
+
+  // Load profile on mount
+  useEffect(() => {
+    if (session?.user?.id) {
+      loadProfile(session.user.id);
+    }
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [session?.user?.id]);
+
+  const displayImageUri = localAvatarUri || profile?.avatar_url;
+
+  const genders: TChoice[] = [
+    { text: "completeProfile.step1.genderFemale" },
+    { text: "completeProfile.step1.genderMale" },
+    { text: "completeProfile.step1.genderNonBinary" },
   ];
 
-  const [practiceLevel, setPracticeLevel] = useState(practiceLevels[0]);
+  const genderMap: Record<string, "female" | "male" | "nonbinary"> = {
+    "completeProfile.step1.genderFemale": "female",
+    "completeProfile.step1.genderMale": "male",
+    "completeProfile.step1.genderNonBinary": "nonbinary",
+  };
 
-  // TODO: Add setProfileImage when implementing actual photo upload
+  const selectedGender = genders.find((g) => genderMap?.[g.text] === gender);
 
-  const handleSave = () => {
-    // TODO: Implement save profile logic
-    console.log("Saving profile...");
+  const practiceLevels: TChoice[] = [
+    {
+      text: "completeProfile.step3.levelBeginner",
+      secondaryText: "1 à 2h par semaine",
+    },
+    {
+      text: "completeProfile.step3.levelIntermediate",
+      secondaryText: "3 à 4h par semaine",
+    },
+    {
+      text: "completeProfile.step3.levelAdvanced",
+      secondaryText: "5 à 7h par semaine",
+    },
+    {
+      text: "completeProfile.step3.levelConfirmed",
+      secondaryText: "8 à 11h par semaine",
+    },
+    {
+      text: "completeProfile.step3.levelExpert",
+      secondaryText: "+ de 12h par semaine",
+    },
+  ];
+
+  const sportLevelMap = {
+    beginner: "completeProfile.step3.levelBeginner",
+    intermediate: "completeProfile.step3.levelIntermediate",
+    advanced: "completeProfile.step3.levelAdvanced",
+    confirmed: "completeProfile.step3.levelConfirmed",
+    expert: "completeProfile.step3.levelExpert",
+  };
+
+  const selectedPracticeLevel = practiceLevels.find((l) =>
+    sportLevel ? sportLevelMap[sportLevel] === l.text : false,
+  );
+
+  const handlePickImage = async () => {
+    try {
+      setIsPickerLoading(true);
+
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          t("completeProfile.step1.permissionDenied") || "Permission needed",
+          t("completeProfile.step1.permissionMessage") ||
+            "Sorry, we need camera roll permissions to make this work.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setLocalAvatarUri(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert(
+        t("completeProfile.step1.errorTitle") || "Error",
+        t("completeProfile.step1.errorMessage") ||
+          "Failed to pick image. Please try again.",
+      );
+    } finally {
+      setIsPickerLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!session?.user?.id) {
+      toast.error("User session not found");
+      return;
+    }
+
+    await saveProfile(session.user.id);
   };
 
   const handleDeleteAccountPress = () => {
@@ -53,16 +173,12 @@ export default function EditProfile() {
     // TODO: Implement account deletion logic
   };
 
-  const handleEditPhoto = () => {
-    // TODO: Implement photo picker logic
-    // For now, just open the resize modal with the current image
-  };
-
   return (
     <BasicScreen
       title="Modifier mon profil"
       description="Mets à jour tes infos ici"
     >
+      <StatusBar style="auto" />
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-4 pb-32 pt-6"
@@ -70,10 +186,27 @@ export default function EditProfile() {
       >
         <View className="gap-6 items-center">
           {/* Profile Image */}
-          <Pressable className="relative" onPress={handleEditPhoto}>
-            <Image source={profileImage} className="size-30 rounded-[18.5px]" />
+          <Pressable
+            className="relative"
+            onPress={handlePickImage}
+            disabled={isPickerLoading}
+          >
+            {displayImageUri ? (
+              <Image
+                source={{ uri: displayImageUri }}
+                className="size-30 rounded-[18.5px]"
+              />
+            ) : (
+              <View className="size-30 rounded-[18.5px] bg-light items-center justify-center">
+                <Text className="text-subtleText">No photo</Text>
+              </View>
+            )}
             <View className="absolute -right-2 -bottom-2 bg-white rounded-[9px] items-center justify-center border-2 border-stroke p-1">
-              <IcPencil size={24} />
+              {isPickerLoading ? (
+                <View className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              ) : (
+                <IcPencil size={24} />
+              )}
             </View>
           </Pressable>
 
@@ -87,12 +220,15 @@ export default function EditProfile() {
 
             <Input label="Nom" value={lastName} onChangeText={setLastName} />
 
-            <Input
+            <DatePicker
               label="Date de naissance"
-              value={birthDate}
-              onChangeText={setBirthDate}
-              rightIcon={<IcCalendar />}
-              onRightIconPress={() => console.log("Open date picker")}
+              selectedDate={birthDate ? dayjs(birthDate).toDate() : undefined}
+              onSelect={(date) =>
+                setBirthDate(dayjs(date).format("YYYY-MM-DD"))
+              }
+              maxDate={dayjs().toDate()}
+              placeholder="DD/MM/YYYY"
+              showIcon={false}
             />
 
             <Dropdown
@@ -100,29 +236,54 @@ export default function EditProfile() {
               label="Genre"
               modalTitle="Genre"
               options={genders}
-              selectedOption={gender}
-              onSelect={setGender}
+              selectedOption={selectedGender}
+              onSelect={(choice) => {
+                const mappedGender = genderMap?.[choice.text];
+                if (mappedGender) setGender(mappedGender);
+              }}
               modalHeight="45%"
             />
 
-            <Input label="Taille" value={height} onChangeText={setHeight} />
+            <Input
+              label="Taille (cm)"
+              value={height}
+              onChangeText={setHeight}
+              placeholder="170"
+              keyboardType="numeric"
+            />
 
             {/* Wheelchair Toggle */}
             <View className="flex-row items-center justify-between py-2">
               <Text className="text-secondary font-bold text-base">
                 Je suis en fauteuil
               </Text>
-              <Toggle value={isWheelchair} onValueChange={setIsWheelchair} />
+              <Toggle value={inWheelchair} onValueChange={setInWheelchair} />
             </View>
 
-            <Input label="Poids" value={weight} onChangeText={setWeight} />
+            <Input
+              label="Poids (kg)"
+              value={weight}
+              onChangeText={setWeight}
+              placeholder="63.5"
+              keyboardType="decimal-pad"
+            />
 
             <Dropdown
               label="Niveau de pratique"
               modalTitle="Niveau de pratique"
-              selectedOption={practiceLevel}
+              selectedOption={selectedPracticeLevel}
               options={practiceLevels}
-              onSelect={setPracticeLevel}
+              onSelect={(choice) => {
+                const mappedLevel = Object.entries(sportLevelMap).find(
+                  ([_, text]) => text === choice.text,
+                )?.[0] as
+                  | "beginner"
+                  | "intermediate"
+                  | "advanced"
+                  | "confirmed"
+                  | "expert";
+                if (mappedLevel) setSportLevel(mappedLevel);
+              }}
               type="input"
               modalHeight="60%"
               itemType="secondary"
@@ -148,7 +309,8 @@ export default function EditProfile() {
           type="primary"
           size="large"
           onPress={handleSave}
-          disabled={false}
+          disabled={isSaving}
+          loading={isSaving || isLoading}
           className="mb-6"
         />
       </View>

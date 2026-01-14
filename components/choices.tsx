@@ -131,7 +131,7 @@ export const Choice = ({
 
   return (
     <Pressable
-      className={cn(choiceWrapper({ selected, type }), "flex-1", className)}
+      className={cn(choiceWrapper({ selected, type }), className)}
       onPress={onPress}
       style={style}
     >
@@ -140,7 +140,7 @@ export const Choice = ({
         <Text className={cn(choiceText({ type, selected }), textClassName)}>
           {choice.text}
         </Text>
-        {type === "radio" && choice.secondaryText && (
+        {type === "radio" && choice.secondaryText !== undefined && (
           <Text className="text-sm text-subtleText">
             {choice.secondaryText}
           </Text>
@@ -196,7 +196,11 @@ export const Choices = ({
         <Text className="text-accent font-medium text-sm">{label}</Text>
       )}
 
-      <View className="gap-2 mt-2">
+      <View
+        className={clsx("gap-2 mt-2", {
+          "flex-row flex-wrap": numColumns > 1,
+        })}
+      >
         {data.map((item, index) => (
           <Choice
             key={index}
