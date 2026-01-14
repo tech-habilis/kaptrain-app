@@ -82,7 +82,7 @@ export default function TabataWidget({
   return (
     <Pressable
       onPress={() => router.push(ROUTE.TIMER_EXPANDED)}
-      className="w-full pt-safe mb-4"
+      className="w-full pt-safe"
       style={{
         backgroundColor: phaseTheme.backgroundColor,
       }}

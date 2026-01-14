@@ -7,11 +7,10 @@ import DatePicker from "@/components/date-picker";
 import Text from "@/components/text";
 import { useTranslation } from "react-i18next";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
-import { View, Image, Pressable, Alert, Platform } from "react-native";
+import { View, Image, Pressable, Alert } from "react-native";
 import { useState } from "react";
 import dayjs from "dayjs";
 import * as ImagePicker from "expo-image-picker";
-import { toast } from "../toast";
 
 export function Step1() {
   const { t } = useTranslation();
@@ -28,11 +27,6 @@ export function Step1() {
 
   const handlePickImage = async () => {
     try {
-      if (Platform.OS === 'ios') {
-        toast.info('Not available on iOS yet')
-        return;
-      }
-
       setIsPickerLoading(true);
 
       // Request permission

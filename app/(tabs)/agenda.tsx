@@ -168,7 +168,7 @@ export default function Agenda() {
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
 
       <ScrollView className="flex-1 pt-safe px-4">
         {/* Header */}

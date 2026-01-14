@@ -7,9 +7,6 @@ import IcPencil from "@/components/icons/pencil";
 import { useRef, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 import Text from "@/components/text";
-import PhotoResizeModal, {
-  PhotoResizeModalRef,
-} from "@/components/photo-resize-modal";
 import DeleteAccountModal, {
   DeleteAccountModalRef,
 } from "@/components/delete-account-modal";
@@ -17,7 +14,6 @@ import Dropdown from "@/components/dropdown";
 import { TChoice } from "@/types";
 
 export default function EditProfile() {
-  const photoResizeModalRef = useRef<PhotoResizeModalRef>(null);
   const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
   const [firstName, setFirstName] = useState("Marie");
   const [lastName, setLastName] = useState("Patouillet");
@@ -60,17 +56,6 @@ export default function EditProfile() {
   const handleEditPhoto = () => {
     // TODO: Implement photo picker logic
     // For now, just open the resize modal with the current image
-    photoResizeModalRef.current?.present();
-  };
-
-  const handlePhotoConfirm = (croppedImage?: any) => {
-    // TODO: Update profile image with cropped image
-    // setProfileImage(croppedImage);
-    console.log("Photo confirmed:", croppedImage);
-  };
-
-  const handlePhotoCancel = () => {
-    console.log("Photo resize cancelled");
   };
 
   return (
@@ -85,15 +70,12 @@ export default function EditProfile() {
       >
         <View className="gap-6 items-center">
           {/* Profile Image */}
-          <View className="relative">
+          <Pressable className="relative" onPress={handleEditPhoto}>
             <Image source={profileImage} className="size-30 rounded-[18.5px]" />
-            <Pressable
-              className="absolute -right-2 -bottom-2 bg-white rounded-[9px] items-center justify-center border-2 border-stroke p-1"
-              onPress={handleEditPhoto}
-            >
+            <View className="absolute -right-2 -bottom-2 bg-white rounded-[9px] items-center justify-center border-2 border-stroke p-1">
               <IcPencil size={24} />
-            </Pressable>
-          </View>
+            </View>
+          </Pressable>
 
           {/* Form Fields */}
           <View className="gap-6 w-full">
@@ -170,14 +152,6 @@ export default function EditProfile() {
           className="mb-6"
         />
       </View>
-
-      {/* Photo Resize Modal */}
-      <PhotoResizeModal
-        ref={photoResizeModalRef}
-        imageSource={profileImage}
-        onConfirm={handlePhotoConfirm}
-        onCancel={handlePhotoCancel}
-      />
 
       {/* Delete Account Modal */}
       <DeleteAccountModal

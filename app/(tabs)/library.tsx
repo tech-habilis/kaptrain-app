@@ -254,28 +254,29 @@ export default function Library() {
   };
 
   return (
-    <ScrollView className="bg-white">
-      <StatusBar style="auto" />
+    <View className="bg-white">
+      <StatusBar style="dark" />
 
       <TabataWidget />
+      <ScrollView className="bg-white pt-4">
+        <View className="px-4">
+          <Text className="font-bold text-lg text-secondary">Bibliothèque</Text>
+          <Text className="text-subtleText text-base mt-1">
+            Choisis les exercices et les programmes qui t’aideront à atteindre
+            tes objectifs
+          </Text>
 
-      <View className="px-4">
-        <Text className="font-bold text-lg text-secondary">Bibliothèque</Text>
-        <Text className="text-subtleText text-base mt-1">
-          Choisis les exercices et les programmes qui t’aideront à atteindre tes
-          objectifs
-        </Text>
+          <Tabs
+            tabs={tabs}
+            onSelected={setTab}
+            selected={tab}
+            className="w-full my-4"
+            textClassName="font-semibold"
+          />
+        </View>
 
-        <Tabs
-          tabs={tabs}
-          onSelected={setTab}
-          selected={tab}
-          className="w-full my-4"
-          textClassName="font-semibold"
-        />
-      </View>
-
-      {renderTabContent()}
-    </ScrollView>
+        {renderTabContent()}
+      </ScrollView>
+    </View>
   );
 }
