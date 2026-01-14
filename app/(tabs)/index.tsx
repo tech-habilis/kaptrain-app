@@ -16,7 +16,6 @@ import { ActivityCard } from "@/components/agenda/activity-card";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-  Image,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -26,6 +25,7 @@ import {
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import { useSession } from "@/contexts/auth-context";
+import Avatar from "@/components/avatar";
 
 const Agenda = () => {
   const sessions = [
@@ -155,10 +155,7 @@ export default function HomeScreen() {
       <StatusBar style="auto" />
       <ImageBackground source={require("../../assets/images/home-hero.png")}>
         <View className="px-4 pt-safe pb-14 flex-row gap-3 items-center">
-          <Image
-            source={require("../../assets/images/sample-avatar.png")}
-            className="rounded-lg border border-white"
-          />
+          <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
           <View className="gap-1.5 flex-1">
             <RawText className="text-white text-xl font-bold" numberOfLines={1}>

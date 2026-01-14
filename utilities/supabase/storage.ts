@@ -1,4 +1,5 @@
 import { supabase } from "@/utilities/supabase";
+import { File } from "expo-file-system";
 
 const BUCKET_NAME = "user-avatars";
 
@@ -15,24 +16,30 @@ const generateFileName = (userId: string): string => {
  * @param uri - Local URI of the image to upload
  * @returns Public URL of the uploaded image
  */
-export async function uploadProfileImage(userId: string, uri: string): Promise<string> {
+export async function uploadProfileImage(
+  userId: string,
+  uri: string,
+): Promise<string> {
   try {
     // Get file info from URI
     const uriParts = uri.split(".");
     const fileExt = uriParts[uriParts.length - 1];
     const fileName = `${generateFileName(userId)}.${fileExt}`;
 
-    // Fetch the file as a blob
-    const response = await fetch(uri);
-    const blob = await response.blob();
+    // Read file bytes using new expo-file-system API
+    const file = new File(uri);
+    const bytes = await file.bytes();
 
-    // Upload to Supabase Storage
+    // Determine content type
+    const contentType = `image/${fileExt === "jpg" ? "jpeg" : fileExt}`;
+
+    // Upload to Supabase Storage with ArrayBuffer
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
-      .upload(fileName, blob, {
+      .upload(fileName, bytes.buffer, {
         cacheControl: "3600",
         upsert: true,
-        contentType: blob.type || "image/jpeg",
+        contentType: contentType,
       });
 
     if (error) {
@@ -68,7 +75,9 @@ export async function deleteProfileImage(url: string): Promise<void> {
 
     const filePath = pathParts.slice(bucketIndex + 1).join("/");
 
-    const { error } = await supabase.storage.from(BUCKET_NAME).remove([filePath]);
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove([filePath]);
 
     if (error) {
       throw error;

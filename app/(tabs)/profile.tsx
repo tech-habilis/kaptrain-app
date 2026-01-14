@@ -1,3 +1,4 @@
+import Avatar from "@/components/avatar";
 import { Chip } from "@/components/chip";
 import SingleFab from "@/components/fab";
 import IcArrowRight from "@/components/icons/arrow-right";
@@ -16,7 +17,7 @@ import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View, Image, ImageBackground, Pressable } from "react-native";
+import { View, ImageBackground, Pressable } from "react-native";
 
 const profileMenu = [
   {
@@ -54,10 +55,7 @@ export default function ProfileScreen() {
       <StatusBar style="light" />
       <ImageBackground source={require("../../assets/images/profile-hero.png")}>
         <View className="px-4 pt-safe pb-6 flex-row gap-3 items-center">
-          <Image
-            source={{uri: session?.user?.avatarUrl || ''}}
-            className="rounded-lg border border-white size-14"
-          />
+          <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
           <View className="gap-1.5 flex-1">
             <Text className="text-white text-xl font-bold" numberOfLines={1}>
