@@ -131,6 +131,9 @@ importers:
       react-native-svg:
         specifier: 15.12.1
         version: 15.12.1(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react-native-timer-picker:
+        specifier: ^2.4.0
+        version: 2.4.0(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-ui-datepicker:
         specifier: ^3.1.2
         version: 3.1.2(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -3860,6 +3863,13 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
+
+  react-native-timer-picker@2.4.0:
+    resolution: {integrity: sha512-jjllLDTF1Z79EbylDxt3imqfd52U8vncctPkBe10YUc6sQeXF7ZvCuXHaGEOHa4HZbrqburkaAWWXrbMlhrIBA==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      react: '>=18.2.0'
+      react-native: '>=0.72.0'
 
   react-native-ui-datepicker@3.1.2:
     resolution: {integrity: sha512-1yukCKMLUuVb5daYOgb4mLZqpynZ6GMQyNF2NPwpiDB5F2D/NGpeOmoYb7qFwDrTNwr+m4IemNUa0TlYIFktlg==}
@@ -9079,6 +9089,11 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
       warn-once: 0.1.1
+
+  react-native-timer-picker@2.4.0(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
 
   react-native-ui-datepicker@3.1.2(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:

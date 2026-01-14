@@ -83,3 +83,9 @@ export type SportOption = {
   name: string;
   icon: React.ReactNode;
 };
+
+export type SelectTimeProp = {
+  id: string;
+  type: 'start' | 'end';
+  value: string;
+}

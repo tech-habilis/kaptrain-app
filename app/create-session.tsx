@@ -6,7 +6,7 @@ import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { ROUTE } from "@/constants/route";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, View, TouchableOpacity } from "react-native";
 import DatePicker from "@/components/date-picker";
 import { DateType } from "react-native-ui-datepicker";
@@ -20,6 +20,9 @@ import IcTrash from "@/components/icons/trash";
 import BottomSheetModal, {
   RawBottomSheetModalType,
 } from "@/components/bottom-sheet-modal";
+import IcClose from "@/components/icons/close";
+import { TimerPickerModal } from "react-native-timer-picker";
+import { SelectTimeProp } from "@/types";
 
 interface ChoiceChipProps {
   label: string;
@@ -151,8 +154,21 @@ export default function CreateSession() {
   const [selectedDate, setSelectedDate] = useState<DateType>(
     new Date("2025-04-25"),
   );
-  const [startTime, setStartTime] = useState<string>("10:00");
-  const [endTime, setEndTime] = useState<string>("11:00");
+  const [timeRange, setTimeRange] = useState<
+    { start: string; end: string } | undefined
+  >({
+    start: "10:00",
+    end: "11:00",
+  });
+  const [selectedTime, setSelectedTime] = useState<SelectTimeProp>();
+  const isShowingTimePicker = selectedTime !== undefined;
+  const selectedTimeAsDate = useMemo(() => {
+    const time = selectedTime?.value.split(":");
+    const hours = parseInt(time?.[0] || "");
+    const minutes = parseInt(time?.[1] || "");
+    return { hours, minutes };
+  }, [selectedTime?.value]);
+
   const [sessionName, setSessionName] = useState<string>(
     "Séance cyclisme du 19/04",
   );
@@ -287,7 +303,6 @@ export default function CreateSession() {
                 <Text className="text-sm font-medium text-accent w-6">Le</Text>
                 <View className="flex-1">
                   <DatePicker
-                    label="25/04/2025"
                     selectedDate={selectedDate}
                     onSelect={setSelectedDate}
                     className="w-full"
@@ -296,35 +311,71 @@ export default function CreateSession() {
               </View>
 
               {/* Time Range Input */}
-              <View className="flex-row items-center gap-2">
-                <Text
-                  className="text-sm font-medium text-accent"
-                  style={{ width: 24 }}
-                >
-                  De
-                </Text>
-                <View className="flex-1">
-                  <Input
-                    value={startTime}
-                    onChangeText={setStartTime}
-                    placeholder="10:00"
-                    inputClassName="text-center text-base"
+              <View>
+                {timeRange === undefined ? (
+                  <Button
+                    leftIcon={<IcPlus size={24} color={ColorConst.accent} />}
+                    type="tertiary"
+                    text="Renseigner une heure"
+                    onPress={() => {
+                      setTimeRange({ start: "10:00", end: "11:00" });
+                    }}
                   />
-                </View>
-                <Text
-                  className="text-sm font-medium text-accent text-center"
-                  style={{ width: 16 }}
-                >
-                  à
-                </Text>
-                <View className="flex-1">
-                  <Input
-                    value={endTime}
-                    onChangeText={setEndTime}
-                    placeholder="11:00"
-                    inputClassName="text-center text-base"
-                  />
-                </View>
+                ) : (
+                  <View className="flex-row items-center gap-2">
+                    <Text
+                      className="text-sm font-medium text-accent"
+                      style={{ width: 24 }}
+                    >
+                      De
+                    </Text>
+                    <View className="flex-1">
+                      <Input
+                        value={timeRange.start}
+                        placeholder="10:00"
+                        inputClassName="text-center text-base"
+                        asPressable
+                        onPress={() => {
+                          setSelectedTime({
+                            id: "time",
+                            type: "start",
+                            value: timeRange.start,
+                          });
+                        }}
+                      />
+                    </View>
+                    <Text
+                      className="text-sm font-medium text-accent text-center"
+                      style={{ width: 16 }}
+                    >
+                      à
+                    </Text>
+                    <View className="flex-1">
+                      <Input
+                        value={timeRange.end}
+                        asPressable
+                        onPress={() =>
+                          setSelectedTime({
+                            id: "time",
+                            type: "end",
+                            value: timeRange.end,
+                          })
+                        }
+                        placeholder="11:00"
+                        inputClassName="text-center text-base"
+                      />
+                    </View>
+
+                    <Pressable
+                      onPress={() => {
+                        setTimeRange(undefined);
+                      }}
+                      className="p-1"
+                    >
+                      <IcClose size={20} color={ColorConst.subtleText} />
+                    </Pressable>
+                  </View>
+                )}
               </View>
             </View>
           </>
@@ -475,6 +526,32 @@ export default function CreateSession() {
           textClassName="text-error"
         />
       </BottomSheetModal>
+
+      <TimerPickerModal
+        closeOnOverlayPress
+        modalProps={{
+          overlayOpacity: 0.2,
+        }}
+        onCancel={() => setSelectedTime(undefined)}
+        onConfirm={({ hours, minutes }) => {
+          if (!timeRange) return;
+
+          const field = selectedTime?.type === "start" ? "start" : "end";
+          setTimeRange({
+            ...timeRange,
+            [field]: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
+          });
+
+          setSelectedTime(undefined);
+        }}
+        styles={{
+          theme: "light",
+        }}
+        visible={isShowingTimePicker}
+        setIsVisible={() => setSelectedTime(undefined)}
+        initialValue={selectedTimeAsDate}
+        hideSeconds
+      />
     </View>
   );
 }
