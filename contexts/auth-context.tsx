@@ -96,6 +96,40 @@ const AuthContext = createContext<TAuthContext>({
   isCheckingProfileCompletion: false,
 });
 
+// Helper function to sync auth metadata from database profile
+// This ensures that if user has updated their profile in the database,
+// those values take precedence over social provider data on re-login
+const syncAuthMetadataFromProfile = async (userId: string) => {
+  try {
+    const profile = await getUserProfile(userId);
+
+    // Only update if user has completed onboarding and has profile data
+    if (profile.onboarding_date) {
+      const metadataUpdates: Record<string, string | null> = {};
+
+      // Use name from database if available, otherwise don't override
+      if (profile.first_name || profile.last_name) {
+        metadataUpdates.name = `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
+      }
+
+      // Use avatar from database if available, otherwise don't override
+      if (profile.avatar_url) {
+        metadataUpdates.avatar_url = profile.avatar_url;
+      }
+
+      // Only update if we have something to update
+      if (Object.keys(metadataUpdates).length > 0) {
+        await supabase.auth.updateUser({
+          data: metadataUpdates,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error syncing auth metadata from profile:", error);
+    // Don't fail sign-in if sync fails
+  }
+};
+
 export function useSession() {
   const value = use(AuthContext);
   if (!value) {
@@ -156,8 +190,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
         ],
       });
 
-
-
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: "apple",
         token: credential.identityToken!,
@@ -169,25 +201,41 @@ export function SessionProvider({ children }: PropsWithChildren) {
         return;
       }
 
-      // Apple only provides the user's name the first time they sign in
-      // If it's available, update the user metadata with it
-      if (credential.fullName) {
-        const nameParts = [];
-        if (credential.fullName.givenName)
-          nameParts.push(credential.fullName.givenName);
-        if (credential.fullName.middleName)
-          nameParts.push(credential.fullName.middleName);
-        if (credential.fullName.familyName)
-          nameParts.push(credential.fullName.familyName);
-        const fullName = nameParts.join(" ");
-        await supabase.auth.updateUser({
-          data: {
-            name: fullName,
-            display_name: fullName,
-            first_name: credential.fullName.givenName,
-            last_name: credential.fullName.familyName,
-          },
-        });
+      // Only update metadata from Apple for NEW users (first time sign-up)
+      // For returning users, sync from database to preserve their changes
+      if (data.session?.user && credential.fullName) {
+        try {
+          const profile = await getUserProfile(data.session.user.id);
+
+          // If user hasn't completed onboarding, save Apple's name
+          if (!profile.onboarding_date && credential.fullName) {
+            const nameParts = [];
+            if (credential.fullName.givenName)
+              nameParts.push(credential.fullName.givenName);
+            if (credential.fullName.middleName)
+              nameParts.push(credential.fullName.middleName);
+            if (credential.fullName.familyName)
+              nameParts.push(credential.fullName.familyName);
+            const fullName = nameParts.join(" ");
+
+            if (fullName) {
+              await supabase.auth.updateUser({
+                data: {
+                  name: fullName,
+                  display_name: fullName,
+                  first_name: credential.fullName.givenName,
+                  last_name: credential.fullName.familyName,
+                },
+              });
+            }
+          } else {
+            // Returning user - sync metadata from database to preserve their changes
+            await syncAuthMetadataFromProfile(data.session.user.id);
+          }
+        } catch (profileError) {
+          console.error("Error checking profile during Apple sign-in:", profileError);
+          // Continue with sign-in even if profile check fails
+        }
       }
 
       setSession(supabaseUtils.toLocalSession(data.session));
@@ -216,6 +264,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
           provider: "google",
           token: response.data.idToken || "",
         });
+
+        // Sync metadata from database to preserve user's changes
+        // This ensures that if user updated their name/avatar in the app,
+        // those values are restored instead of using the old Google data
+        if (data.session?.user) {
+          try {
+            await syncAuthMetadataFromProfile(data.session.user.id);
+          } catch (profileError) {
+            console.error("Error syncing profile during Google sign-in:", profileError);
+            // Continue with sign-in even if sync fails
+          }
+        }
 
         setSession(supabaseUtils.toLocalSession(data.session));
         router.replace(ROUTE.ROOT);
