@@ -1,0 +1,645 @@
+# Design System Rules - Kaptrain Mobile App
+
+> This document provides comprehensive guidelines for converting Figma designs to React Native code following the Kaptrain app's architecture and patterns.
+
+## 1. Token Definitions
+
+### Color Tokens
+**File:** `/constants/theme.ts`
+
+#### Primary Color Palette
+```typescript
+export const ColorConst = {
+  primary: '#457CE2',        // Blue - Primary brand color
+  secondary: '#06234B',      // Dark blue - Secondary/Text color
+  tertiary: '#FF9E69',       // Orange - Accent color
+  decorative: '#FFD1A7',     // Light orange - Decorative elements
+  text: '#04152D',           // Dark text - Main text color
+  subtleText: '#727988',     // Gray - Secondary text
+  stroke: '#E5E5EB',         // Light gray - Borders/dividers
+  accent: '#424F65',         // Medium gray - Accent text
+  light: '#EEEFF9',          // Very light blue - Backgrounds
+  warmLight: '#FFF7F3',      // Warm light - Special backgrounds
+  success: '#4FD365',        // Green - Success states
+  error: '#FF604B',          // Red - Error states
+  link: '#04152D',
+  secondary500: '#1A1C1E',
+  secondaryGrey: '#BABABA',
+  green: "#3FA951",
+  error2: "#E32828"
+}
+```
+
+#### Tailwind Theme Configuration
+**File:** `/global.css`
+```css
+@theme {
+  --color-primary: #457CE2;
+  --color-secondary: #06234B;
+  --color-tertiary: #FF9E69;
+  --color-decorative: #FFD1A7;
+  --color-text: #04152D;
+  --color-subtleText: #727988;
+  --color-stroke: #E5E5EB;
+  --color-accent: #424F65;
+  --color-light: #EEEFF9;
+  --color-success: #4FD365;
+  --color-error: #FF604B;
+}
+```
+
+### Typography Tokens
+**File:** `/constants/theme.ts`
+```typescript
+export const Fonts = Platform.select({
+  ios: {
+    sans: "system-ui",
+    serif: "ui-serif",
+    rounded: "ui-rounded",
+    mono: "ui-monospace",
+  },
+  default: {
+    sans: "normal",
+    serif: "serif",
+    rounded: "normal",
+    mono: "monospace",
+  },
+  web: {
+    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    serif: "Georgia, 'Times New Roman', serif",
+    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+  },
+});
+```
+
+### Typography Scale
+- **Headings**: `text-lg font-bold` (18px), `text-xl font-bold` (20px)
+- **Body**: `text-base` (16px, default)
+- **Small**: `text-sm` (14px)
+- **Extra small**: `text-xs` (12px)
+- **Tiny**: `text-[10px]` (10px)
+- **Font weights**: `font-normal`, `font-medium`, `font-semibold`, `font-bold`
+
+### Spacing & Layout
+- **Padding**: `p-3` (12px), `p-4` (16px), `p-6` (24px)
+- **Gaps**: `gap-1` (4px), `gap-1.5` (6px), `gap-2` (8px), `gap-3` (12px)
+- **Border Radius**:
+  - Small: `rounded-xl` (14px)
+  - Large: `rounded-2xl` (20px)
+  - Full: `rounded-full`
+- **Border Width**: `border` (1px), `border-2` (2px)
+- **Safe Area**: Always use `pt-safe`, `pb-safe` for notch/status bar
+
+---
+
+## 2. Component Library
+
+### Core Component Architecture
+
+#### Text Component (CRITICAL)
+**File:** `/components/text.tsx`
+
+**MUST ALWAYS USE** - Never use React Native's `Text` directly.
+
+```typescript
+import Text from "@/components/text";
+
+// Auto-translated text
+<Text>menu.agenda</Text>
+
+// Non-translated text
+<Text>{someVariable}</Text>
+```
+
+#### Button Component
+**File:** `/components/button.tsx`
+
+```typescript
+import Button, { ButtonIcon, ButtonLink } from "@/components/button";
+
+// Standard button
+<Button
+  text="Click me"
+  type="primary"      // primary | secondary | tertiary | link | secondaryV2
+  size="large"        // small | large
+  leftIcon={<Icon />}
+  loading={isLoading}
+  onPress={handlePress}
+  className="h-14"
+/>
+
+// Icon-only button
+<ButtonIcon size="large" type="secondaryV2">
+  <IcPlus size={24} />
+</ButtonIcon>
+```
+
+#### Chip Component
+**File:** `/components/chip.tsx`
+
+```typescript
+import { Chip } from "@/components/chip";
+
+<Chip
+  text="Label"
+  type="selected"      // default | selected | disabled | uncheck
+  leftIcon={<Icon />}
+  className="custom-classes"
+/>
+```
+
+#### Activity Card Pattern (Consistent Design)
+**File:** `/components/agenda/activity-card.tsx`
+
+```typescript
+<View className="border border-stroke rounded-[14px] flex-row items-center justify-between active:opacity-80">
+  <View
+    className="pl-3 rounded-[14px] border-l-4 py-1.5 flex-1"
+    style={{ borderLeftColor: activity.color }}
+  >
+    <View className="flex-row gap-1 items-center">
+      {icon && <View>{icon}</View>}
+      <Text className="font-bold">{activity.title}</Text>
+    </View>
+    <Text className="text-subtleText text-xs mt-1">{activity.description}</Text>
+    <Text className="text-text text-[10px] mt-0.5 italic">{activity.coachName}</Text>
+  </View>
+  <IcArrowRight size={24} color={ColorConst.accent} />
+</View>
+```
+
+#### Chart Components
+**Location:** `/components/charts/`
+- Donut Chart, Line Chart, Area Chart, Bar Chart, Circular Progress
+
+---
+
+## 3. Frameworks & Libraries
+
+### Core Tech Stack
+```json
+{
+  "react": "19.1.0",
+  "react-native": "0.81.5",
+  "expo": "~54.0.27",
+  "expo-router": "~6.0.17",
+  "typescript": "~5.9.2"
+}
+```
+
+### Styling Stack
+- **Tailwind CSS v4** with **uniwind** for React Native
+- **tailwind-merge** (`cn()` utility) for class name merging
+- **tailwind-variants** (`tv()`) for component variants
+- **clsx** for conditional classes
+
+### State Management
+- **Supabase** for authentication and database
+- **React Context** for auth state (`/contexts/auth-context.tsx`)
+- **AsyncStorage** via `use-storage-state.ts` hook
+
+### UI Libraries
+- **react-native-reanimated** for animations
+- **@gorhom/bottom-sheet** for modal sheets
+- **react-native-gesture-handler** for gestures
+- **expo-haptics** for haptic feedback
+
+---
+
+## 4. Asset Management
+
+### Image Assets
+**Location:** `/assets/images/`
+
+```
+assets/images/
+├── icon.png                    # App icon
+├── splash-icon.png            # Splash screen
+├── onboarding-0.png           # Onboarding screens
+├── home-hero.png              # Home hero
+├── timer-hero.png             # Timer hero
+├── sample-avatar.png          # Default avatar
+├── coach-avatar.png           # Coach avatar
+└── library-category-*.png     # Category icons
+```
+
+### Image Usage
+```typescript
+import { Image } from "react-native";
+<Image source={require("@/assets/images/home-hero.png")} />
+```
+
+---
+
+## 5. Icon System
+
+### Icon Naming Convention
+**Pattern:** `Ic[IconName]` (PascalCase)
+**Location:** `/components/icons/`
+
+```typescript
+// Example structure
+const IcIconName = ({ size = 24, color = "#424F65" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="..." stroke={color} strokeWidth={2} />
+  </Svg>
+);
+```
+
+### Icon Categories
+- **Navigation**: `home.tsx`, `library.tsx`, `agenda.tsx`, `profile.tsx`
+- **Actions**: `plus.tsx`, `search.tsx`, `filter.tsx`, `close.tsx`
+- **Status**: `check-circle-filled.tsx`, `error.tsx`, `warning.tsx`, `info.tsx`
+- **Sports**: `cycling.tsx`, `basketball.tsx`, `bodybuilding.tsx`, `rowing.tsx`, `yoga.tsx`
+- **Equipment**: `bench.tsx`, `box.tsx`, `medicine-ball.tsx`
+
+### Icon Usage
+```typescript
+import IcArrowRight from "@/components/icons/arrow-right";
+import IcSearch from "@/components/icons/search";
+
+<IcArrowRight size={24} color={ColorConst.accent} />
+<IcSearch size={16} color={ColorConst.primary} />
+```
+
+---
+
+## 6. Styling Approach
+
+### Class Name Utility (CRITICAL)
+**File:** `/utilities/cn.ts`
+
+```typescript
+import cn from "@/utilities/cn";
+import { clsx } from "clsx";
+
+// ALWAYS use this pattern:
+className={cn(
+  "base-classes",           // Always strings
+  clsx({                    // Use clsx for conditionals
+    "conditional-class": condition,
+  }),
+  className                  // Optional prop for override
+)}
+```
+
+**NEVER pass booleans directly to `cn()`:**
+```typescript
+// ❌ WRONG
+className={cn("base", isActive && "active")}
+
+// ✅ RIGHT
+className={cn("base", clsx({ active: isActive }))}
+```
+
+### Component Variants (tailwind-variants)
+```typescript
+import { tv, VariantProps } from "tailwind-variants";
+
+const component = tv({
+  base: "base-classes",
+  variants: {
+    type: {
+      primary: "bg-primary text-white",
+      secondary: "bg-light text-secondary",
+    },
+  },
+  defaultVariants: { type: "primary" },
+});
+
+type ComponentVariants = VariantProps<typeof component>;
+```
+
+### Common Layout Patterns
+
+#### Screen Layout
+```typescript
+<View className="flex-1 bg-white">
+  <StatusBar style="auto" />
+  <ScrollView className="flex-1 pt-safe px-4">
+    {/* Content */}
+  </ScrollView>
+</View>
+```
+
+#### Card Pattern
+```typescript
+<View className="border border-stroke rounded-xl flex-row items-center justify-between pr-3">
+  <View
+    className="flex-1 py-1.5 pl-3 rounded-xl"
+    style={{ borderLeftWidth: 4, borderLeftColor: activity.color }}
+  >
+    {/* Title with icon */}
+    <View className="flex-row items-center gap-1">
+      {icon && <View>{icon}</View>}
+      <Text className="font-bold text-sm">{activity.title}</Text>
+    </View>
+    {/* Description */}
+    <Text className="text-subtleText text-xs mt-1">{activity.description}</Text>
+    {/* Coach name */}
+    <Text className="text-text text-[10px] mt-0.5 italic">{activity.coachName}</Text>
+  </View>
+  <IcArrowRight size={24} color={ColorConst.accent} />
+</View>
+```
+
+---
+
+## 7. Project Structure
+
+### File-Based Routing (Expo Router)
+```
+app/
+├── _layout.tsx              # Root layout with providers
+├── (tabs)/                  # Tab navigator
+│   ├── _layout.tsx         # Tab configuration
+│   ├── index.tsx           # Home/explore screen
+│   ├── library.tsx         # Library screen
+│   ├── agenda.tsx          # Agenda screen
+│   └── profile.tsx         # Profile screen
+├── sign-in.tsx              # Auth screens
+├── onboarding.tsx           # Onboarding flow
+└── [other-routes].tsx       # Other screens
+```
+
+### Component Organization
+```
+components/
+├── icons/                  # All icon components (Ic prefix)
+├── charts/                 # Data visualization components
+├── agenda/                 # Agenda-specific components
+├── home/                   # Home screen components
+├── session/                # Workout session components
+├── button.tsx              # Core button
+├── chip.tsx                # Chip component
+├── text.tsx                # Custom text (CRITICAL)
+└── [other components].tsx
+```
+
+### Constants & Configuration
+```
+constants/
+├── theme.ts               # Color and typography tokens
+├── route.ts               # Navigation constants (CRITICAL)
+└── storage-key.ts         # AsyncStorage keys
+
+utilities/
+├── supabase/              # Database and auth setup
+├── i18n/                  # Internationalization config
+└── cn.ts                  # Class name utility (CRITICAL)
+```
+
+### Routing Pattern (CRITICAL)
+**MUST ALWAYS use ROUTE constants:**
+
+```typescript
+import { ROUTE } from "@/constants/route";
+import { router } from "expo-router";
+
+// ✅ CORRECT
+router.push(ROUTE.CREATE_SESSION);
+
+// ❌ WRONG
+router.push("/create-session");
+```
+
+**When creating a new screen:**
+1. Add route name to `ROUTE_NAME` in `constants/route.ts`
+2. Add route path to `ROUTE` object
+3. Create corresponding file in `/app/`
+
+---
+
+## Figma-to-Code Conversion Guidelines
+
+### 1. Color Mapping
+| Figma Color | Token | Tailwind Class | Inline Style |
+|-------------|-------|----------------|--------------|
+| `#457CE2` | `ColorConst.primary` | `bg-primary`, `text-primary` | `style={{ backgroundColor: ColorConst.primary }}` |
+| `#06234B` | `ColorConst.secondary` | `bg-secondary`, `text-secondary` | `style={{ color: ColorConst.secondary }}` |
+| `#FF9E69` | `ColorConst.tertiary` | `bg-tertiary`, `text-tertiary` | - |
+| `#FFD1A7` | `ColorConst.decorative` | `bg-decorative` | - |
+| `#EEEFF9` | `ColorConst.light` | `bg-light` | - |
+| `#04152D` | `ColorConst.text` | `text-text` | `style={{ color: ColorConst.text }}` |
+| `#727988` | `ColorConst.subtleText` | `text-subtleText` | - |
+| `#E5E5EB` | `ColorConst.stroke` | `border-stroke` | - |
+| `#424F65` | `ColorConst.accent` | `text-accent` | - |
+| `#4FD365` | `ColorConst.success` | `text-success` | - |
+| `#FF604B` | `ColorConst.error` | `text-error` | - |
+
+### 2. Spacing Scale
+| Purpose | Tailwind Class | Pixel Value |
+|---------|----------------|-------------|
+| Small padding | `px-3 py-2` | 12px × 8px |
+| Medium padding | `px-4 py-3` | 16px × 12px |
+| Large padding | `p-4` | 16px all |
+| XL padding | `p-6` | 24px all |
+| Small gap | `gap-1` | 4px |
+| Medium gap | `gap-2` | 8px |
+| Large gap | `gap-3` | 12px |
+
+### 3. Border Radius
+| Usage | Tailwind Class | Pixel Value |
+|-------|----------------|-------------|
+| Small cards/buttons | `rounded-xl` | 14px |
+| Large cards/buttons | `rounded-2xl` | 20px |
+| Full rounded | `rounded-full` | 50% |
+| Custom | `rounded-[14px]` | Custom value |
+
+### 4. Typography Implementation
+```typescript
+// Headings
+<Text className="font-bold text-lg">Heading</Text>        // 18px
+<Text className="font-bold text-xl">Large Heading</Text>  // 20px
+
+// Body text
+<Text className="font-medium text-base">Body text</Text>   // 16px
+<Text className="font-normal text-sm">Small text</Text>    // 14px
+
+// Labels/captions
+<Text className="font-medium text-xs">Label</Text>         // 12px
+<Text className="font-normal text-[10px]">Tiny</Text>      // 10px
+
+// Colors
+<Text className="text-text">Main text</Text>
+<Text className="text-subtleText">Secondary text</Text>
+<Text className="text-accent">Accent text</Text>
+```
+
+### 5. Component Patterns
+
+#### Buttons
+```typescript
+// Primary button
+<Button
+  text="Primary Action"
+  type="primary"
+  size="large"
+  onPress={handlePress}
+/>
+
+// Secondary button
+<Button
+  text="Secondary"
+  type="secondary"
+  size="small"
+  onPress={handlePress}
+/>
+
+// Custom button styling
+<View className="bg-primary rounded-2xl p-4">
+  <Text className="text-white text-center font-bold">Custom Button</Text>
+</View>
+```
+
+#### Cards
+```typescript
+// Standard card
+<View className="border border-stroke rounded-xl p-4">
+  <Text className="font-bold text-lg">Card Title</Text>
+  <Text className="text-subtleText text-sm mt-2">Card content</Text>
+</View>
+
+// Card with left border accent
+<View
+  className="bg-white rounded-xl p-3"
+  style={{ borderLeftWidth: 4, borderLeftColor: ColorConst.primary }}
+>
+  <Text className="font-semibold">Card with accent</Text>
+</View>
+```
+
+#### List Items
+```typescript
+<View className="flex-row items-center justify-between py-3 border-b border-stroke">
+  <View className="flex-row items-center gap-2">
+    <IcIcon size={20} color={ColorConst.accent} />
+    <Text className="text-base">List item</Text>
+  </View>
+  <IcArrowRight size={24} color={ColorConst.accent} />
+</View>
+```
+
+### 6. Icon Usage Guide
+| Context | Size | Color |
+|---------|------|------|
+| Bottom tabs | 28 | `ColorConst.secondary` |
+| Navigation headers | 24 | `ColorConst.secondary` |
+| Inline icons | 16-20 | `ColorConst.accent` |
+| Button icons | 20-24 | Inherits from text |
+| Status icons | 16-20 | Thematic (success/error) |
+
+### 7. Screen Checklist
+Every screen MUST include:
+- [ ] `<StatusBar style="auto" />` at the top
+- [ ] `<Stack.Screen options={{ headerShown: false }} />` for custom header
+- [ ] `pt-safe` class for top padding
+- [ ] `flex-1` on main container
+- [ ] Custom `Text` component (never RN's `Text`)
+- [ ] Proper ROUTE constants for navigation
+- [ ] `cn()` + `clsx()` for conditional classes
+- [ ] Theme colors from `ColorConst` or Tailwind
+
+### 8. Common Mistakes to Avoid
+
+❌ **Don't do this:**
+```typescript
+// Using RN's Text directly
+<Text>Hello</Text>
+
+// Hardcoding colors
+<View style={{ backgroundColor: "#457CE2" }}>
+
+// Hardcoding routes
+router.push("/my-sports");
+
+// Boolean in cn()
+className={cn("base", isActive && "active")}
+
+// Missing StatusBar
+<View className="flex-1">{/* No StatusBar */}</View>
+```
+
+✅ **Do this instead:**
+```typescript
+// Use custom Text
+import Text from "@/components/text";
+<Text>Hello</Text>
+
+// Use theme colors
+import { ColorConst } from "@/constants/theme";
+<View style={{ backgroundColor: ColorConst.primary }}>
+
+// Use ROUTE constants
+import { ROUTE } from "@/constants/route";
+router.push(ROUTE.MY_SPORTS);
+
+// Use clsx for conditionals
+className={cn("base", clsx({ active: isActive }))}
+
+// Always include StatusBar
+import { StatusBar } from "expo-status-bar";
+<StatusBar style="auto" />
+```
+
+---
+
+## TypeScript Props Pattern
+
+```typescript
+interface ComponentProps {
+  // Required props first
+  title: string;
+
+  // Optional with defaults
+  size?: "small" | "large";
+  type?: "primary" | "secondary";
+
+  // Optional callbacks
+  onPress?: () => void;
+
+  // Custom styling
+  className?: string;
+
+  // React nodes
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+export function Component({
+  title,
+  size = "large",
+  type = "primary",
+  onPress,
+  className = "",
+  icon,
+}: ComponentProps) {
+  // Implementation
+}
+```
+
+---
+
+## Internationalization
+
+The app uses **react-i18next**. The custom `Text` component automatically translates text that matches translation keys:
+
+```typescript
+// Automatically translated
+<Text>menu.agenda</Text> → Shows translated "Agenda" or "Agenda"
+
+// Without translation (variables)
+<Text>{userName}</Text>
+```
+
+**Language preference** persisted in secure storage.
+**Fallback language:** French
+
+---
+
+## Database Integration
+
+- **Supabase client:** `/utilities/supabase/client.ts`
+- **Auto-generated types:** `/utilities/supabase/database.types.ts`
+- **Regenerate types after schema changes:** `pnpm db:generate --project-id "PROJECT_ID"`

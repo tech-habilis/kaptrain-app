@@ -16,8 +16,8 @@ export default function CustomSplash() {
       <Text className="text-white text-[44px] font-bold mb-4 mt-3.5 uppercase">
         {appName}
       </Text>
-      <Text className="text-white font-medium">landing.text1</Text>
-      <Text className="text-white font-medium">landing.text2</Text>
+      <Text className="text-white font-medium">L'Expertise de haut niveau,</Text>
+      <Text className="text-white font-medium">accessible à tous</Text>
     </AnimatedImageBackground>
   );
 }

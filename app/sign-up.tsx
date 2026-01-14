@@ -7,20 +7,42 @@ import { useState } from "react";
 import { View, ImageBackground, Text as RawText } from "react-native";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
-import Input from "@/components/input";
-import IcEye from "@/components/icons/eye";
-import IcEyeOff from "@/components/icons/eye-off";
-import { Trans } from "react-i18next";
+import Input, { PasswordInput } from "@/components/input";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "expo-router";
+import {
+  signUpSchema,
+  type SignUpFormData,
+} from "@/utilities/validation/schema";
 
 export default function SignIn() {
   const { signUpWithEmail, isLoggedIn: isSigningUp } = useSession();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof SignUpFormData, string>>
+  >({});
+
+  const validateForm = () => {
+    const result = signUpSchema.safeParse({ email, password, confirmPassword });
+
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof SignUpFormData, string>> = {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0]) {
+          fieldErrors[issue.path[0] as keyof SignUpFormData] = t(issue.message);
+        }
+      });
+      setErrors(fieldErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
+  };
 
   return (
     <View className="w-full h-full flex bg-white">
@@ -49,36 +71,39 @@ export default function SignIn() {
         <Input
           label="signIn.emailAddress"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (errors.email)
+              setErrors((prev) => ({ ...prev, email: undefined }));
+          }}
           placeholder="signIn.exampleEmail"
           autoCapitalize="none"
           keyboardType="email-address"
+          error={errors.email}
         />
-        <Input
+        <PasswordInput
           label="signUp.createPassword"
           value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (errors.password)
+              setErrors((prev) => ({ ...prev, password: undefined }));
+          }}
           placeholder="common.password"
           className="mt-6"
-          rightIcon={
-            showPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
-          }
-          onRightIconPress={() => setShowPassword((prev) => !prev)}
-          keyboardType={showPassword ? "visible-password" : "default"}
+          error={errors.password}
         />
-        <Input
+        <PasswordInput
           label="signUp.confirmPassword"
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry={!showConfirmPassword}
+          onChangeText={(text) => {
+            setConfirmPassword(text);
+            if (errors.confirmPassword)
+              setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+          }}
           placeholder="signUp.confirmPasswordPlaceholder"
           className="mt-6"
-          rightIcon={
-            showConfirmPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
-          }
-          onRightIconPress={() => setShowConfirmPassword((prev) => !prev)}
-          keyboardType={showConfirmPassword ? "visible-password" : "default"}
+          error={errors.confirmPassword}
         />
 
         <View className="grow" />
@@ -104,12 +129,14 @@ export default function SignIn() {
 
         <Button
           onPress={() => {
-            signUpWithEmail({
-              name: "",
-              email,
-              password,
-              confirmPassword,
-            });
+            if (validateForm()) {
+              signUpWithEmail({
+                name: "",
+                email,
+                password,
+                confirmPassword,
+              });
+            }
           }}
           disabled={isSigningUp}
           text="signUp.createAccount"

@@ -1,7 +1,7 @@
-import { StatisticWidget } from "@/constants/mock";
 import { View } from "react-native";
 import Text from "./text";
 import cn from "@/utilities/cn";
+import { StatisticWidget } from "@/types";
 
 export default function StatisticWidgetCard({
   statistic,

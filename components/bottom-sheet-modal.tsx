@@ -14,8 +14,9 @@ const BottomSheetModal = forwardRef<
     children: React.ReactNode;
     name: string;
     className?: string;
+    withHandle?: boolean;
   }
->(({ className = "", name, children, ...props }, ref) => {
+>(({ className = "", name, children, withHandle = true, ...props }, ref) => {
   return (
     <RawBottomSheetModal
       ref={ref}
@@ -27,10 +28,11 @@ const BottomSheetModal = forwardRef<
           appearsOnIndex={0}
         />
       )}
-      handleComponent={(props) => <BottomSheetHandle {...props} name={name} />}
+      handleComponent={(props) =>
+        withHandle ? <BottomSheetHandle {...props} name={name} /> : null
+      }
       {...props}
       name={name}
-
     >
       <BottomSheetView className={cn("h-full px-4", className)}>
         {children}

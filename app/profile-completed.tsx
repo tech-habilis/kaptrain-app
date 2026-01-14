@@ -5,11 +5,8 @@ import Text from "@/components/text";
 import Button from "@/components/button";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
-import { useSession } from "@/contexts/auth-context";
 
 export default function ProfileCompleted() {
-  const { setProfileCompleted } = useSession();
-
   return (
     <ImageBackground
       source={require("../assets/images/mail-verified.png")}
@@ -31,7 +28,6 @@ export default function ProfileCompleted() {
           className="w-full mb-6"
           text="profileCompleted.explore"
           onPress={() => {
-            setProfileCompleted();
             router.replace(ROUTE.TABS);
           }}
         />

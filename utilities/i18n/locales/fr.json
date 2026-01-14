@@ -10,7 +10,7 @@
     "loginToYourAccount": "Connecte-toi à ton compte",
     "youDontHaveAnAccount": "Tu n'as pas de compte ?",
     "signUp": "Inscris toi",
-    "emailAddress": "Adresse email",
+    "emailAddress": "Adresse mail",
     "forgotPassword": "Mot de passe oublié ?",
     "exampleEmail": "exemple@gmail.com",
     "signIn": "Se connecter",
@@ -19,11 +19,12 @@
   },
   "menu": {
     "home": "Accueil",
-    "profile": "Profil",
-    "tips": "Conseils",
-    "articles": "Articles"
+    "library": "Bibliothèque",
+    "agenda": "Agenda",
+    "profile": "Profil"
   },
   "common": {
+    "hello": "Bonjour",
     "helloWorld": "Bonjour tout le monde ! Ceci est un message de test pour ceux qui ont essayé la fonctionnalité de langue. Bien que les utilisateurs de cette application n'utilisent probablement que l'anglais, qui sait s'ils utilisent le français ou le japonais ?",
     "password": "Mot de passe",
     "next": "Suivant",
@@ -33,6 +34,26 @@
   "error": {
     "googleSignInFailed": "Échec de la connexion avec Google. Veuillez réessayer plus tard ou contacter le support.",
     "emailAndPasswordRequired": "Email et mot de passe sont requis."
+  },
+  "validation": {
+    "passwordRequired": "Le mot de passe est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordUppercase": "Le mot de passe doit contenir au moins 1 majuscule",
+    "passwordNumber": "Le mot de passe doit contenir au moins 1 chiffre",
+    "passwordSpecial": "Le mot de passe doit contenir au moins 1 caractère spécial",
+    "emailRequired": "L'email est requis",
+    "emailInvalid": "Adresse mail invalide",
+    "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
+    "currentPasswordRequired": "Le mot de passe actuel est requis",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameRequired": "Le nom est requis",
+    "birthDateRequired": "La date de naissance est requise",
+    "genderRequired": "Le genre est requis",
+    "weightRequired": "Le poids est requis",
+    "sportLevelRequired": "Le niveau de sport est requis",
+    "atLeastOneSportRequired": "Veuillez sélectionner au moins un sport",
+    "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports"
   },
   "landing": {
     "text1": "L'Expertise de haut niveau,",

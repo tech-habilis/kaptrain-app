@@ -1,7 +1,6 @@
 /* eslint-disable import/no-named-as-default-member */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import * as Localization from "expo-localization";
 import * as SessionStorage from "expo-secure-store";
 import { STORAGE_KEY } from "@/constants/storage-key";
 
@@ -16,7 +15,6 @@ const resources = {
 export const initI18n = async () => {
   let savedLanguage =
     (await SessionStorage.getItemAsync(STORAGE_KEY.LANGUAGE)) ||
-    Localization.getLocales()[0].languageCode ||
     "fr";
 
   i18n.use(initReactI18next).init({
