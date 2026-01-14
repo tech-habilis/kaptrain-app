@@ -55,7 +55,7 @@ export default function ProfileScreen() {
       <ImageBackground source={require("../../assets/images/profile-hero.png")}>
         <View className="px-4 pt-safe pb-6 flex-row gap-3 items-center">
           <Image
-            source={require("../../assets/images/sample-avatar.png")}
+            source={{uri: session?.user?.avatarUrl || ''}}
             className="rounded-lg border border-white size-14"
           />
 

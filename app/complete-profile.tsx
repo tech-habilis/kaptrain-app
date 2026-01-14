@@ -64,7 +64,10 @@ export default function CompleteProfile() {
   // Load existing profile data on mount
   useEffect(() => {
     if (session?.user?.id) {
-      loadProfileData(session.user.id);
+      loadProfileData(session.user.id, {
+        name: session.user.name,
+        avatarUrl: session.user.avatarUrl,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);

@@ -12,11 +12,20 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.kaptrain",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.470536532763-kf2rekjkhpmt7ij9bcu70udr8ghrrhnj"
+            ]
+          }
+        ]
       },
       "usesAppleSignIn": true,
       "appleTeamId": "CTWKNVBLA8",
-      "scheme": ["com.googleusercontent.apps.470536532763-kf2rekjkhpmt7ij9bcu70udr8ghrrhnj"]
+      "scheme": [
+        "com.googleusercontent.apps.470536532763-kf2rekjkhpmt7ij9bcu70udr8ghrrhnj"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -55,7 +64,13 @@
       "expo-apple-authentication",
       "expo-font",
       "expo-web-browser",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you use them as profile picture."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

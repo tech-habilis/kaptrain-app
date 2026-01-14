@@ -37,7 +37,7 @@ interface CompleteProfileState {
   updateStep5: (data: Partial<Step5FormData>) => void;
   setLocalAvatarUri: (uri: string | null) => void;
   saveStep: (step: number, userId: string) => Promise<boolean>;
-  loadProfileData: (userId: string) => Promise<void>;
+  loadProfileData: (userId: string, authMetadata?: { name: string | null; avatarUrl: string | null }) => Promise<void>;
   validateStep: (step: number) => boolean;
   reset: () => void;
 }
@@ -116,7 +116,7 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
 
   setLocalAvatarUri: (uri) => set({ localAvatarUri: uri }),
 
-  loadProfileData: async (userId) => {
+  loadProfileData: async (userId, authMetadata) => {
     try {
       set({ isLoading: true });
 
@@ -165,6 +165,21 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
         if (Array.isArray(prefs.selectedSports)) {
           mappedData.selectedSports = prefs.selectedSports as string[];
         }
+      }
+
+      // If profile is empty (new user from OAuth), populate from auth metadata
+      if (!mappedData.firstName && !mappedData.lastName && authMetadata?.name) {
+        const nameParts = authMetadata.name.trim().split(" ");
+        if (nameParts.length > 0) {
+          mappedData.firstName = nameParts[0];
+          if (nameParts.length > 1) {
+            mappedData.lastName = nameParts.slice(1).join(" ");
+          }
+        }
+      }
+
+      if (!mappedData.avatarUrl && authMetadata?.avatarUrl) {
+        mappedData.avatarUrl = authMetadata.avatarUrl;
       }
 
       set((state) => ({
