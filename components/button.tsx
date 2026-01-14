@@ -27,8 +27,8 @@ const button = tv({
       large: "rounded-2xl p-4",
     },
     disabled: {
-      true: "opacity-40",
-      false: "active:opacity-80",
+      true: "bg-primary/90",
+      // false: "active:opacity-80",
     },
   },
   compoundVariants: [
@@ -103,9 +103,9 @@ export default function Button({
     loading?: boolean;
     children?: React.ReactNode;
   }) {
-    if (text && children) {
-      throw new Error("Button cannot have both text prop and children");
-    }
+  if (text && children) {
+    throw new Error("Button cannot have both text prop and children");
+  }
 
   const loadingColorMap: Record<
     Exclude<ButtonVariants["type"], undefined>,

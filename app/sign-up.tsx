@@ -92,6 +92,7 @@ export default function SignIn() {
           placeholder="common.password"
           className="mt-6"
           error={errors.password}
+          hintText="signUp.passwordRequirements"
         />
         <PasswordInput
           label="signUp.confirmPassword"

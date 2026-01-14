@@ -58,6 +58,7 @@ export default function Input({
   style,
   asPressable = false,
   onPress,
+  hintText,
   ...props
 }: TextInputProps &
   ComponentProps<typeof inputWrapper> & {
@@ -69,6 +70,7 @@ export default function Input({
     inputClassName?: string;
     error?: string;
     asPressable?: boolean;
+    hintText?: string;
   }) {
   const { t } = useTranslation();
 
@@ -134,7 +136,16 @@ export default function Input({
           {renderRightSide()}
         </View>
       </Pressable>
-      {error && <Text className="text-error2 text-xs">{error}</Text>}
+
+      {/* hint & error text */}
+      <Text
+        className={clsx("text-subtleText text-xs", {
+          "text-error2": !!error,
+          "hidden": !error && !hintText
+        })}
+      >
+        {error !== undefined ? error : hintText !== undefined ? hintText : ""}
+      </Text>
     </View>
   );
 }
