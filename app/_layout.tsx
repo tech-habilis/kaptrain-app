@@ -72,9 +72,9 @@ function RootNavigator() {
     >
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
+        <Stack.Protected guard={showCompleteProfileForm}>
         <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
-        {/*<Stack.Protected guard={showCompleteProfileForm}>
-        </Stack.Protected>*/}
+        </Stack.Protected>
 
         <Stack.Screen name={ROUTE_NAME.TABS} />
       </Stack.Protected>

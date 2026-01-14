@@ -7,12 +7,15 @@ import DatePicker from "@/components/date-picker";
 import Text from "@/components/text";
 import { useTranslation } from "react-i18next";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
-import { ScrollView, View } from "react-native";
+import { View, Image, Pressable, Alert } from "react-native";
+import { useState } from "react";
 import dayjs from "dayjs";
+import * as ImagePicker from "expo-image-picker";
 
 export function Step1() {
   const { t } = useTranslation();
-  const { formData, errors, updateStep1 } = useCompleteProfileStore();
+  const { formData, errors, updateStep1, localAvatarUri, setLocalAvatarUri } = useCompleteProfileStore();
+  const [isPickerLoading, setIsPickerLoading] = useState(false);
 
   const genders: TChoice[] = [
     { text: "completeProfile.step1.genderFemale" },
@@ -22,14 +25,78 @@ export function Step1() {
 
   const selectedGender = genders.find((g) => g.text === formData.gender);
 
+  const handlePickImage = async () => {
+    try {
+      setIsPickerLoading(true);
+
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          t("completeProfile.step1.permissionDenied") || "Permission needed",
+          t("completeProfile.step1.permissionMessage") ||
+            "Sorry, we need camera roll permissions to make this work."
+        );
+        return;
+      }
+
+      // Pick image
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        // Store local URI for preview and upload
+        updateStep1({ avatarUrl: uri });
+        setLocalAvatarUri(uri);
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert(
+        t("completeProfile.step1.errorTitle") || "Error",
+        t("completeProfile.step1.errorMessage") || "Failed to pick image. Please try again."
+      );
+    } finally {
+      setIsPickerLoading(false);
+    }
+  };
+
+  const displayImageUri = localAvatarUri || formData.avatarUrl;
+
   return (
     <View className="gap-6 mt-6">
-      <View className="bg-light self-center p-6 rounded-2xl relative">
-        <IcUser />
-
-        <View className="absolute bg-primary p-1 -right-2 -bottom-2 rounded-lg items-center justify-center">
-          <IcPlus />
-        </View>
+      <View className="items-center">
+        <Pressable
+          className="bg-light rounded-2xl relative overflow-hidden"
+          onPress={handlePickImage}
+          disabled={isPickerLoading}
+        >
+          {displayImageUri ? (
+            <Image
+              source={{ uri: displayImageUri }}
+              className="w-28 h-28"
+              style={{ borderRadius: 16 }}
+            />
+          ) : (
+            <View className="w-28 h-28 items-center justify-center">
+              <IcUser />
+            </View>
+          )}
+          <View className="absolute bg-primary p-2 -right-2 -bottom-2 rounded-lg items-center justify-center">
+            {isPickerLoading ? (
+              <View className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+            ) : (
+              <IcPlus size={20} color="#FFFFFF" />
+            )}
+          </View>
+        </Pressable>
+        <Text className="text-subtleText text-xs mt-2">
+          completeProfile.step1.avatarHint
+        </Text>
       </View>
 
       <Input

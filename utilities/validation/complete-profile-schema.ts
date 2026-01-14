@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Step 1: Personal Information
 export const step1Schema = z.object({
+  avatarUrl: z.string().optional(),
   firstName: z.string().min(1, "validation.firstNameRequired"),
   lastName: z.string().min(1, "validation.lastNameRequired"),
   birthDate: z.string().min(1, "validation.birthDateRequired"),

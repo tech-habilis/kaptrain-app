@@ -15,6 +15,7 @@ import {
   step5Schema,
 } from "@/utilities/validation/complete-profile-schema";
 import { updateUserProfile, getUserProfile } from "@/utilities/supabase/profile";
+import { uploadProfileImage } from "@/utilities/supabase/storage";
 import { toast } from "@/components/toast";
 
 interface CompleteProfileState {
@@ -23,6 +24,7 @@ interface CompleteProfileState {
   errors: Partial<Record<keyof CompleteProfileFormData, string>>;
   isSaving: boolean;
   isLoading: boolean;
+  localAvatarUri: string | null; // For preview before upload
 
   // Actions
   setCurrentStep: (step: number) => void;
@@ -33,6 +35,7 @@ interface CompleteProfileState {
   updateStep3: (data: Partial<Step3FormData>) => void;
   updateStep4: (data: Partial<Step4FormData>) => void;
   updateStep5: (data: Partial<Step5FormData>) => void;
+  setLocalAvatarUri: (uri: string | null) => void;
   saveStep: (step: number, userId: string) => Promise<boolean>;
   loadProfileData: (userId: string) => Promise<void>;
   validateStep: (step: number) => boolean;
@@ -40,6 +43,7 @@ interface CompleteProfileState {
 }
 
 const initialState: CompleteProfileFormData = {
+  avatarUrl: "",
   firstName: "",
   lastName: "",
   birthDate: "",
@@ -57,6 +61,7 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
   errors: {},
   isSaving: false,
   isLoading: false,
+  localAvatarUri: null,
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -109,6 +114,8 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
     }));
   },
 
+  setLocalAvatarUri: (uri) => set({ localAvatarUri: uri }),
+
   loadProfileData: async (userId) => {
     try {
       set({ isLoading: true });
@@ -119,6 +126,7 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
       const mappedData: Partial<CompleteProfileFormData> = {};
 
       // Step 1: Personal info
+      if (profile.avatar_url) mappedData.avatarUrl = profile.avatar_url;
       if (profile.first_name) mappedData.firstName = profile.first_name;
       if (profile.last_name) mappedData.lastName = profile.last_name;
       if (profile.date_of_birth) mappedData.birthDate = profile.date_of_birth;
@@ -171,13 +179,32 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
   },
 
   saveStep: async (step, userId) => {
-    const { formData } = get();
+    const { formData, localAvatarUri } = get();
 
     try {
       set({ isSaving: true });
 
       // Map form data to database schema
       const updates: Record<string, any> = {};
+
+      // Step 1: Upload avatar if user just picked one
+      if (step >= 1 && localAvatarUri) {
+        try {
+          const avatarUrl = await uploadProfileImage(userId, localAvatarUri);
+          updates.avatar_url = avatarUrl;
+          // Update form data with the uploaded URL
+          set((state) => ({
+            formData: { ...state.formData, avatarUrl: avatarUrl },
+            localAvatarUri: null, // Clear local URI after upload
+          }));
+        } catch (error: any) {
+          console.error("Error uploading avatar:", error);
+          toast.error(error.message || "Failed to upload profile image");
+          // Don't proceed if avatar upload fails
+          set({ isSaving: false });
+          return false;
+        }
+      }
 
       // Step 1: Personal info
       if (step >= 1 && formData.firstName && formData.lastName) {
@@ -312,5 +339,6 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
     errors: {},
     isSaving: false,
     isLoading: false,
+    localAvatarUri: null,
   }),
 }));
