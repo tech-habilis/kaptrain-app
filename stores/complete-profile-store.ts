@@ -17,6 +17,7 @@ import {
 import { updateUserProfile, getUserProfile } from "@/utilities/supabase/profile";
 import { uploadProfileImage } from "@/utilities/supabase/storage";
 import { toast } from "@/components/toast";
+import { supabase } from "@/utilities/supabase";
 
 interface CompleteProfileState {
   currentStep: number;
@@ -276,6 +277,25 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
       // Only update if we have data to save
       if (Object.keys(updates).length > 0) {
         await updateUserProfile(userId, updates);
+
+        // Also update auth metadata to keep in sync with database
+        if (step >= 1 && (updates.first_name || updates.last_name || updates.avatar_url)) {
+          try {
+            const fullName = updates.first_name || updates.last_name
+              ? `${updates.first_name || ""} ${updates.last_name || ""}`.trim()
+              : undefined;
+
+            await supabase.auth.updateUser({
+              data: {
+                ...(fullName && { name: fullName }),
+                ...(updates.avatar_url && { avatar_url: updates.avatar_url }),
+              },
+            });
+          } catch (authError) {
+            console.error("Error updating auth metadata:", authError);
+            // Don't fail the save if auth metadata update fails
+          }
+        }
       }
 
       set({ isSaving: false });
