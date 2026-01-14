@@ -48,5 +48,6 @@ app-example
 
 
 build-*.apk
+kaptrain-*.apk
 
 credentials.json
