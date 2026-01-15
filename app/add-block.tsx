@@ -1,5 +1,4 @@
 import Button from "@/components/button";
-import IcArrowLeft from "@/components/icons/arrow-left";
 import IcPlus from "@/components/icons/plus";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
@@ -21,7 +20,11 @@ import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import Input from "@/components/input";
 import IcSearch from "@/components/icons/search";
 import IcFilter from "@/components/icons/filter";
-import getExercises, { mockExercises } from "@/constants/mock";
+import getExercises, {
+  intensityOptions,
+  mockExercises,
+  zoneReference,
+} from "@/constants/mock";
 import { Choices } from "@/components/choices";
 import Tabs from "@/components/tabs";
 import IcInfoCircle from "@/components/icons/info-circle";
@@ -29,6 +32,7 @@ import { clsx } from "clsx";
 import ExerciseCards from "@/components/exercise-cards";
 import BasicScreen from "@/components/basic-screen";
 import { TimerPickerModal } from "react-native-timer-picker";
+import IcChevronDown from "@/components/icons/chevron-down";
 
 export default function AddBlock() {
   const { mode } = useLocalSearchParams();
@@ -41,21 +45,17 @@ export default function AddBlock() {
     "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
   );
 
-  const intensityOptions: TChoice[] = [
-    { text: "Aucun" },
-    { text: "FORCE (%RM)" },
-    { text: "Cardiaque (%FC Max)" },
-    { text: "Puissance (%PMA)" },
-    { text: "Puissance (%FTP)" },
-    { text: "Vitesse (%VMA)" },
-    { text: "Vitesse (Vitesse brute)" },
-    { text: "Ressenti (RPE physique)" },
-    { text: "Ressenti (RPE cognitif)" },
-  ];
-
   const [selectedIntensity, setSelectedIntensity] = useState<TChoice>(
     intensityOptions[0],
   );
+
+  const durationOrDistanceTabs = ["Temps", "Distance"];
+  const [tabDurationOrDistance, setTabDurationOrDistance] = useState(
+    durationOrDistanceTabs[0],
+  );
+
+  const [series, setSeries] = useState<string>();
+  const [recovery, setRecovery] = useState<string>();
   const [vmaValue, setVmaValue] = useState<string>("");
   const [exercises, setExercises] = useState<Exercise[]>(mockExercises);
 
@@ -66,47 +66,13 @@ export default function AddBlock() {
   };
   const [showInputTime, setShowInputTime] = useState(false);
   const [vmaDuration, setVmaDuration] = useState<typeof defaultVmaDuration>();
+  const [vmaDistance, setVmaDistance] = useState("");
 
-  const reference = [
-    {
-      zone: "Zones",
-      percentage: "Pourcentage VMA",
-      targetPace: "Allure cible (km/h)",
-      color: ColorConst.secondary,
-    },
-    {
-      zone: "Z1",
-      percentage: "30-50%",
-      targetPace: "9:00 – 6:00",
-      color: ColorConst.success,
-    },
-    {
-      zone: "Z2",
-      percentage: "51-70%",
-      targetPace: "5:53 – 4:17",
-      color: "#CEA700",
-    },
-    {
-      zone: "Z3",
-      percentage: "71-91%",
-      targetPace: "4:13 – 3:45",
-      color: "#DB8000",
-    },
-    {
-      zone: "Z4",
-      percentage: "85-105%",
-      targetPace: "3:42 – 3:18",
-      color: "#E65B08",
-    },
-    {
-      zone: "Z5",
-      percentage: "91-105%",
-      targetPace: "3:18 – 3:00",
-      color: "#E35D56",
-    },
-    { zone: "Z6", percentage: "150%", targetPace: "2:30", color: "#E04D60" },
-    { zone: "Z7", percentage: "250%", targetPace: "1:30", color: "#BA0003" },
-  ];
+  const zones: TChoice[] = zoneReference.slice(1).map((x) => ({
+    text: x.zone,
+    secondaryText: x.percentage,
+  }));
+  const [selectedZone, setSelectedZone] = useState<TChoice>();
 
   const referenceModalRef = useRef<BottomSheetModalType>(null);
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
@@ -139,6 +105,60 @@ export default function AddBlock() {
     bottomSheetModalRef.current?.dismiss();
   };
 
+  const renderDurationOrDistanceTabs = () => {
+    if (tabDurationOrDistance === "Distance") {
+      return (
+        <Input
+          value={vmaDistance}
+          onChangeText={setVmaDistance}
+          placeholder="0 km"
+          inputClassName="text-center"
+          translate={false}
+          keyboardType="decimal-pad"
+          returnKeyType="done"
+        />
+      );
+    }
+
+    return (
+      <>
+        <Input
+          value={
+            vmaDuration
+              ? Object.values(vmaDuration)
+                  .map((x) => x.toString().padStart(2, "0"))
+                  .join(":")
+              : undefined
+          }
+          asPressable
+          onPress={() => setShowInputTime(true)}
+          placeholder="00:00:00"
+          inputClassName="text-center"
+          translate={false}
+        />
+
+        <TimerPickerModal
+          closeOnOverlayPress
+          modalProps={{
+            overlayOpacity: 0.2,
+          }}
+          onCancel={() => setShowInputTime(false)}
+          onConfirm={({ hours, minutes, seconds }) => {
+            setVmaDuration({ hours, minutes, seconds });
+            setShowInputTime(false);
+          }}
+          styles={{
+            theme: "light",
+          }}
+          visible={showInputTime}
+          setIsVisible={() => setShowInputTime(false)}
+          initialValue={defaultVmaDuration}
+          hideDays
+        />
+      </>
+    );
+  };
+
   return (
     <BasicScreen
       title={isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
@@ -149,7 +169,7 @@ export default function AddBlock() {
       {/* Main Content */}
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-4 pb-32"
+        contentContainerClassName="px-4 pb-38"
         showsVerticalScrollIndicator={false}
       >
         {/* Block Title Input */}
@@ -206,64 +226,52 @@ export default function AddBlock() {
                 placeholder="0"
                 type="unit"
                 unit="series"
-                value={vmaValue}
-                onChangeText={setVmaValue}
+                value={series}
+                onChangeText={setSeries}
                 className="grow"
                 inputClassName="text-base font-normal"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
               />
 
               <Input
                 placeholder="0s"
                 type="unit"
                 unit="Récup"
-                value={vmaValue}
-                onChangeText={setVmaValue}
+                value={recovery}
+                onChangeText={setRecovery}
                 className="grow"
                 inputClassName="text-base font-normal"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
               />
             </View>
 
             <Tabs
-              tabs={["Temps", "Distance"]}
-              selected="Temps"
-              onSelected={() => null}
+              tabs={durationOrDistanceTabs}
+              selected={tabDurationOrDistance}
+              onSelected={setTabDurationOrDistance}
             />
 
-            <Input
-              value={
-                vmaDuration
-                  ? Object.values(vmaDuration)
-                      .map((x) => x.toString().padStart(2, "0"))
-                      .join(":")
-                  : undefined
-              }
-              asPressable
-              onPress={() => setShowInputTime(true)}
-              placeholder="00:00:00"
-              inputClassName="text-center"
-            />
-            <TimerPickerModal
-              closeOnOverlayPress
-              modalProps={{
-                overlayOpacity: 0.2,
-              }}
-              onCancel={() => setShowInputTime(false)}
-              onConfirm={({ hours, minutes }) => {}}
-              styles={{
-                theme: "light",
-              }}
-              visible={showInputTime}
-              setIsVisible={() => setShowInputTime(false)}
-              initialValue={defaultVmaDuration}
-              hideSeconds
-            />
+            {renderDurationOrDistanceTabs()}
 
             <Tabs
               tabs={["Zone", "%"]}
               selected="Zone"
               onSelected={() => null}
             />
-            <Input placeholder="Z1 30-50%" inputClassName="text-center" />
+            <Dropdown
+              type="input"
+              placeholder="Z1 30-50%"
+              options={zones}
+              selectedOption={selectedZone}
+              onSelect={setSelectedZone}
+              modalHeight="90%"
+              rightIcon={<IcChevronDown />}
+              formatLabel={(choice) => `${choice.text} ${choice.secondaryText}`}
+              inputWrapperClassName="justify-center"
+              textClassName="flex-none"
+            />
 
             <BottomSheetModal
               ref={referenceModalRef}
@@ -286,7 +294,7 @@ export default function AddBlock() {
               </View>
               <FlatList
                 contentContainerClassName="mt-6"
-                data={reference}
+                data={zoneReference}
                 renderItem={({ item, index }) => (
                   <View className="flex-row items-center overflow-hidden">
                     <Text
@@ -358,6 +366,7 @@ export default function AddBlock() {
             // Save block and go back
             router.back();
           }}
+          className="mb-6"
         />
       </View>
 

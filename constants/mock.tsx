@@ -310,3 +310,56 @@ export const ALL_SPORTS: SportOption[] = [
   },
   { id: "yoga", name: "Yoga", icon: <IcYoga size={24} /> },
 ];
+
+export const zoneReference = [
+  {
+    zone: "Zones",
+    percentage: "Pourcentage VMA",
+    targetPace: "Allure cible (km/h)",
+    color: ColorConst.secondary,
+  },
+  {
+    zone: "Z1",
+    percentage: "30-50%",
+    targetPace: "9:00 – 6:00",
+    color: ColorConst.success,
+  },
+  {
+    zone: "Z2",
+    percentage: "51-70%",
+    targetPace: "5:53 – 4:17",
+    color: "#CEA700",
+  },
+  {
+    zone: "Z3",
+    percentage: "71-91%",
+    targetPace: "4:13 – 3:45",
+    color: "#DB8000",
+  },
+  {
+    zone: "Z4",
+    percentage: "85-105%",
+    targetPace: "3:42 – 3:18",
+    color: "#E65B08",
+  },
+  {
+    zone: "Z5",
+    percentage: "91-105%",
+    targetPace: "3:18 – 3:00",
+    color: "#E35D56",
+  },
+  { zone: "Z6", percentage: "150%", targetPace: "2:30", color: "#E04D60" },
+  { zone: "Z7", percentage: "250%", targetPace: "1:30", color: "#BA0003" },
+];
+
+export const intensityOptions: TChoice[] = [
+  { text: "Aucun" },
+  { text: "FORCE (%RM)" },
+  { text: "Cardiaque (%FC Max)" },
+  { text: "Puissance (%PMA)" },
+  { text: "Puissance (%FTP)" },
+  { text: "Vitesse (%VMA)" },
+  { text: "Vitesse (Vitesse brute)" },
+  { text: "Ressenti (RPE physique)" },
+  { text: "Ressenti (RPE cognitif)" },
+];

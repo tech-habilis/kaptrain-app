@@ -59,6 +59,8 @@ export default function Input({
   asPressable = false,
   onPress,
   hintText,
+  translate = true,
+  inputWrapperClassName = "",
   ...props
 }: TextInputProps &
   ComponentProps<typeof inputWrapper> & {
@@ -71,6 +73,8 @@ export default function Input({
     error?: string;
     asPressable?: boolean;
     hintText?: string;
+    translate?: boolean;
+    inputWrapperClassName?: string;
   }) {
   const { t } = useTranslation();
 
@@ -105,20 +109,28 @@ export default function Input({
   return (
     <View className={cn("flex flex-col gap-2", className)}>
       {label && (
-        <Text className="text-accent font-medium text-sm">{label}</Text>
+        <Text className="text-accent font-medium text-sm" translate={translate}>
+          {label}
+        </Text>
       )}
       <Pressable onPress={asPressable ? onPress : undefined}>
         <View
           pointerEvents={asPressable ? "none" : undefined}
-          className={clsx(inputWrapper({ type }), {
-            "border-error2": !!error,
-          })}
+          className={clsx(
+            inputWrapper({ type }),
+            {
+              "border-error2": !!error,
+            },
+            inputWrapperClassName,
+          )}
         >
           {renderLeftSide()}
           <TextInput
             className={cn(input({ type }), inputClassName)}
             placeholderTextColor={ColorConst.subtleText}
-            placeholder={placeholder ? t(placeholder) : undefined}
+            placeholder={
+              placeholder && translate ? t(placeholder) : placeholder
+            }
             keyboardType={
               keyboardType !== undefined
                 ? keyboardType
@@ -141,8 +153,9 @@ export default function Input({
       <Text
         className={clsx("text-subtleText text-xs", {
           "text-error2": !!error,
-          "hidden": !error && !hintText
+          hidden: !error && !hintText,
         })}
+        translate={translate}
       >
         {error !== undefined ? error : hintText !== undefined ? hintText : ""}
       </Text>

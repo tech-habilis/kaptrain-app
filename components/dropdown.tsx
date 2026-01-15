@@ -11,7 +11,7 @@ import Input from "./input";
 import { useTranslation } from "react-i18next";
 
 interface DropdownProps {
-  label: string;
+  label?: string;
   options: TChoice[];
   selectedOption?: TChoice;
   onSelect: (option: TChoice) => void;
@@ -25,6 +25,9 @@ interface DropdownProps {
   type?: "default" | "input";
   modalHeight?: string | number;
   itemType?: ComponentProps<typeof Choices>["type"];
+  formatLabel?: (choice: TChoice) => string;
+  placeholder?: string;
+  inputWrapperClassName?: ComponentProps<typeof Input>["inputWrapperClassName"];
 }
 
 export default function Dropdown({
@@ -42,6 +45,9 @@ export default function Dropdown({
   alwaysShowLabel = false,
   modalHeight = "65%",
   itemType = "radio",
+  formatLabel,
+  inputWrapperClassName,
+  placeholder,
 }: DropdownProps) {
   const { t } = useTranslation();
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
@@ -52,12 +58,16 @@ export default function Dropdown({
   };
 
   const renderShownText = () => {
-    if (alwaysShowLabel && selectedOption?.text !== undefined) {
+    if (
+      label !== undefined &&
+      alwaysShowLabel &&
+      selectedOption?.text !== undefined
+    ) {
       return (
         <View className="gap-1">
           <Text className="text-subtleText text-xs">{label}</Text>
           <Text className="text-sm font-semibold text-text">
-            {selectedOption?.text}
+            {formatLabel ? formatLabel(selectedOption) : selectedOption.text}
           </Text>
         </View>
       );
@@ -66,12 +76,16 @@ export default function Dropdown({
     if (selectedOption?.text !== undefined) {
       return (
         <Text className="text-sm font-semibold text-text">
-          {selectedOption?.text}
+          {formatLabel ? formatLabel(selectedOption) : selectedOption.text}
         </Text>
       );
     }
 
-    return <Text className="text-sm text-subtleText">{label}</Text>;
+    if (label) {
+      return <Text className="text-sm text-subtleText">{label}</Text>;
+    }
+
+    return null;
   };
 
   return (
@@ -90,9 +104,19 @@ export default function Dropdown({
       ) : (
         <Input
           label={label}
-          value={t(selectedOption?.text || "")}
+          value={
+            selectedOption
+              ? formatLabel
+                ? formatLabel(selectedOption)
+                : t(selectedOption?.text || "")
+              : undefined
+          }
           asPressable
           onPress={() => bottomSheetModalRef.current?.present()}
+          inputClassName={textClassName}
+          rightIcon={rightIcon}
+          inputWrapperClassName={inputWrapperClassName}
+          placeholder={placeholder}
         />
       )}
 
