@@ -1,4 +1,4 @@
-import Button, { ButtonIcon } from "@/components/button";
+import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcPlus from "@/components/icons/plus";
 import Input from "@/components/input";
@@ -6,134 +6,68 @@ import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { ROUTE } from "@/constants/route";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import DatePicker from "@/components/date-picker";
 import { DateType } from "react-native-ui-datepicker";
 import { StatusBar } from "expo-status-bar";
-import IcDrag from "@/components/icons/drag";
 import IcPencil from "@/components/icons/pencil";
-import { Chip } from "@/components/chip";
 import IcCycling from "@/components/icons/cycling";
 import { clsx } from "clsx";
-import IcTrash from "@/components/icons/trash";
-import BottomSheetModal, {
-  RawBottomSheetModalType,
-} from "@/components/bottom-sheet-modal";
 import IcClose from "@/components/icons/close";
 import { TimerPickerModal } from "react-native-timer-picker";
-import { SelectTimeProp, TChoice } from "@/types";
+import { SelectTimeProp, TrainingBlock, TChoice } from "@/types";
 import { supabase } from "@/utilities/supabase";
 import { Choices } from "@/components/choices";
 import FilterAndSelectModal from "@/components/filter-and-select-modal";
+import { useSession } from "@/contexts/auth-context";
+import { z } from "zod";
+import dayjs from "dayjs";
+import Stepper from "@/components/stepper";
+import SessionBlock from "@/components/session-block";
+import ConfirmActionModal from "@/components/confirm-action-modal";
 
-const Stepper = ({ current, total }: { current: number; total: number }) => {
-  return (
-    <View className="flex-row gap-2 py-4">
-      {Array.from({ length: total }).map((_, index) => (
-        <View
-          key={index}
-          className={`flex-1 h-2 rounded-full ${
-            index < current ? "bg-secondary" : "bg-light"
-          }`}
-        />
-      ))}
-    </View>
-  );
-};
-
-interface TrainingBlock {
-  id: string;
-  title: string;
-  exerciseCount: number;
-}
-
-const SessionBlock = ({
-  block,
-  onClickDelete,
-}: {
-  block: TrainingBlock;
-  onClickDelete: () => void;
-}) => {
-  const [showMenu, setShowMenu] = useState(false);
-
-  return (
-    <View
-      className={clsx("flex-row gap-4 items-center", {
-        "-translate-x-18": showMenu,
-      })}
-    >
-      <Pressable
-        className="border border-stroke rounded-xl p-3 flex-row items-center gap-2 w-full"
-        onLongPress={() => setShowMenu(!showMenu)}
-      >
-        {/* Drag Handle */}
-        <View className="size-8 rotate-90 items-center justify-center cla">
-          <IcDrag size={24} />
-        </View>
-
-        {/* Block Content */}
-        <View className="flex-1 gap-1">
-          <Text
-            numberOfLines={1}
-            className="text-sm font-semibold text-secondary leading-6"
-          >
-            {block.title}
-          </Text>
-
-          {/* Exercise Count Tag */}
-          <View className="flex-row">
-            <Chip
-              text={`${block.exerciseCount} exercices`}
-              type="default"
-              className="bg-light border-0"
-            />
-          </View>
-        </View>
-
-        {/* Drag Handle (right side) */}
-        <Pressable
-          className="size-8"
-          onPress={() =>
-            router.push({
-              pathname: ROUTE.ADD_BLOCK,
-              params: { mode: "edit" },
-            })
-          }
-        >
-          <IcPencil size={24} />
-        </Pressable>
-      </Pressable>
-      <ButtonIcon
-        size="large"
-        type="primary"
-        className="bg-error/10 h-full rounded-md"
-        onPress={() => {
-          setShowMenu(false);
-          onClickDelete();
-        }}
-      >
-        <IcTrash />
-      </ButtonIcon>
-    </View>
-  );
-};
+// Validation schema
+const createSessionSchema = z.object({
+  theme: z.string().min(1, "Veuillez sélectionner une thématique"),
+  sports: z.array(z.string()).min(1, "Veuillez sélectionner au moins un sport"),
+  date: z.date({ error: "Veuillez sélectionner une date" }),
+  timeRange: z
+    .object({
+      start: z.string().regex(/^\d{2}:\d{2}$/, "Format invalide"),
+      end: z.string().regex(/^\d{2}:\d{2}$/, "Format invalide"),
+    })
+    .optional(),
+});
 
 const SHOWN_SPORTS = 3;
 
 export default function CreateSession() {
   const { mode } = useLocalSearchParams();
   const isEditing = mode === "edit";
+  const { session, setSession } = useSession();
 
-  const confirmDeleteRef = useRef<RawBottomSheetModalType | null>(null);
+  const [selectedBlockForDelete, setSelectedBlockForDelete] =
+    useState<TrainingBlock>();
+  const showDeleteConfirmation = useMemo(
+    () => selectedBlockForDelete !== undefined,
+    [selectedBlockForDelete],
+  );
   const [currentStep, setCurrentStep] = useState<number>(isEditing ? 2 : 1);
   const [selectedTheme, setSelectedTheme] = useState<TChoice>();
   const [selectedSports, setSelectedSports] = useState<TChoice[]>([]);
   const [showMoreSport, setShowMoreSport] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | undefined>();
 
-  const [selectedDate, setSelectedDate] = useState<DateType>(
-    new Date("2025-04-25"),
-  );
+  // Validation errors for step 1
+  const [errors, setErrors] = useState<{
+    theme?: string;
+    sports?: string;
+    date?: string;
+  }>({});
+
+  const [selectedDate, setSelectedDate] = useState<DateType>(new Date());
   const [timeRange, setTimeRange] = useState<
     { start: string; end: string } | undefined
   >({
@@ -181,14 +115,29 @@ export default function CreateSession() {
     ];
   }, [selectedSports, unselectedSports]);
 
+  const [isFetching, setIsFetching] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetching(true);
       // Fetch themes
-      const { data: themesData } = await supabase
+      const fetchThemes = supabase
         .from("themes")
         .select("name_fr")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
+
+      // Fetch sports
+      const fetchSports = supabase
+        .from("sports")
+        .select("name_fr")
+        .eq("is_active", true)
+        .order("name_fr", { ascending: true });
+
+      const [{ data: themesData }, { data: sportsData }] = await Promise.all([
+        fetchThemes,
+        fetchSports,
+      ]);
 
       if (themesData) {
         const themeChoices: TChoice[] = themesData.map((t) => ({
@@ -200,22 +149,140 @@ export default function CreateSession() {
         }
       }
 
-      // Fetch sports
-      const { data: sportsData } = await supabase
-        .from("sports")
-        .select("name_fr")
-        .eq("is_active", true)
-        .order("name_fr", { ascending: true });
-
       if (sportsData) {
         setAvailableSports(sportsData.map((s) => ({ text: s.name_fr })));
       }
+
+      setIsFetching(false);
     };
 
     fetchData();
-    /* eslint-disable react-hooks/exhaustive-deps */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
-  /* eslint-enable react-hooks/exhaustive-deps */
+
+  const validateStep1 = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    // Validate theme
+    if (!selectedTheme?.text) {
+      newErrors.theme = "Veuillez sélectionner une thématique";
+    }
+
+    // Validate sports
+    if (selectedSports.length === 0) {
+      newErrors.sports = "Veuillez sélectionner au moins un sport";
+    }
+
+    // Validate date
+    if (!selectedDate) {
+      newErrors.date = "Veuillez sélectionner une date";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    setSubmitError(undefined);
+
+    const userId = session?.user?.id;
+    if (!userId) {
+      setSession(null);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Validate form data
+      const validationResult = createSessionSchema.safeParse({
+        theme: selectedTheme?.text,
+        sports: selectedSports.map((s) => s.text),
+        date: selectedDate ? new Date(selectedDate as string) : undefined,
+        timeRange,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.issues[0];
+        setSubmitError(firstError.message);
+        return;
+      }
+
+      const data = validationResult.data;
+
+      // Get sport IDs from database
+      const { data: sportsData, error: sportsError } = await supabase
+        .from("sports")
+        .select("id")
+        .in("name_fr", data.sports);
+
+      if (sportsError || !sportsData || sportsData.length === 0) {
+        setSubmitError("Erreur lors de la récupération des sports");
+        return;
+      }
+
+      // Calculate duration from time range
+      let durationSeconds: number | null = null;
+      if (timeRange) {
+        const [startH, startM] = timeRange.start.split(":").map(Number);
+        const [endH, endM] = timeRange.end.split(":").map(Number);
+        const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
+        durationSeconds = Math.max(0, endMinutes - startMinutes) * 60;
+      }
+
+      // Format date for database
+      const scheduledDate = dayjs(data.date).format("YYYY-MM-DD");
+      const scheduledTime = timeRange ? timeRange.start : null;
+
+      // Insert session
+      const { data: sessionData, error: sessionError } = await supabase
+        .from("sessions")
+        .insert({
+          user_id: userId,
+          title: sessionName,
+          session_type: "individual",
+          session_status: "upcoming",
+          scheduled_date: scheduledDate,
+          scheduled_time: scheduledTime,
+          duration_seconds: durationSeconds,
+          sport_id: sportsData[0].id, // Primary sport
+          created_by: "user",
+        })
+        .select()
+        .single();
+
+      if (sessionError) {
+        setSubmitError("Erreur lors de la création de la séance");
+        return;
+      }
+
+      // Insert session blocks if any
+      if (trainingBlocks.length > 0) {
+        const blocks = trainingBlocks.map((block, index) => ({
+          session_id: sessionData.id,
+          title: block.title,
+          sequence_order: index,
+        }));
+
+        const { error: blocksError } = await supabase
+          .from("session_blocks")
+          .insert(blocks);
+
+        if (blocksError) {
+          setSubmitError("Séance créée, mais erreur lors de l'ajout des blocs");
+          return;
+        }
+      }
+
+      // Navigate back on success
+      router.back();
+    } catch {
+      setSubmitError("Une erreur inattendue s'est produite");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -223,7 +290,16 @@ export default function CreateSession() {
       {/* Header */}
       <View className="px-4 pt-safe">
         <View className="flex-row items-center">
-          <Pressable onPress={router.back} className="p-2">
+          <Pressable
+            onPress={() => {
+              if (currentStep === 0) {
+                router.back();
+              } else {
+                setCurrentStep((current) => current - 1);
+              }
+            }}
+            className="p-2"
+          >
             <IcArrowLeft color={ColorConst.secondary} />
           </Pressable>
           <Text className="text-lg font-bold text-secondary flex-1 ml-1">
@@ -244,36 +320,59 @@ export default function CreateSession() {
         {currentStep === 1 ? (
           <>
             {/* Thématique Section */}
-            <Choices
-              label="Thématique"
-              data={themes}
-              selectedChoice={selectedTheme}
-              onChange={setSelectedTheme}
-              numColumns={2}
-              className="mb-6"
-              itemTextClassName="text-center"
-            />
+            <View>
+              <Choices
+                label="Thématique"
+                data={themes}
+                selectedChoice={selectedTheme}
+                onChange={(choice) => {
+                  setSelectedTheme(choice);
+                  setErrors((prev) => ({ ...prev, theme: undefined }));
+                }}
+                numColumns={2}
+                className="mb-6"
+                itemTextClassName="text-center"
+              />
+              {isFetching && <ActivityIndicator />}
+              {errors.theme && (
+                <Text className="text-error2 text-sm mt-[-16px] mb-2 ml-1">
+                  {errors.theme}
+                </Text>
+              )}
+            </View>
 
             {/* Sports Section */}
-            <Choices
-              label="Sports"
-              data={shownSports}
-              selectedChoices={selectedSports}
-              onChangeMultiple={setSelectedSports}
-              type="multipleChoiceWithoutIcon"
-              numColumns={2}
-              className="mb-6"
-              extraComponent={
-                <Button
-                  type="tertiary"
-                  size="small"
-                  text="Ajouter un sport"
-                  className="flex-1"
-                  leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-                  onPress={() => setShowMoreSport(true)}
-                />
-              }
-            />
+            <View>
+              <Choices
+                label="Sports"
+                data={shownSports}
+                selectedChoices={selectedSports}
+                type="multipleChoiceWithoutIcon"
+                onChangeMultiple={(choices) => {
+                  console.log("selectedChoices changed", choices);
+                  setSelectedSports(choices);
+                  setErrors((prev) => ({ ...prev, sports: undefined }));
+                }}
+                numColumns={2}
+                className="mb-6"
+                extraComponent={
+                  <Button
+                    type="tertiary"
+                    size="small"
+                    text="Ajouter un sport"
+                    className="flex-1"
+                    leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+                    onPress={() => setShowMoreSport(true)}
+                  />
+                }
+              />
+              {isFetching && <ActivityIndicator />}
+              {errors.sports && (
+                <Text className="text-error text-sm mt-[-16px] mb-2 ml-1">
+                  {errors.sports}
+                </Text>
+              )}
+            </View>
 
             {/* Date & Time Section */}
             <View className="gap-3">
@@ -282,15 +381,27 @@ export default function CreateSession() {
               </Text>
 
               {/* Date Input */}
-              <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-medium text-accent w-6">Le</Text>
-                <View className="flex-1">
-                  <DatePicker
-                    selectedDate={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="w-full"
-                  />
+              <View>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-sm font-medium text-accent w-6">
+                    Le
+                  </Text>
+                  <View className="flex-1">
+                    <DatePicker
+                      selectedDate={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setErrors((prev) => ({ ...prev, date: undefined }));
+                      }}
+                      className="w-full"
+                    />
+                  </View>
                 </View>
+                {errors.date && (
+                  <Text className="text-error text-sm mt-1 ml-1">
+                    {errors.date}
+                  </Text>
+                )}
               </View>
 
               {/* Time Range Input */}
@@ -366,19 +477,14 @@ export default function CreateSession() {
           <>
             {/* Step 2: Session Details */}
             {/* Session Name Section */}
-            <View className="gap-3 mb-6">
-              <Text className="text-sm font-medium text-accent">
-                Nom de la séance
-              </Text>
-              <View className="border border-stroke rounded-lg px-3 py-3 flex-row items-center justify-between">
-                <Text className="text-base font-semibold text-text flex-1">
-                  {sessionName}
-                </Text>
-              </View>
-            </View>
+            <Input
+              label="Nom de la séance"
+              value={sessionName}
+              onChangeText={setSessionName}
+            />
 
             {/* Training Blocks Section */}
-            <View className="gap-3">
+            <View className="gap-3 mt-6">
               <Text className="text-sm font-medium text-accent">
                 Déroulé de la séance
               </Text>
@@ -389,7 +495,7 @@ export default function CreateSession() {
                     key={block.id}
                     block={block}
                     onClickDelete={() => {
-                      confirmDeleteRef.current?.present();
+                      setSelectedBlockForDelete(block);
                     }}
                   />
                 ))}
@@ -405,50 +511,60 @@ export default function CreateSession() {
                   }}
                 />
 
-                <View className="flex-row justify-between items-center mt-8">
-                  <Text className="text-accent">
-                    Informations complémentaires
-                  </Text>
-                  <View className="-rotate-90">
-                    <IcArrowLeft />
-                  </View>
-                </View>
-
-                <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
-                  {/* Block Content */}
-                  <View className="flex-1 gap-1">
-                    <Text numberOfLines={1} className="text-sm text-subtleText">
-                      Choix de thématique
-                    </Text>
-
-                    <View className="flex-row gap-1.5 items-center">
-                      <IcCycling />
-                      <Text className="text-base font-semibold text-secondary flex-1">
-                        Cyclisme
+                {isEditing && (
+                  <>
+                    <View className="flex-row justify-between items-center mt-8">
+                      <Text className="text-accent">
+                        Informations complémentaires
                       </Text>
-                      <IcPencil size={24} />
+                      <View className="-rotate-90">
+                        <IcArrowLeft />
+                      </View>
                     </View>
-                  </View>
-                </View>
 
-                <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
-                  {/* Block Content */}
-                  <View className="flex-1 gap-1">
-                    <Text numberOfLines={1} className="text-sm text-subtleText">
-                      Date
-                    </Text>
+                    <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
+                      {/* Block Content */}
+                      <View className="flex-1 gap-1">
+                        <Text
+                          numberOfLines={1}
+                          className="text-sm text-subtleText"
+                        >
+                          Choix de thématique
+                        </Text>
 
-                    <View className="flex-row gap-1.5 items-center">
-                      <Text className="text-accent text-base font-medium">
-                        Le
-                      </Text>
-                      <Text className="text-base font-semibold text-secondary flex-1">
-                        25/04/2025
-                      </Text>
-                      <IcPencil size={24} />
+                        <View className="flex-row gap-1.5 items-center">
+                          <IcCycling />
+                          <Text className="text-base font-semibold text-secondary flex-1">
+                            Cyclisme
+                          </Text>
+                          <IcPencil size={24} />
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                </View>
+
+                    <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
+                      {/* Block Content */}
+                      <View className="flex-1 gap-1">
+                        <Text
+                          numberOfLines={1}
+                          className="text-sm text-subtleText"
+                        >
+                          Date
+                        </Text>
+
+                        <View className="flex-row gap-1.5 items-center">
+                          <Text className="text-accent text-base font-medium">
+                            Le
+                          </Text>
+                          <Text className="text-base font-semibold text-secondary flex-1">
+                            25/04/2025
+                          </Text>
+                          <IcPencil size={24} />
+                        </View>
+                      </View>
+                    </View>
+                  </>
+                )}
               </View>
             </View>
           </>
@@ -476,39 +592,39 @@ export default function CreateSession() {
           }
           type="primary"
           size="large"
+          loading={isSubmitting}
           onPress={() => {
             if (currentStep === 1) {
-              setCurrentStep(2);
+              if (validateStep1()) {
+                setCurrentStep(2);
+              }
             } else {
-              // Navigate to tabs or show success
-              router.push(ROUTE.TABS);
+              handleSubmit();
             }
           }}
         />
+        {submitError && (
+          <Text className="text-error2 text-sm text-center">{submitError}</Text>
+        )}
       </View>
 
-      <BottomSheetModal
-        ref={confirmDeleteRef}
+      <ConfirmActionModal
         name="confirm-delete-ref"
-        snapPoints={["45%"]}
-        className="pb-safe"
-      >
-        <Text className="font-bold text-secondary text-lg">
-          Supprimer cette séance ?
-        </Text>
-        <Text className="text-subtleText text-base mt-1 grow">
-          Cette action est définitive. La séance sera retirée de ta
-          planification.
-        </Text>
-
-        <Button text="Annuler" type="secondary" />
-        <Button
-          text="Supprimer la séance"
-          type="secondary"
-          className="bg-[#FDFAFA] border-error mt-2 mb-6"
-          textClassName="text-error"
-        />
-      </BottomSheetModal>
+        title="Supprimer cette séance ?"
+        message="Cette action est définitive. La séance sera retirée de ta
+      planification."
+        confirm={{
+          text: "Supprimer la séance",
+          isDestructive: true,
+          onPress: () => {
+            setTrainingBlocks((blocks) =>
+              blocks.filter((x) => x.id !== selectedBlockForDelete?.id),
+            );
+            setSelectedBlockForDelete(undefined);
+          },
+        }}
+        show={showDeleteConfirmation}
+      />
 
       <TimerPickerModal
         closeOnOverlayPress

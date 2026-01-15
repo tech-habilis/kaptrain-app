@@ -22,10 +22,11 @@ import {
   View,
   Text as RawText,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import { useSession } from "@/contexts/auth-context";
 import Avatar from "@/components/avatar";
+import { useProfileStore } from "@/stores/profile-store";
 
 const Agenda = () => {
   const sessions = [

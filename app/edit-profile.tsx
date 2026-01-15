@@ -19,7 +19,7 @@ import DeleteAccountModal, {
 import Dropdown from "@/components/dropdown";
 import { TChoice } from "@/types";
 import DatePicker from "@/components/date-picker";
-import { useEditProfileStore } from "@/stores/edit-profile-store";
+import { useProfileStore } from "@/stores/profile-store";
 import { useSession } from "@/contexts/auth-context";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
@@ -57,15 +57,7 @@ export default function EditProfile() {
     inWheelchair,
     weight,
     sportLevel,
-  } = useEditProfileStore();
-
-  // Load profile on mount
-  useEffect(() => {
-    if (session?.user?.id) {
-      loadProfile(session.user.id);
-    }
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [session?.user?.id]);
+  } = useProfileStore();
 
   const displayImageUri = localAvatarUri || profile?.avatar_url;
 

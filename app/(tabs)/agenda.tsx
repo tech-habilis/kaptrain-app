@@ -18,13 +18,15 @@ import { useAgendaCalendar } from "@/hooks/use-agenda-calendar";
 import { useSession } from "@/contexts/auth-context";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
+import { useProfileStore } from "@/stores/profile-store";
 
 // Set dayjs locale to French
 dayjs.locale("fr");
 
 export default function Agenda() {
   const { session } = useSession();
-  const userId = session?.user?.id;
+  const { profile } = useProfileStore();
+  const userId = session?.user?.id
 
   const {
     currentMonthLabel,
@@ -216,10 +218,12 @@ export default function Agenda() {
         </View>
       </ScrollView>
 
-      <SingleFab
-        onPress={() => router.push(ROUTE.CREATE_SESSION)}
-        icon={<IcPlus size={32} color="white" />}
-      />
+      {profile?.role === "coach" && (
+        <SingleFab
+          onPress={() => router.push(ROUTE.CREATE_SESSION)}
+          icon={<IcPlus size={32} color="white" />}
+        />
+      )}
     </View>
   );
 }

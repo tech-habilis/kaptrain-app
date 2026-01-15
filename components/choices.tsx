@@ -220,6 +220,7 @@ export const Choices = ({
                 : item.text === selectedChoice?.text) || false
             }
             onPress={() => {
+              console.log('onpress', item)
               if (
                 type === "multipleChoice" ||
                 type === "multipleChoiceWithoutIcon"

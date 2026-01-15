@@ -7,38 +7,58 @@ import { supabase } from "@/utilities/supabase";
 
 type UserProfile = Database["public"]["Tables"]["user_profiles"]["Row"];
 
-interface EditProfileState {
+type Gender = "female" | "male" | "nonbinary" | "prefer_not_to_say" | "";
+type SportLevel = "beginner" | "intermediate" | "advanced" | "confirmed" | "expert" | "";
+type UserRole = Database["public"]["Enums"]["user_role"];
+
+interface ProfileState {
+  // Profile data
   profile: UserProfile | null;
+
+  // Loading states
   isLoading: boolean;
   isSaving: boolean;
+
+  // Local avatar URI for upload
   localAvatarUri: string | null;
 
-  // Form state
+  // Form fields - Basic Info
   firstName: string;
   lastName: string;
+  displayName: string;
+  bio: string;
+  email: string;
+
+  // Form fields - Personal Details
   birthDate: string;
-  gender: "female" | "male" | "nonbinary" | "prefer_not_to_say" | "";
+  gender: Gender;
   height: string;
   inWheelchair: boolean;
   weight: string;
-  sportLevel: "beginner" | "intermediate" | "advanced" | "confirmed" | "expert" | "";
+  sportLevel: SportLevel;
+
+  // System fields (read-only)
+  role: UserRole | null;
 
   // Actions
   loadProfile: (userId: string) => Promise<void>;
   setFirstName: (value: string) => void;
   setLastName: (value: string) => void;
+  setDisplayName: (value: string) => void;
+  setBio: (value: string) => void;
+  setEmail: (value: string) => void;
   setBirthDate: (value: string) => void;
-  setGender: (value: "female" | "male" | "nonbinary" | "prefer_not_to_say") => void;
+  setGender: (value: Gender) => void;
   setHeight: (value: string) => void;
   setInWheelchair: (value: boolean) => void;
   setWeight: (value: string) => void;
-  setSportLevel: (value: "beginner" | "intermediate" | "advanced" | "confirmed" | "expert") => void;
+  setSportLevel: (value: SportLevel) => void;
   setLocalAvatarUri: (uri: string | null) => void;
   saveProfile: (userId: string) => Promise<boolean>;
   reset: () => void;
 }
 
-export const useEditProfileStore = create<EditProfileState>((set, get) => ({
+export const useProfileStore = create<ProfileState>((set, get) => ({
   profile: null,
   isLoading: false,
   isSaving: false,
@@ -47,12 +67,16 @@ export const useEditProfileStore = create<EditProfileState>((set, get) => ({
   // Initial form state
   firstName: "",
   lastName: "",
+  displayName: "",
+  bio: "",
+  email: "",
   birthDate: "",
   gender: "",
   height: "",
   inWheelchair: false,
   weight: "",
   sportLevel: "",
+  role: null,
 
   loadProfile: async (userId) => {
     try {
@@ -62,12 +86,16 @@ export const useEditProfileStore = create<EditProfileState>((set, get) => ({
         profile,
         firstName: profile.first_name || "",
         lastName: profile.last_name || "",
+        displayName: profile.display_name || "",
+        bio: profile.bio || "",
+        email: profile.email || "",
         birthDate: profile.date_of_birth || "",
-        gender: (profile.gender as any) || "",
+        gender: (profile.gender as Gender) || "",
         height: profile.height?.toString() || "",
         inWheelchair: profile.in_wheelchair || false,
         weight: profile.weight?.toString() || "",
-        sportLevel: (profile.sport_level as any) || "",
+        sportLevel: (profile.sport_level as SportLevel) || "",
+        role: profile.role || null,
       });
     } catch (error: any) {
       console.error("Error loading profile:", error);
@@ -79,6 +107,9 @@ export const useEditProfileStore = create<EditProfileState>((set, get) => ({
 
   setFirstName: (value) => set({ firstName: value }),
   setLastName: (value) => set({ lastName: value }),
+  setDisplayName: (value) => set({ displayName: value }),
+  setBio: (value) => set({ bio: value }),
+  setEmail: (value) => set({ email: value }),
   setBirthDate: (value) => set({ birthDate: value }),
   setGender: (value) => set({ gender: value }),
   setHeight: (value) => set({ height: value }),
@@ -88,8 +119,20 @@ export const useEditProfileStore = create<EditProfileState>((set, get) => ({
   setLocalAvatarUri: (uri) => set({ localAvatarUri: uri }),
 
   saveProfile: async (userId) => {
-    const { firstName, lastName, birthDate, gender, height, inWheelchair, weight, sportLevel, localAvatarUri } =
-      get();
+    const {
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      email,
+      birthDate,
+      gender,
+      height,
+      inWheelchair,
+      weight,
+      sportLevel,
+      localAvatarUri,
+    } = get();
 
     try {
       set({ isSaving: true });
@@ -110,9 +153,14 @@ export const useEditProfileStore = create<EditProfileState>((set, get) => ({
         }
       }
 
-      // Update other fields if they changed
+      // Update basic info fields
       if (firstName) updates.first_name = firstName;
       if (lastName) updates.last_name = lastName;
+      if (displayName) updates.display_name = displayName;
+      if (bio !== undefined) updates.bio = bio || null;
+      if (email) updates.email = email;
+
+      // Update personal details fields
       if (birthDate) updates.date_of_birth = birthDate;
       if (gender) updates.gender = gender;
       if (height) updates.height = parseInt(height, 10);
@@ -156,11 +204,15 @@ export const useEditProfileStore = create<EditProfileState>((set, get) => ({
     localAvatarUri: null,
     firstName: "",
     lastName: "",
+    displayName: "",
+    bio: "",
+    email: "",
     birthDate: "",
     gender: "",
     height: "",
     inWheelchair: false,
     weight: "",
     sportLevel: "",
+    role: null,
   }),
 }));

@@ -89,3 +89,9 @@ export type SelectTimeProp = {
   type: 'start' | 'end';
   value: string;
 }
+
+export interface TrainingBlock {
+  id: string;
+  title: string;
+  exerciseCount: number;
+}

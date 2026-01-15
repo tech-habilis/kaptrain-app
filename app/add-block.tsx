@@ -27,6 +27,8 @@ import Tabs from "@/components/tabs";
 import IcInfoCircle from "@/components/icons/info-circle";
 import { clsx } from "clsx";
 import ExerciseCards from "@/components/exercise-cards";
+import BasicScreen from "@/components/basic-screen";
+import { TimerPickerModal } from "react-native-timer-picker";
 
 export default function AddBlock() {
   const { mode } = useLocalSearchParams();
@@ -56,6 +58,14 @@ export default function AddBlock() {
   );
   const [vmaValue, setVmaValue] = useState<string>("");
   const [exercises, setExercises] = useState<Exercise[]>(mockExercises);
+
+  const defaultVmaDuration = {
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  };
+  const [showInputTime, setShowInputTime] = useState(false);
+  const [vmaDuration, setVmaDuration] = useState<typeof defaultVmaDuration>();
 
   const reference = [
     {
@@ -130,29 +140,21 @@ export default function AddBlock() {
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="auto" />
-      {/* Header */}
-      <View className="px-4 pt-safe">
-        <View className="flex-row items-center py-2">
-          <Pressable onPress={router.back} className="p-2">
-            <IcArrowLeft color={ColorConst.secondary} />
-          </Pressable>
-          <Text className="text-lg font-bold text-secondary flex-1 ml-1">
-            {isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
-          </Text>
-        </View>
-      </View>
+    <BasicScreen
+      title={isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
+      headerClassName="bg-white"
+    >
+      <StatusBar style="dark" />
 
       {/* Main Content */}
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-4 pb-32 pt-6"
+        contentContainerClassName="px-4 pb-32"
         showsVerticalScrollIndicator={false}
       >
         {/* Block Title Input */}
         <View className="gap-3 mb-6">
-          <View className="flex-row items-start" style={{ minHeight: 48 }}>
+          <View className="flex-row items-start">
             <TextInput
               value={blockTitle}
               onChangeText={setBlockTitle}
@@ -160,7 +162,6 @@ export default function AddBlock() {
               placeholderTextColor={ColorConst.subtleText}
               multiline
               className="flex-1 text-base font-semibold text-secondary leading-6"
-              style={{ minHeight: 48 }}
             />
           </View>
 
@@ -179,6 +180,7 @@ export default function AddBlock() {
         {/* Intensity Reference Dropdown */}
         <View className="mb-6">
           <Dropdown
+            modalHeight="90%"
             label="Référence d'intensité"
             options={intensityOptions}
             selectedOption={selectedIntensity}
@@ -226,7 +228,35 @@ export default function AddBlock() {
               selected="Temps"
               onSelected={() => null}
             />
-            <Input placeholder="00:00:00:00" inputClassName="text-center" />
+
+            <Input
+              value={
+                vmaDuration
+                  ? Object.values(vmaDuration)
+                      .map((x) => x.toString().padStart(2, "0"))
+                      .join(":")
+                  : undefined
+              }
+              asPressable
+              onPress={() => setShowInputTime(true)}
+              placeholder="00:00:00"
+              inputClassName="text-center"
+            />
+            <TimerPickerModal
+              closeOnOverlayPress
+              modalProps={{
+                overlayOpacity: 0.2,
+              }}
+              onCancel={() => setShowInputTime(false)}
+              onConfirm={({ hours, minutes }) => {}}
+              styles={{
+                theme: "light",
+              }}
+              visible={showInputTime}
+              setIsVisible={() => setShowInputTime(false)}
+              initialValue={defaultVmaDuration}
+              hideSeconds
+            />
 
             <Tabs
               tabs={["Zone", "%"]}
@@ -342,7 +372,6 @@ export default function AddBlock() {
           {/* Search and Filter */}
           <View className="gap-3 mb-4">
             <Input
-              placeholder="Rechercher un exercice"
               leftIcon={<IcSearch />}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -385,6 +414,6 @@ export default function AddBlock() {
           )}
         </View>
       </BottomSheetModal>
-    </View>
+    </BasicScreen>
   );
 }

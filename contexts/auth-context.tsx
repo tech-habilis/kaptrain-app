@@ -27,6 +27,7 @@ import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
 import { appScheme } from "@/constants/misc";
 import { AuthError } from "@supabase/auth-js";
+import { useProfileStore } from "@/stores/profile-store";
 
 type TEmailSignIn = {
   email: string;
@@ -54,6 +55,7 @@ type TAuthContext = {
   resetPassword: (email: string) => void;
   verifyPasswordResetOtp: (email: string, otp: string) => void;
   updatePassword: (newPassword: string) => void;
+  loadProfile: () => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -82,6 +84,7 @@ const AuthContext = createContext<TAuthContext>({
   resetPassword: (email: string) => {},
   verifyPasswordResetOtp: (email: string, otp: string) => {},
   updatePassword: (newPassword: string) => {},
+  loadProfile: () => {},
 
   session: null,
   isLoadingSession: false,
@@ -109,7 +112,8 @@ const syncAuthMetadataFromProfile = async (userId: string) => {
 
       // Use name from database if available, otherwise don't override
       if (profile.first_name || profile.last_name) {
-        metadataUpdates.name = `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
+        metadataUpdates.name =
+          `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
       }
 
       // Use avatar from database if available, otherwise don't override
@@ -139,6 +143,7 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
+  const { loadProfile } = useProfileStore();
   const { t } = useTranslation();
   const [[isLoadingSession, session], setSession] =
     useJsonStorageState<TSession>(STORAGE_KEY.SESSION);
@@ -150,7 +155,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [fetchingSession, setFetchingSession] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] = useState(false);
+  const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] =
+    useState(false);
   const [showCompleteProfileForm, setShowCompleteProfileForm] = useState(false);
   const [
     [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
@@ -233,7 +239,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
             await syncAuthMetadataFromProfile(data.session.user.id);
           }
         } catch (profileError) {
-          console.error("Error checking profile during Apple sign-in:", profileError);
+          console.error(
+            "Error checking profile during Apple sign-in:",
+            profileError,
+          );
           // Continue with sign-in even if profile check fails
         }
       }
@@ -272,7 +281,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
           try {
             await syncAuthMetadataFromProfile(data.session.user.id);
           } catch (profileError) {
-            console.error("Error syncing profile during Google sign-in:", profileError);
+            console.error(
+              "Error syncing profile during Google sign-in:",
+              profileError,
+            );
             // Continue with sign-in even if sync fails
           }
         }
@@ -498,14 +510,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed:", { event: _event, session });
-      setSession(supabaseUtils.toLocalSession(session));
+      const localSession = supabaseUtils.toLocalSession(session);
+      setSession(localSession);
+      if (localSession?.user) {
+        loadProfile(localSession.user.id);
+      }
     });
 
     // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchSession, setSession]);
+  }, [fetchSession, loadProfile, setSession]);
 
   // Check profile completion when session user ID changes
   useEffect(() => {
@@ -535,6 +551,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
         resetPassword,
         verifyPasswordResetOtp,
         updatePassword,
+        loadProfile: () => {
+          if (session?.user?.id) {
+            loadProfile(session.user.id);
+          }
+        },
 
         session,
         isLoadingSession:
