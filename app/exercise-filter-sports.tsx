@@ -22,6 +22,7 @@ import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import { Chip } from "@/components/chip";
 import { clsx } from "clsx";
 import { mockSports } from "@/constants/mock";
+import FilterAndSelectModal from "@/components/filter-and-select-modal";
 
 const sportChoices: TChoice[] = [
   {
@@ -59,8 +60,8 @@ export default function ExerciseFilterSports() {
   const [selectedChoices, setSelectedChoices] = useState<TChoice[]>([
     sportChoices[0],
   ]);
-  const [search, setSearch] = useState<string>("");
-  const addSportModalRef = useRef<BottomSheetModalType>(null);
+
+  const [showAddSport, setShowAddSport] = useState(false);
 
   return (
     <View className="bg-white flex-1 py-safe px-4">
@@ -83,56 +84,18 @@ export default function ExerciseFilterSports() {
           text="Ajouter un sport"
           leftIcon={<IcPlus color={ColorConst.accent} size={24} />}
           type="tertiary"
-          onPress={() => addSportModalRef.current?.present()}
+          onPress={() => setShowAddSport(true)}
         />
       </View>
 
-      <BottomSheetModal
-        ref={addSportModalRef}
+      <FilterAndSelectModal
         name="add-sport-modal"
-        snapPoints={["88%"]}
-        className="pb-safe"
-      >
-        <View className="flex-row gap-4 items-center">
-          <Input
-            leftIcon={<IcSearch size={16} />}
-            className="flex-1"
-            value={search}
-            onChangeText={setSearch}
-          />
-          <Pressable onPress={() => {}}>
-            <IcClose color={ColorConst.accent} />
-          </Pressable>
-        </View>
-
-        <View
-          className={clsx("flex-row flex-wrap gap-2", {
-            "mt-6": selectedChoices.length > 0,
-          })}
-        >
-          {selectedChoices.map((choice, index) => (
-            <Chip
-              key={index}
-              text={choice.text}
-              type="selected"
-              onLeftSidePress={() => {
-                setSelectedChoices(
-                  selectedChoices.filter((c) => c.text !== choice.text),
-                );
-              }}
-            />
-          ))}
-        </View>
-
-        <Choices
-          numColumns={1}
-          data={sportChoices}
-          type="multipleChoice"
-          selectedChoices={selectedChoices}
-          onChangeMultiple={setSelectedChoices}
-          className="mt-4"
-        />
-      </BottomSheetModal>
+        choices={sportChoices}
+        selectedChoices={selectedChoices}
+        onSelected={(selected) => setSelectedChoices(selected as TChoice[])}
+        show={showAddSport}
+        onDismiss={() => setShowAddSport(false)}
+      />
     </View>
   );
 }

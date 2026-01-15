@@ -6,8 +6,8 @@ import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { ROUTE } from "@/constants/route";
 import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, View, TouchableOpacity } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, ScrollView, View } from "react-native";
 import DatePicker from "@/components/date-picker";
 import { DateType } from "react-native-ui-datepicker";
 import { StatusBar } from "expo-status-bar";
@@ -22,34 +22,10 @@ import BottomSheetModal, {
 } from "@/components/bottom-sheet-modal";
 import IcClose from "@/components/icons/close";
 import { TimerPickerModal } from "react-native-timer-picker";
-import { SelectTimeProp } from "@/types";
-
-interface ChoiceChipProps {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}
-
-const ChoiceChip = ({ label, selected, onPress }: ChoiceChipProps) => {
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      className={`px-2 py-3 rounded-lg flex-1 items-center justify-center min-h-12 ${
-        selected
-          ? "bg-light border-2 border-primary"
-          : "bg-white border border-stroke"
-      }`}
-    >
-      <Text
-        className={`text-sm font-medium text-center ${
-          selected ? "text-text" : "text-subtleText"
-        }`}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-};
+import { SelectTimeProp, TChoice } from "@/types";
+import { supabase } from "@/utilities/supabase";
+import { Choices } from "@/components/choices";
+import FilterAndSelectModal from "@/components/filter-and-select-modal";
 
 const Stepper = ({ current, total }: { current: number; total: number }) => {
   return (
@@ -143,14 +119,18 @@ const SessionBlock = ({
   );
 };
 
+const SHOWN_SPORTS = 3;
+
 export default function CreateSession() {
   const { mode } = useLocalSearchParams();
   const isEditing = mode === "edit";
 
   const confirmDeleteRef = useRef<RawBottomSheetModalType | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(isEditing ? 2 : 1);
-  const [selectedTheme, setSelectedTheme] = useState<string>("Sports");
-  const [selectedSports, setSelectedSports] = useState<string[]>(["Cyclisme"]);
+  const [selectedTheme, setSelectedTheme] = useState<TChoice>();
+  const [selectedSports, setSelectedSports] = useState<TChoice[]>([]);
+  const [showMoreSport, setShowMoreSport] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState<DateType>(
     new Date("2025-04-25"),
   );
@@ -180,29 +160,69 @@ export default function CreateSession() {
     },
   ]);
 
-  const themes = [
-    "Sports",
-    "Mobilité & Stretching",
-    "Préparation physique",
-    "Kinésithérapie & Réaltérisation",
-  ];
-
-  const sports = ["Aviron", "Course à pied", "Cyclisme"];
-
-  const toggleSport = (sport: string) => {
-    if (selectedSports.includes(sport)) {
-      setSelectedSports(selectedSports.filter((s) => s !== sport));
-    } else {
-      setSelectedSports([...selectedSports, sport]);
+  // Fetch sports and themes from Supabase
+  const [themes, setThemes] = useState<TChoice[]>([]);
+  const [availableSports, setAvailableSports] = useState<TChoice[]>([]);
+  const unselectedSports = useMemo(
+    () =>
+      availableSports.filter(
+        (x) => !selectedSports.some((y) => y.text === x.text),
+      ),
+    [availableSports, selectedSports],
+  );
+  const shownSports = useMemo(() => {
+    if (selectedSports.length >= SHOWN_SPORTS) {
+      return selectedSports;
     }
-  };
+
+    return [
+      ...selectedSports,
+      ...unselectedSports.slice(0, SHOWN_SPORTS - selectedSports.length),
+    ];
+  }, [selectedSports, unselectedSports]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch themes
+      const { data: themesData } = await supabase
+        .from("themes")
+        .select("name_fr")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (themesData) {
+        const themeChoices: TChoice[] = themesData.map((t) => ({
+          text: t.name_fr,
+        }));
+        setThemes(themeChoices);
+        if (themeChoices.length > 0 && !selectedTheme) {
+          setSelectedTheme(themeChoices[0]);
+        }
+      }
+
+      // Fetch sports
+      const { data: sportsData } = await supabase
+        .from("sports")
+        .select("name_fr")
+        .eq("is_active", true)
+        .order("name_fr", { ascending: true });
+
+      if (sportsData) {
+        setAvailableSports(sportsData.map((s) => ({ text: s.name_fr })));
+      }
+    };
+
+    fetchData();
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, []); // Run once on mount
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <View className="flex-1 bg-white">
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
       {/* Header */}
       <View className="px-4 pt-safe">
-        <View className="flex-row items-center py-2">
+        <View className="flex-row items-center">
           <Pressable onPress={router.back} className="p-2">
             <IcArrowLeft color={ColorConst.secondary} />
           </Pressable>
@@ -224,73 +244,36 @@ export default function CreateSession() {
         {currentStep === 1 ? (
           <>
             {/* Thématique Section */}
-            <View className="gap-3 mb-6">
-              <Text className="text-sm font-medium text-accent">
-                Thématique
-              </Text>
-              <View className="gap-2">
-                <View className="flex-row gap-2">
-                  <ChoiceChip
-                    label={themes[0]}
-                    selected={selectedTheme === themes[0]}
-                    onPress={() => setSelectedTheme(themes[0])}
-                  />
-                  <ChoiceChip
-                    label={themes[1]}
-                    selected={selectedTheme === themes[1]}
-                    onPress={() => setSelectedTheme(themes[1])}
-                  />
-                </View>
-                <View className="flex-row gap-2">
-                  <ChoiceChip
-                    label={themes[2]}
-                    selected={selectedTheme === themes[2]}
-                    onPress={() => setSelectedTheme(themes[2])}
-                  />
-                  <ChoiceChip
-                    label={themes[3]}
-                    selected={selectedTheme === themes[3]}
-                    onPress={() => setSelectedTheme(themes[3])}
-                  />
-                </View>
-              </View>
-            </View>
+            <Choices
+              label="Thématique"
+              data={themes}
+              selectedChoice={selectedTheme}
+              onChange={setSelectedTheme}
+              numColumns={2}
+              className="mb-6"
+              itemTextClassName="text-center"
+            />
 
             {/* Sports Section */}
-            <View className="gap-3 mb-6">
-              <Text className="text-sm font-medium text-accent">Sports</Text>
-              <View className="gap-2">
-                <View className="flex-row gap-2">
-                  <ChoiceChip
-                    label={sports[0]}
-                    selected={selectedSports.includes(sports[0])}
-                    onPress={() => toggleSport(sports[0])}
-                  />
-                  <ChoiceChip
-                    label={sports[1]}
-                    selected={selectedSports.includes(sports[1])}
-                    onPress={() => toggleSport(sports[1])}
-                  />
-                </View>
-                <View className="flex-row gap-2">
-                  <ChoiceChip
-                    label={sports[2]}
-                    selected={selectedSports.includes(sports[2])}
-                    onPress={() => toggleSport(sports[2])}
-                  />
-                  <Button
-                    type="tertiary"
-                    size="small"
-                    text="Ajouter un sport"
-                    className="flex-1 min-h-12"
-                    leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-                    onPress={() => {
-                      // Handle add sport action
-                    }}
-                  />
-                </View>
-              </View>
-            </View>
+            <Choices
+              label="Sports"
+              data={shownSports}
+              selectedChoices={selectedSports}
+              onChangeMultiple={setSelectedSports}
+              type="multipleChoiceWithoutIcon"
+              numColumns={2}
+              className="mb-6"
+              extraComponent={
+                <Button
+                  type="tertiary"
+                  size="small"
+                  text="Ajouter un sport"
+                  className="flex-1"
+                  leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+                  onPress={() => setShowMoreSport(true)}
+                />
+              }
+            />
 
             {/* Date & Time Section */}
             <View className="gap-3">
@@ -551,6 +534,15 @@ export default function CreateSession() {
         setIsVisible={() => setSelectedTime(undefined)}
         initialValue={selectedTimeAsDate}
         hideSeconds
+      />
+
+      <FilterAndSelectModal
+        name="show-more-sport-modal"
+        show={showMoreSport}
+        choices={availableSports}
+        selectedChoices={selectedSports}
+        onSelected={(selected) => setSelectedSports(selected as TChoice[])}
+        onDismiss={() => setShowMoreSport(false)}
       />
     </View>
   );

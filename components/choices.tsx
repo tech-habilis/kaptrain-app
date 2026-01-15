@@ -8,7 +8,7 @@ import IcRadio from "./icons/radio";
 import IcRadioSelected from "./icons/radio-selected";
 import { TChoice } from "@/types";
 import { clsx } from "clsx";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 const choiceWrapper = tv({
   base: "rounded-lg px-2 py-4 justify-center items-center",
@@ -166,6 +166,7 @@ export const Choices = ({
   activeItemClassName = "",
   inactiveItemClassName = "",
   itemTextClassName = "",
+  extraComponent,
 }: {
   label?: string;
   data: TChoice[];
@@ -180,6 +181,7 @@ export const Choices = ({
   activeItemClassName?: string;
   inactiveItemClassName?: string;
   itemTextClassName?: string;
+  extraComponent?: ReactNode;
 } & Omit<ChoiceVariants, "selected">) => {
   const [width, setWidth] = useState(0);
   const gap = numColumns > 1 ? 8 : 0;
@@ -246,6 +248,7 @@ export const Choices = ({
             }}
           />
         ))}
+        {extraComponent}
       </View>
     </View>
   );
