@@ -89,9 +89,9 @@ export default function Dropdown({
         </Button>
       ) : (
         <Input
-          readOnly
           label={label}
           value={t(selectedOption?.text || "")}
+          asPressable
           onPress={() => bottomSheetModalRef.current?.present()}
         />
       )}

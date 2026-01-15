@@ -27,8 +27,8 @@ const button = tv({
       large: "rounded-2xl p-4",
     },
     disabled: {
-      true: "bg-primary/90",
-      // false: "active:opacity-80",
+      true: "opacity-40",
+      false: "active:opacity-80",
     },
   },
   compoundVariants: [
