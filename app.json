@@ -68,7 +68,8 @@
         {
           "photosPermission": "The app accesses your photos to let you use them as profile picture."
         }
-      ]
+      ],
+      "@rnrepo/expo-config-plugin"
     ],
     "experiments": {
       "typedRoutes": true,

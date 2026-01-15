@@ -32,6 +32,9 @@ importers:
       '@react-navigation/native':
         specifier: ^7.1.8
         version: 7.1.20(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@rnrepo/expo-config-plugin':
+        specifier: 0.2.0-beta.0
+        version: 0.2.0-beta.0(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       '@supabase/supabase-js':
         specifier: ^2.88.0
         version: 2.88.0
@@ -1353,6 +1356,13 @@ packages:
 
   '@react-navigation/routers@7.5.1':
     resolution: {integrity: sha512-pxipMW/iEBSUrjxz2cDD7fNwkqR4xoi0E/PcfTQGCcdJwLoaxzab5kSadBLj1MTJyT0YRrOXL9umHpXtp+Dv4w==}
+
+  '@rnrepo/expo-config-plugin@0.2.0-beta.0':
+    resolution: {integrity: sha512-3KrM5/wruzSXTj6nrhzNAhm+CgefcKzqU61DQ/UAl71VdFErXl3VFN6fDwCHWX6Y7WgRfR6S2hr3UF9pIFkJHA==}
+    peerDependencies:
+      expo: ^54
+      react: '*'
+      react-native: '*'
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
@@ -6260,6 +6270,16 @@ snapshots:
   '@react-navigation/routers@7.5.1':
     dependencies:
       nanoid: 3.3.11
+
+  '@rnrepo/expo-config-plugin@0.2.0-beta.0(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@expo/config-plugins': 54.0.4
+      '@expo/config-types': 54.0.10
+      expo: 54.0.31(@babel/core@7.28.5)(@expo/metro-runtime@6.1.2)(expo-router@6.0.21)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
+    transitivePeerDependencies:
+      - supports-color
 
   '@rtsao/scc@1.1.0': {}
 
