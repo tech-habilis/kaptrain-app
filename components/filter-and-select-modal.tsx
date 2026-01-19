@@ -28,7 +28,7 @@ export default function FilterAndSelectModal({
   onDismiss: () => void;
   choices: TChoice[];
   selectedChoices: TChoice | TChoice[];
-    onSelected: (choices: TChoice | TChoice[]) => void;
+  onSelected: (choices: TChoice | TChoice[]) => void;
 }) {
   const ref = useRef<RawBottomSheetModalType>(null);
   const isMultipleSelect = Array.isArray(selectedChoices);
@@ -72,14 +72,14 @@ export default function FilterAndSelectModal({
             "mt-6 mb-4": selectedChoices.length > 0,
           })}
         >
-          {selectedChoices.map((choice, index) => (
+          {selectedChoices.map((choice) => (
             <Chip
-              key={index}
+              key={choice.id}
               text={choice.text}
               type="selected"
               onLeftSidePress={() => {
                 const choicesWithoutCurrent = selectedChoices.filter(
-                  (x) => x.text === choice.text,
+                  (x) => x.id !== choice.id,
                 );
                 onSelected(choicesWithoutCurrent);
               }}

@@ -1,4 +1,4 @@
-import { FlatList, Pressable, View, ViewStyle } from "react-native";
+import { Pressable, View, ViewStyle } from "react-native";
 import Text from "./text";
 import { tv, VariantProps } from "tailwind-variants";
 import cn from "@/utilities/cn";
@@ -203,9 +203,9 @@ export const Choices = ({
           "flex-row flex-wrap": numColumns > 1,
         })}
       >
-        {data.map((item, index) => (
+        {data.map((item) => (
           <Choice
-            key={index}
+            key={item.id}
             type={type}
             className={clsx(itemClassName, {
               [activeItemClassName]: selectedChoice?.text === item.text,
@@ -225,7 +225,7 @@ export const Choices = ({
                 type === "multipleChoiceWithoutIcon"
               ) {
                 const nonNullSelectedChoices = selectedChoices || [];
-                const isSelecting = !selectedChoices?.includes(item);
+                const isSelecting = !selectedChoices?.some((c) => c.id === item.id);
 
                 if (
                   maxChoice !== undefined &&
@@ -238,7 +238,7 @@ export const Choices = ({
                 onChangeMultiple?.(
                   isSelecting
                     ? [...nonNullSelectedChoices, item]
-                    : nonNullSelectedChoices.filter((c) => c !== item),
+                    : nonNullSelectedChoices.filter((c) => c.id !== item.id),
                 );
 
                 return;

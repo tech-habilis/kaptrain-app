@@ -123,14 +123,14 @@ export default function CreateSession() {
       // Fetch themes
       const fetchThemes = supabase
         .from("themes")
-        .select("name_fr")
+        .select("id, name_fr")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
 
       // Fetch sports
       const fetchSports = supabase
         .from("sports")
-        .select("name_fr")
+        .select("id, name_fr")
         .eq("is_active", true)
         .order("name_fr", { ascending: true });
 
@@ -141,6 +141,7 @@ export default function CreateSession() {
 
       if (themesData) {
         const themeChoices: TChoice[] = themesData.map((t) => ({
+          id: t.id,
           text: t.name_fr,
         }));
         setThemes(themeChoices);
@@ -150,7 +151,9 @@ export default function CreateSession() {
       }
 
       if (sportsData) {
-        setAvailableSports(sportsData.map((s) => ({ text: s.name_fr })));
+        setAvailableSports(
+          sportsData.map((s) => ({ id: s.id, text: s.name_fr })),
+        );
       }
 
       setIsFetching(false);
@@ -292,7 +295,7 @@ export default function CreateSession() {
         <View className="flex-row items-center">
           <Pressable
             onPress={() => {
-              if (currentStep === 0) {
+              if (currentStep === 1) {
                 router.back();
               } else {
                 setCurrentStep((current) => current - 1);
@@ -335,7 +338,7 @@ export default function CreateSession() {
               />
               {isFetching && <ActivityIndicator />}
               {errors.theme && (
-                <Text className="text-error2 text-sm mt-[-16px] mb-2 ml-1">
+                <Text className="text-error2 text-sm -mt-4 mb-2 ml-1">
                   {errors.theme}
                 </Text>
               )}
@@ -368,7 +371,7 @@ export default function CreateSession() {
               />
               {isFetching && <ActivityIndicator />}
               {errors.sports && (
-                <Text className="text-error text-sm mt-[-16px] mb-2 ml-1">
+                <Text className="text-error text-sm -mt-4 mb-2 ml-1">
                   {errors.sports}
                 </Text>
               )}

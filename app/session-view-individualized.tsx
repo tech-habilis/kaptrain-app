@@ -8,14 +8,16 @@ import IcHyrox from "@/components/icons/hyrox";
 import IcPencil from "@/components/icons/pencil";
 import { SessionCard } from "@/components/session";
 import Text from "@/components/text";
-import { mockExercises } from "@/constants/mock";
+import getExercises from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
-import { Exercise } from "@/types";
+import { ExerciseItem } from "@/types";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
+
+const exercises = getExercises({ isGridView: false });
 
 export default function SessionViewIndividualized() {
   const [expandedSections, setExpandedSections] = useState<{
@@ -28,28 +30,28 @@ export default function SessionViewIndividualized() {
   const sessionData: {
     title: string;
     description: string;
-    exercises: Exercise[];
+    exercises: ExerciseItem[];
     haveNote: boolean;
   }[] = [
     {
       title: "Échauffement",
       description:
         "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: mockExercises,
+      exercises: exercises,
       haveNote: true,
     },
     {
       title: "Hyrox Grand Palais",
       description:
         "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: mockExercises,
+      exercises: exercises,
       haveNote: false,
     },
     {
       title: "Récupération",
       description:
         "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: mockExercises,
+      exercises: exercises,
       haveNote: false,
     },
   ];

@@ -14,18 +14,14 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Dropdown from "@/components/dropdown";
-import { Exercise, TChoice } from "@/types";
+import { choicesToExercises, TChoice } from "@/types";
 import BottomSheetModal from "@/components/bottom-sheet-modal";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import Input from "@/components/input";
-import IcSearch from "@/components/icons/search";
-import IcFilter from "@/components/icons/filter";
 import getExercises, {
   intensityOptions,
-  mockExercises,
   zoneReference,
 } from "@/constants/mock";
-import { Choices } from "@/components/choices";
 import Tabs from "@/components/tabs";
 import IcInfoCircle from "@/components/icons/info-circle";
 import { clsx } from "clsx";
@@ -33,10 +29,19 @@ import ExerciseCards from "@/components/exercise-cards";
 import BasicScreen from "@/components/basic-screen";
 import { TimerPickerModal } from "react-native-timer-picker";
 import IcChevronDown from "@/components/icons/chevron-down";
+import FilterAndSelectModal from "@/components/filter-and-select-modal";
 
 export default function AddBlock() {
   const { mode } = useLocalSearchParams();
   const isEditing = mode === "edit";
+
+  // Validation errors
+  const [errors, setErrors] = useState<{
+    title?: string;
+    description?: string;
+    intensity?: string;
+    exercises?: string;
+  }>({});
 
   const [blockTitle, setBlockTitle] = useState<string>(
     "Travail de l'endurance aérobie haute, zone Z4 (~95 % de la VMA)",
@@ -56,8 +61,6 @@ export default function AddBlock() {
 
   const [series, setSeries] = useState<string>();
   const [recovery, setRecovery] = useState<string>();
-  const [vmaValue, setVmaValue] = useState<string>("");
-  const [exercises, setExercises] = useState<Exercise[]>(mockExercises);
 
   const defaultVmaDuration = {
     hours: 0,
@@ -69,40 +72,25 @@ export default function AddBlock() {
   const [vmaDistance, setVmaDistance] = useState("");
 
   const zones: TChoice[] = zoneReference.slice(1).map((x) => ({
+    id: x.id,
     text: x.zone,
     secondaryText: x.percentage,
   }));
   const [selectedZone, setSelectedZone] = useState<TChoice>();
 
   const referenceModalRef = useRef<BottomSheetModalType>(null);
-  const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<TChoice[]>([]);
+  const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
 
   const availableExercises = getExercises({ isGridView: true });
   const exerciseChoices: TChoice[] = availableExercises.map((ex) => ({
+    id: ex.id,
     text: ex.title,
     leftIcon: ex.icon,
   }));
 
   const removeExercise = (id: string) => {
-    setExercises(exercises.filter((ex) => ex.id !== id));
-  };
-
-  const addSelectedExercises = () => {
-    const newExercises = selectedExercises.map((choice) => {
-      const exercise = availableExercises.find(
-        (ex) => ex.title === choice.text,
-      );
-      return {
-        id: exercise?.id || String(Date.now()),
-        title: choice.text,
-        image: exercise?.image || "",
-      };
-    });
-    setExercises([...exercises, ...newExercises]);
-    setSelectedExercises([]);
-    bottomSheetModalRef.current?.dismiss();
+    setSelectedExercises((x) => x.filter((y) => y.id !== id));
   };
 
   const renderDurationOrDistanceTabs = () => {
@@ -159,6 +147,33 @@ export default function AddBlock() {
     );
   };
 
+  const validateAndSave = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    // Validate title
+    if (!blockTitle || blockTitle.trim().length === 0) {
+      newErrors.title = "Le titre du bloc est requis";
+    }
+
+    // Validate description
+    if (!blockDescription || blockDescription.trim().length === 0) {
+      newErrors.description = "La description du bloc est requise";
+    }
+
+    // Validate intensity
+    if (!selectedIntensity?.text) {
+      newErrors.intensity = "La référence d'intensité est requise";
+    }
+
+    // Validate exercises
+    if (selectedExercises.length === 0) {
+      newErrors.exercises = "Au moins un exercice est requis";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   return (
     <BasicScreen
       title={isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
@@ -177,24 +192,36 @@ export default function AddBlock() {
           <View className="flex-row items-start">
             <TextInput
               value={blockTitle}
-              onChangeText={setBlockTitle}
+              onChangeText={(text) => {
+                setBlockTitle(text);
+                setErrors((prev) => ({ ...prev, title: undefined }));
+              }}
               placeholder="Titre du bloc"
               placeholderTextColor={ColorConst.subtleText}
               multiline
               className="flex-1 text-base font-semibold text-secondary leading-6"
             />
           </View>
+          {errors.title && (
+            <Text className="text-error text-sm">{errors.title}</Text>
+          )}
 
           {/* Block Description */}
           <TextInput
             value={blockDescription}
-            onChangeText={setBlockDescription}
+            onChangeText={(text) => {
+              setBlockDescription(text);
+              setErrors((prev) => ({ ...prev, description: undefined }));
+            }}
             placeholder="Description du bloc"
             placeholderTextColor={ColorConst.subtleText}
             multiline
             className="text-base text-subtleText leading-6"
             style={{ minHeight: 120 }}
           />
+          {errors.description && (
+            <Text className="text-error text-sm">{errors.description}</Text>
+          )}
         </View>
 
         {/* Intensity Reference Dropdown */}
@@ -204,12 +231,18 @@ export default function AddBlock() {
             label="Référence d'intensité"
             options={intensityOptions}
             selectedOption={selectedIntensity}
-            onSelect={setSelectedIntensity}
+            onSelect={(choice) => {
+              setSelectedIntensity(choice);
+              setErrors((prev) => ({ ...prev, intensity: undefined }));
+            }}
             modalTitle="Choisis une référence d'intensité"
             size="large"
             className="justify-between"
             alwaysShowLabel
           />
+          {errors.intensity && (
+            <Text className="text-error text-sm mt-2">{errors.intensity}</Text>
+          )}
         </View>
 
         {/* VMA Form - Show when Vitesse (%VMA) is selected */}
@@ -328,11 +361,20 @@ export default function AddBlock() {
 
         {/* Exercises Section */}
         <View className="gap-3">
-          {/* Exercise Cards - Horizontal Scroll */}
           <ExerciseCards
-            exercises={exercises}
-            onRemoveExercise={(id) => removeExercise(id)}
+            exercises={choicesToExercises(
+              selectedExercises,
+              availableExercises,
+            )}
+            onRemoveExercise={(id) => {
+              removeExercise(id);
+              setErrors((prev) => ({ ...prev, exercises: undefined }));
+            }}
           />
+
+          {errors.exercises && (
+            <Text className="text-error text-sm">{errors.exercises}</Text>
+          )}
 
           {/* Add Exercise Button */}
           <Button
@@ -340,9 +382,7 @@ export default function AddBlock() {
             size="small"
             text="Ajouter des exercices"
             leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-            onPress={() => {
-              bottomSheetModalRef.current?.present();
-            }}
+            onPress={() => setShowAddExerciseModal(true)}
           />
         </View>
       </ScrollView>
@@ -363,66 +403,24 @@ export default function AddBlock() {
           type="primary"
           size="large"
           onPress={() => {
-            // Save block and go back
-            router.back();
+            if (validateAndSave()) {
+              // Save block and go back
+              router.back();
+            }
           }}
           className="mb-6"
         />
       </View>
 
-      {/* Exercise Selection Bottom Sheet */}
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        name="exercise-selection"
-        snapPoints={["90%"]}
-        className="pb-0"
-      >
-        <View className="flex-1">
-          {/* Search and Filter */}
-          <View className="gap-3 mb-4">
-            <Input
-              leftIcon={<IcSearch />}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            <Button
-              type="secondaryV2"
-              size="small"
-              text="Filtres"
-              leftIcon={<IcFilter />}
-              onPress={() => {
-                // Open filter modal
-              }}
-            />
-          </View>
-
-          {/* Exercise List */}
-          <ScrollView
-            className="flex-1"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          >
-            <Choices
-              data={exerciseChoices}
-              selectedChoices={selectedExercises}
-              onChangeMultiple={setSelectedExercises}
-              type="multipleChoice"
-            />
-          </ScrollView>
-
-          {/* Bottom CTA */}
-          {selectedExercises.length > 0 && (
-            <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-4 pb-6">
-              <Button
-                text={`Ajouter ${selectedExercises.length} exercice${selectedExercises.length > 1 ? "s" : ""}`}
-                type="primary"
-                size="large"
-                onPress={addSelectedExercises}
-              />
-            </View>
-          )}
-        </View>
-      </BottomSheetModal>
+      <FilterAndSelectModal
+        choices={exerciseChoices}
+        selectedChoices={selectedExercises}
+        onSelected={(selected) => setSelectedExercises(selected as TChoice[])}
+        name="add-exercise-to-block-modal"
+        show={showAddExerciseModal}
+        onDismiss={() => setShowAddExerciseModal(false)}
+        height="90%"
+      />
     </BasicScreen>
   );
 }

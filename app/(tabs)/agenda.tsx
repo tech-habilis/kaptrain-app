@@ -1,12 +1,8 @@
-import { useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, View, Pressable } from "react-native";
+import { ScrollView, View, FlatList } from "react-native";
 import Text from "@/components/text";
-import { Chip } from "@/components/chip";
-import { Day } from "@/components/agenda/day";
 import { ActivityCard } from "@/components/agenda/activity-card";
-import IcArrowLeft from "@/components/icons/arrow-left";
-import IcArrowRight from "@/components/icons/arrow-right";
+import { AgendaCalendarView } from "@/components/agenda/agenda-calendar-view";
 import IcHyrox from "@/components/icons/hyrox";
 import IcPlus from "@/components/icons/plus";
 import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
@@ -26,7 +22,7 @@ dayjs.locale("fr");
 export default function Agenda() {
   const { session } = useSession();
   const { profile } = useProfileStore();
-  const userId = session?.user?.id
+  const userId = session?.user?.id;
 
   const {
     currentMonthLabel,
@@ -44,14 +40,6 @@ export default function Agenda() {
   const selectedDateLabel = dayjs(selectedDate)
     .format("D MMMM YYYY")
     .replace(/^\w/, (c) => c.toUpperCase());
-
-  // Handle day press
-  const handleDayPress = useCallback(
-    (date: Date) => {
-      selectDate(date);
-    },
-    [selectDate],
-  );
 
   // Mock activities for display - will be replaced with real session data later
   const todayActivities =
@@ -100,77 +88,17 @@ export default function Agenda() {
     <View className="flex-1 bg-white">
       <StatusBar style="dark" />
 
-      <ScrollView className="flex-1 pt-safe px-4">
-        {/* Header */}
-        <View className="flex-row items-center justify-between h-8 mb-6">
-          <Text className="text-lg font-bold text-secondary">
-            {currentMonthLabel}
-          </Text>
-
-          <View className="flex-row items-center gap-3">
-            {/* Today chip */}
-            <Pressable onPress={goToToday}>
-              <Chip
-                text="Aujourd'hui"
-                type="default"
-                className="border border-stroke"
-              />
-            </Pressable>
-
-            {/* Navigation arrows */}
-            <Pressable
-              onPress={goToPrevMonth}
-              className="w-10 h-10 items-center justify-center"
-            >
-              <IcArrowLeft size={24} color={ColorConst.accent} />
-            </Pressable>
-            <Pressable
-              onPress={goToNextMonth}
-              className="w-10 h-10 items-center justify-center"
-            >
-              <IcArrowRight size={24} color={ColorConst.accent} />
-            </Pressable>
-          </View>
-        </View>
-
+      <View className="flex-1 pt-safe px-4">
         {/* Calendar Section */}
-        <View className="gap-4 mb-6">
-          {/* Week day headers */}
-          <View className="flex-row justify-between items-center">
-            {weekDays.map((day) => (
-              <View key={day} className="w-8 items-center">
-                <Text className="text-xs font-medium text-subtleText">
-                  {day}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Calendar weeks */}
-          <View className="gap-2">
-            {calendarWeeks.map((week, weekIndex) => (
-              <View
-                key={weekIndex}
-                className="flex-row justify-between items-center"
-              >
-                {week.map((dayData, dayIndex) => (
-                  <Pressable
-                    key={`${weekIndex}-${dayIndex}`}
-                    onPress={() => handleDayPress(dayData.date)}
-                  >
-                    <Day
-                      day={dayData.day}
-                      isCurrentMonth={dayData.isCurrentMonth}
-                      isToday={dayData.isToday}
-                      isSelected={dayData.isSelected}
-                      activities={dayData.activities}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            ))}
-          </View>
-        </View>
+        <AgendaCalendarView
+          currentMonthLabel={currentMonthLabel}
+          weekDays={weekDays}
+          calendarWeeks={calendarWeeks}
+          selectDate={selectDate}
+          goToToday={goToToday}
+          goToNextMonth={goToNextMonth}
+          goToPrevMonth={goToPrevMonth}
+        />
 
         {/* Daily Activities Section */}
         <View className="gap-4 mb-24">
@@ -183,15 +111,16 @@ export default function Agenda() {
           </View>
 
           {/* Activities list */}
-          <View className="gap-2">
-            {todayActivities.map((activity, index) => (
+          <FlatList
+            data={todayActivities}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item, index }) => (
               <ActivityCard
-                key={index}
-                title={activity.title}
-                description={activity.sessionTitle}
-                coachName={activity.coachName}
-                borderColor={activity.color}
-                icon={activity.icon}
+                title={item.title}
+                description={item.sessionTitle}
+                coachName={item.coachName}
+                borderColor={item.color}
+                icon={item.icon}
                 onLongPress={() =>
                   router.push({
                     pathname: ROUTE.CREATE_SESSION,
@@ -213,10 +142,12 @@ export default function Agenda() {
                   }
                 }}
               />
-            ))}
-          </View>
+            )}
+            ItemSeparatorComponent={() => <View className="h-2" />}
+            scrollEnabled={false}
+          />
         </View>
-      </ScrollView>
+      </View>
 
       {profile?.role === "coach" && (
         <SingleFab

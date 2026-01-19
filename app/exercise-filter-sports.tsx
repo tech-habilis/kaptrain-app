@@ -1,59 +1,15 @@
-import BottomSheetModal from "@/components/bottom-sheet-modal";
 import Button from "@/components/button";
 import { Choices } from "@/components/choices";
 import { TChoice } from "@/types";
 import IcArrowLeft from "@/components/icons/arrow-left";
-import IcBasketball from "@/components/icons/basketball";
-import IcBodybuilding from "@/components/icons/bodybuilding";
-import IcClose from "@/components/icons/close";
-import IcCrossfit from "@/components/icons/crossfit";
-import IcCycling from "@/components/icons/cycling";
 import IcPlus from "@/components/icons/plus";
-import IcRowing from "@/components/icons/rowing";
-import IcSearch from "@/components/icons/search";
-import IcYoga from "@/components/icons/yoga";
-import Input from "@/components/input";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Pressable, View } from "react-native";
-import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
-import { Chip } from "@/components/chip";
-import { clsx } from "clsx";
-import { mockSports } from "@/constants/mock";
+import { mockSports, sportChoices } from "@/constants/mock";
 import FilterAndSelectModal from "@/components/filter-and-select-modal";
-
-const sportChoices: TChoice[] = [
-  {
-    text: "sports.athletics",
-    leftIcon: <IcCycling />,
-  },
-  {
-    text: "sports.rowing",
-    leftIcon: <IcRowing />,
-  },
-  {
-    text: "sports.basketball",
-    leftIcon: <IcBasketball />,
-  },
-  {
-    text: "sports.crossfit",
-    leftIcon: <IcCrossfit />,
-  },
-  {
-    text: "sports.cycling",
-    leftIcon: <IcCycling />,
-  },
-  {
-    text: "sports.bodybuilding",
-    leftIcon: <IcBodybuilding />,
-  },
-  {
-    text: "sports.yoga",
-    leftIcon: <IcYoga />,
-  },
-];
 
 export default function ExerciseFilterSports() {
   const [selectedSport, setSelectedSport] = useState<TChoice>();
