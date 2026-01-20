@@ -1,4 +1,3 @@
-import { TrainingBlock } from "@/types";
 import { clsx } from "clsx";
 import { useState } from "react";
 import { View, Pressable } from "react-native";
@@ -10,12 +9,13 @@ import IcPencil from "./icons/pencil";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import IcTrash from "./icons/trash";
+import type { SessionBlockData } from "@/stores/create-session-store";
 
 const SessionBlock = ({
   block,
   onClickDelete,
 }: {
-  block: TrainingBlock;
+  block: SessionBlockData;
   onClickDelete: () => void;
 }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -47,7 +47,7 @@ const SessionBlock = ({
           {/* Exercise Count Tag */}
           <View className="flex-row">
             <Chip
-              text={`${block.exerciseCount} exercices`}
+              text={`${block.exercises.length} exercices`}
               type="default"
               className="bg-light border-0"
             />
@@ -60,7 +60,7 @@ const SessionBlock = ({
           onPress={() =>
             router.push({
               pathname: ROUTE.ADD_BLOCK,
-              params: { mode: "edit" },
+              params: { mode: "edit", blockId: block.id },
             })
           }
         >

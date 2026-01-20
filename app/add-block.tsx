@@ -3,7 +3,7 @@ import IcPlus from "@/components/icons/plus";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -19,8 +19,8 @@ import BottomSheetModal from "@/components/bottom-sheet-modal";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import Input from "@/components/input";
 import getExercises, {
-  intensityOptions,
   zoneReference,
+  zoneReferenceWithHeader,
 } from "@/constants/mock";
 import Tabs from "@/components/tabs";
 import IcInfoCircle from "@/components/icons/info-circle";
@@ -30,10 +30,15 @@ import BasicScreen from "@/components/basic-screen";
 import { TimerPickerModal } from "react-native-timer-picker";
 import IcChevronDown from "@/components/icons/chevron-down";
 import FilterAndSelectModal from "@/components/filter-and-select-modal";
+import ConfirmActionModal from "@/components/confirm-action-modal";
+import { useCreateSessionStore } from "@/stores/create-session-store";
+import type { SessionBlockData } from "@/stores/create-session-store";
+import { supabase } from "@/utilities/supabase";
 
 export default function AddBlock() {
-  const { mode } = useLocalSearchParams();
+  const { mode, blockId } = useLocalSearchParams();
   const isEditing = mode === "edit";
+  const createSessionStore = useCreateSessionStore();
 
   // Validation errors
   const [errors, setErrors] = useState<{
@@ -43,16 +48,45 @@ export default function AddBlock() {
     exercises?: string;
   }>({});
 
-  const [blockTitle, setBlockTitle] = useState<string>(
-    "Travail de l'endurance aérobie haute, zone Z4 (~95 % de la VMA)",
-  );
-  const [blockDescription, setBlockDescription] = useState<string>(
-    "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-  );
+  // Delete confirmation state
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
-  const [selectedIntensity, setSelectedIntensity] = useState<TChoice>(
-    intensityOptions[0],
-  );
+  const [blockTitle, setBlockTitle] = useState<string>("");
+  const [blockDescription, setBlockDescription] = useState<string>("");
+
+  const [intensityOptions, setIntensityOptions] = useState<TChoice[]>([]);
+  const [selectedIntensity, setSelectedIntensity] = useState<TChoice>();
+
+  // Fetch intensity options from Supabase
+  useEffect(() => {
+    const fetchIntensityOptions = async () => {
+      const { data, error } = await supabase
+        .from("intensity_references")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching intensity options:", error);
+        return;
+      }
+
+      const options: TChoice[] = (data || []).map((item: any) => ({
+        id: item.id,
+        text: item.name_fr,
+      }));
+
+      setIntensityOptions(options);
+
+      // Set default intensity to "Aucun" (first option) if not already set
+      if (!selectedIntensity && options.length > 0) {
+        setSelectedIntensity(options[0]);
+      }
+    };
+
+    fetchIntensityOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const durationOrDistanceTabs = ["Temps", "Distance"];
   const [tabDurationOrDistance, setTabDurationOrDistance] = useState(
@@ -92,6 +126,22 @@ export default function AddBlock() {
   const removeExercise = (id: string) => {
     setSelectedExercises((x) => x.filter((y) => y.id !== id));
   };
+
+  // Load block data when editing
+  useEffect(() => {
+    if (isEditing && blockId) {
+      const block = createSessionStore.sessionData?.blocks.find(
+        (b) => b.id === blockId,
+      );
+      if (block) {
+        setBlockTitle(block.title);
+        setBlockDescription(block.description);
+        setSelectedIntensity(block.intensity);
+        setSelectedExercises(block.exercises);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, blockId]);
 
   const renderDurationOrDistanceTabs = () => {
     if (tabDurationOrDistance === "Distance") {
@@ -246,7 +296,7 @@ export default function AddBlock() {
         </View>
 
         {/* VMA Form - Show when Vitesse (%VMA) is selected */}
-        {selectedIntensity.text === "Vitesse (%VMA)" && (
+        {selectedIntensity?.text === "Vitesse (%VMA)" && (
           <View className="mb-6 gap-2">
             <View className="flex-row items-center gap-2">
               <Text>Vitesse maximale aérobie (VMA)</Text>
@@ -327,28 +377,37 @@ export default function AddBlock() {
               </View>
               <FlatList
                 contentContainerClassName="mt-6"
-                data={zoneReference}
+                data={zoneReferenceWithHeader}
                 renderItem={({ item, index }) => (
                   <View className="flex-row items-center overflow-hidden">
                     <Text
-                      className={clsx("border border-stroke py-1 px-4 w-1/5", {
-                        "font-medium text-secondary": index === 0,
-                      })}
+                      className={clsx(
+                        "border border-stroke py-1 px-4 w-[22%] h-full",
+                        {
+                          "font-medium text-secondary": index === 0,
+                        },
+                      )}
                       style={{ color: item.color }}
                     >
                       {item.zone}
                     </Text>
                     <Text
-                      className={clsx("border border-stroke py-1 px-4 w-2/5", {
-                        "font-medium text-secondary": index === 0,
-                      })}
+                      className={clsx(
+                        "border border-stroke py-1 px-4 w-[35%] h-full",
+                        {
+                          "font-medium text-secondary": index === 0,
+                        },
+                      )}
                     >
                       {item.percentage}
                     </Text>
                     <Text
-                      className={clsx("border border-stroke py-1 px-4 w-2/5", {
-                        "font-medium text-secondary": index === 0,
-                      })}
+                      className={clsx(
+                        "border border-stroke py-1 px-4 w-[42%] h-full",
+                        {
+                          "font-medium text-secondary": index === 0,
+                        },
+                      )}
                     >
                       {item.targetPace}
                     </Text>
@@ -392,7 +451,7 @@ export default function AddBlock() {
         <Button
           type="secondary"
           text="Supprimer le bloc"
-          onPress={() => {}}
+          onPress={() => setShowDeleteConfirmation(true)}
           className={clsx({
             hidden: !isEditing,
           })}
@@ -404,7 +463,22 @@ export default function AddBlock() {
           size="large"
           onPress={() => {
             if (validateAndSave()) {
-              // Save block and go back
+              // Save block to store
+              const blockData: SessionBlockData = {
+                id: isEditing && blockId ? (blockId as string) : String(Date.now()),
+                title: blockTitle,
+                description: blockDescription,
+                intensity: selectedIntensity!,
+                exercises: selectedExercises,
+              };
+
+              if (isEditing && blockId) {
+                createSessionStore.updateBlock(blockId as string, blockData);
+              } else {
+                createSessionStore.addBlock(blockData);
+              }
+
+              // Go back to create-session
               router.back();
             }
           }}
@@ -420,6 +494,24 @@ export default function AddBlock() {
         show={showAddExerciseModal}
         onDismiss={() => setShowAddExerciseModal(false)}
         height="90%"
+      />
+
+      <ConfirmActionModal
+        name="confirm-delete-block-modal"
+        title="Supprimer ce bloc ?"
+        message="Cette action est définitive. Le bloc sera retiré de ta séance."
+        confirm={{
+          text: "Supprimer le bloc",
+          isDestructive: true,
+          onPress: () => {
+            if (blockId) {
+              createSessionStore.removeBlock(blockId as string);
+            }
+            setShowDeleteConfirmation(false);
+            router.back();
+          },
+        }}
+        show={showDeleteConfirmation}
       />
     </BasicScreen>
   );

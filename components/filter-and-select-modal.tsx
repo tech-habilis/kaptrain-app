@@ -21,6 +21,8 @@ export default function FilterAndSelectModal({
   selectedChoices,
   onSelected,
   onDismiss,
+  maxChoice,
+  singleChoice,
 }: {
   name: string;
   show: boolean;
@@ -29,9 +31,11 @@ export default function FilterAndSelectModal({
   choices: TChoice[];
   selectedChoices: TChoice | TChoice[];
   onSelected: (choices: TChoice | TChoice[]) => void;
+  maxChoice?: number;
+  singleChoice?: boolean;
 }) {
   const ref = useRef<RawBottomSheetModalType>(null);
-  const isMultipleSelect = Array.isArray(selectedChoices);
+  const isMultipleSelect = Array.isArray(selectedChoices) && !singleChoice;
   const [search, setSearch] = useState<string>("");
   const shownChoices = choices.filter((x) =>
     x.text.toLowerCase().includes(search.toLowerCase()),
@@ -66,7 +70,7 @@ export default function FilterAndSelectModal({
         </Pressable>
       </View>
 
-      {Array.isArray(selectedChoices) && (
+      {!singleChoice && Array.isArray(selectedChoices) && (
         <View
           className={clsx("flex-row flex-wrap gap-2 mt-6", {
             "mt-6 mb-4": selectedChoices.length > 0,
@@ -92,12 +96,36 @@ export default function FilterAndSelectModal({
         <Choices
           numColumns={1}
           data={shownChoices}
-          type={isMultipleSelect ? "multipleChoice" : "radio"}
-          selectedChoice={isMultipleSelect ? undefined : selectedChoices}
+          type={
+            singleChoice
+              ? "radio"
+              : isMultipleSelect
+                ? "multipleChoice"
+                : "radio"
+          }
+          selectedChoice={
+            singleChoice && Array.isArray(selectedChoices)
+              ? selectedChoices[0]
+              : !Array.isArray(selectedChoices)
+                ? (selectedChoices as TChoice)
+                : undefined
+          }
           selectedChoices={isMultipleSelect ? selectedChoices : undefined}
-          onChangeMultiple={onSelected}
-          onChange={onSelected}
-          maxChoice={5}
+          onChangeMultiple={(choices) => {
+            // Enforce maxChoice limit
+            if (maxChoice && choices.length > maxChoice) {
+              // Keep only the first maxChoice selections
+              onSelected(choices.slice(0, maxChoice));
+            } else {
+              onSelected(choices);
+            }
+          }}
+          onChange={
+            singleChoice
+              ? (choice) => onSelected([choice])
+              : onSelected
+          }
+          maxChoice={maxChoice ?? 5}
         />
       </BottomSheetScrollView>
     </BottomSheetModal>

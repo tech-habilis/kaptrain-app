@@ -16,7 +16,7 @@ import IcCycling from "@/components/icons/cycling";
 import { clsx } from "clsx";
 import IcClose from "@/components/icons/close";
 import { TimerPickerModal } from "react-native-timer-picker";
-import { SelectTimeProp, TrainingBlock, TChoice } from "@/types";
+import { SelectTimeProp, TChoice } from "@/types";
 import { supabase } from "@/utilities/supabase";
 import { Choices } from "@/components/choices";
 import FilterAndSelectModal from "@/components/filter-and-select-modal";
@@ -26,12 +26,25 @@ import dayjs from "dayjs";
 import Stepper from "@/components/stepper";
 import SessionBlock from "@/components/session-block";
 import ConfirmActionModal from "@/components/confirm-action-modal";
+import {
+  useCreateSessionStore,
+  type SessionBlockData,
+} from "@/stores/create-session-store";
 
 // Validation schema
 const createSessionSchema = z.object({
+  sessionName: z
+    .any()
+    .refine((val) => val !== undefined && val !== null && val !== "", {
+      message: "Le nom de la séance est requis",
+    })
+    .refine((val) => typeof val === "string", {
+      message: "Le nom de la séance doit être une chaîne de caractères",
+    }),
   theme: z.string().min(1, "Veuillez sélectionner une thématique"),
   sports: z.array(z.string()).min(1, "Veuillez sélectionner au moins un sport"),
   date: z.date({ error: "Veuillez sélectionner une date" }),
+  blocks: z.array(z.any()).min(1, "Au moins un bloc est requis"),
   timeRange: z
     .object({
       start: z.string().regex(/^\d{2}:\d{2}$/, "Format invalide"),
@@ -43,16 +56,19 @@ const createSessionSchema = z.object({
 const SHOWN_SPORTS = 3;
 
 export default function CreateSession() {
-  const { mode } = useLocalSearchParams();
+  const { mode, sessionId } = useLocalSearchParams();
   const isEditing = mode === "edit";
   const { session, setSession } = useSession();
+  const createSessionStore = useCreateSessionStore();
 
   const [selectedBlockForDelete, setSelectedBlockForDelete] =
-    useState<TrainingBlock>();
+    useState<SessionBlockData>();
   const showDeleteConfirmation = useMemo(
     () => selectedBlockForDelete !== undefined,
     [selectedBlockForDelete],
   );
+  const [showSessionDeleteConfirmation, setShowSessionDeleteConfirmation] =
+    useState(false);
   const [currentStep, setCurrentStep] = useState<number>(isEditing ? 2 : 1);
   const [selectedTheme, setSelectedTheme] = useState<TChoice>();
   const [selectedSports, setSelectedSports] = useState<TChoice[]>([]);
@@ -65,6 +81,8 @@ export default function CreateSession() {
     theme?: string;
     sports?: string;
     date?: string;
+    sessionName?: string;
+    blocks?: string;
   }>({});
 
   const [selectedDate, setSelectedDate] = useState<DateType>(new Date());
@@ -83,16 +101,7 @@ export default function CreateSession() {
     return { hours, minutes };
   }, [selectedTime?.value]);
 
-  const [sessionName, setSessionName] = useState<string>(
-    "Séance cyclisme du 19/04",
-  );
-  const [trainingBlocks, setTrainingBlocks] = useState<TrainingBlock[]>([
-    {
-      id: "1",
-      title: "Travail de l'endurance aérobie haute, zone Z4 (~95 % de la VMA)",
-      exerciseCount: 3,
-    },
-  ]);
+  const [sessionName, setSessionName] = useState<string>();
 
   // Fetch sports and themes from Supabase
   const [themes, setThemes] = useState<TChoice[]>([]);
@@ -163,6 +172,150 @@ export default function CreateSession() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
 
+  // Initialize store on mount
+  useEffect(() => {
+    createSessionStore.initializeSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Load existing session data when in edit mode
+  useEffect(() => {
+    if (isEditing && sessionId && typeof sessionId === "string") {
+      const loadSessionData = async () => {
+        setIsFetching(true);
+        try {
+          const { data: sessionData, error } = await supabase
+            .from("sessions")
+            .select("*")
+            .eq("id", sessionId)
+            .single();
+
+          if (error) throw error;
+          if (sessionData) {
+            // Set session name
+            setSessionName(sessionData.title);
+
+            // Set date - ensure it's a Date object
+            const scheduledDate = new Date(sessionData.scheduled_date);
+            setSelectedDate(scheduledDate);
+
+            // Set time range if exists
+            if (sessionData.scheduled_time) {
+              // Parse time and only keep hours and minutes (remove seconds)
+              const timeParts = sessionData.scheduled_time.split(":");
+              const formattedTime = `${timeParts[0]}:${timeParts[1]}`;
+              setTimeRange({
+                start: formattedTime,
+                end: formattedTime, // In a real app, you'd have separate end time
+              });
+            } else {
+              setTimeRange(undefined);
+            }
+
+            // Fetch and set sport
+            if (sessionData.sport_id) {
+              const { data: sportData } = await supabase
+                .from("sports")
+                .select("*")
+                .eq("id", sessionData.sport_id)
+                .single();
+
+              if (sportData) {
+                setSelectedSports([
+                  { id: sportData.id, text: sportData.name_fr },
+                ]);
+              }
+            }
+
+            // Load theme from store if available, otherwise set default
+            const storeData = createSessionStore.sessionData;
+            if (storeData?.theme) {
+              setSelectedTheme(storeData.theme);
+            } else if (themes.length > 0) {
+              setSelectedTheme(themes[0]);
+            }
+          }
+
+          // Fetch session blocks with exercises
+          const { data: blocksData } = await supabase
+            .from("session_blocks")
+            .select(
+              `
+              *,
+              session_exercises (
+                id,
+                name,
+                sequence_order
+              )
+            `,
+            )
+            .eq("session_id", sessionId)
+            .order("sequence_order", { ascending: true });
+
+          if (blocksData && blocksData.length > 0) {
+            // Convert to SessionBlockData format
+            for (const block of blocksData) {
+              // Fetch intensity reference if intensity_id exists
+              let intensity = { id: "id-Aucun", text: "Aucun" };
+              if (block.intensity_id) {
+                const { data: intensityData } = await supabase
+                  .from("intensity_references")
+                  .select("id, name_fr")
+                  .eq("id", block.intensity_id)
+                  .single();
+
+                if (intensityData) {
+                  intensity = {
+                    id: intensityData.id,
+                    text: intensityData.name_fr,
+                  };
+                }
+              }
+
+              // Convert exercises to TChoice format
+              const exercises: TChoice[] =
+                block.session_exercises?.map((exercise: any) => ({
+                  id: exercise.id,
+                  text: exercise.name,
+                })) || [];
+
+              const blockData: SessionBlockData = {
+                id: block.id,
+                title: block.title || "",
+                description: block.description || "",
+                intensity,
+                exercises,
+              };
+              createSessionStore.addBlock(blockData);
+            }
+          }
+        } catch (error) {
+          console.error("Error loading session:", error);
+        } finally {
+          setIsFetching(false);
+        }
+      };
+
+      loadSessionData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, sessionId]);
+
+  // Sync store data to local state (for when returning from add-block)
+  useEffect(() => {
+    const storeData = createSessionStore.sessionData;
+    if (storeData) {
+      if (storeData.sessionName) {
+        setSessionName(storeData.sessionName);
+      }
+      // Clear blocks error if blocks are added
+      if (storeData.blocks && storeData.blocks.length > 0) {
+        setErrors((prev) => ({ ...prev, blocks: undefined }));
+      }
+      // Could sync other fields here if needed
+    }
+  }, [createSessionStore.sessionData]);
+
   const validateStep1 = (): boolean => {
     const newErrors: typeof errors = {};
 
@@ -186,7 +339,16 @@ export default function CreateSession() {
   };
 
   const handleSubmit = async () => {
+    console.log("=== handleSubmit called ===");
+    console.log("isEditing:", isEditing);
+    console.log("sessionId:", sessionId);
+
     setSubmitError(undefined);
+
+    // Console.log the overall data from store
+    const sessionData = createSessionStore.sessionData;
+    console.log("=== CREATE SESSION DATA ===");
+    console.log(JSON.stringify(sessionData, null, 2));
 
     const userId = session?.user?.id;
     if (!userId) {
@@ -194,24 +356,44 @@ export default function CreateSession() {
       return;
     }
 
+    // Assert userId is non-null after the check
+    const coachId: string = userId;
+
+    console.log("Starting submit...");
     setIsSubmitting(true);
 
     try {
       // Validate form data
       const validationResult = createSessionSchema.safeParse({
+        sessionName,
         theme: selectedTheme?.text,
         sports: selectedSports.map((s) => s.text),
         date: selectedDate ? new Date(selectedDate as string) : undefined,
+        blocks: createSessionStore.sessionData?.blocks || [],
         timeRange,
       });
 
+      console.log("Validation result:", validationResult.success);
       if (!validationResult.success) {
-        const firstError = validationResult.error.issues[0];
-        setSubmitError(firstError.message);
+        console.log("Validation errors:", validationResult.error.issues);
+        // Set field-specific errors
+        const newErrors: typeof errors = {};
+        validationResult.error.issues.forEach((issue) => {
+          const field = issue.path[0] as keyof typeof errors;
+          // Check if field is a valid error field (theme, sports, date, sessionName, blocks)
+          if (
+            ["theme", "sports", "date", "sessionName", "blocks"].includes(field)
+          ) {
+            newErrors[field] = issue.message;
+          }
+        });
+        setErrors(newErrors);
+        setIsSubmitting(false);
         return;
       }
 
       const data = validationResult.data;
+      console.log("Validation passed, data:", data);
 
       // Get sport IDs from database
       const { data: sportsData, error: sportsError } = await supabase
@@ -238,43 +420,161 @@ export default function CreateSession() {
       const scheduledDate = dayjs(data.date).format("YYYY-MM-DD");
       const scheduledTime = timeRange ? timeRange.start : null;
 
-      // Insert session
-      const { data: sessionData, error: sessionError } = await supabase
-        .from("sessions")
-        .insert({
-          user_id: userId,
-          title: sessionName,
-          session_type: "individual",
-          session_status: "upcoming",
-          scheduled_date: scheduledDate,
-          scheduled_time: scheduledTime,
-          duration_seconds: durationSeconds,
-          sport_id: sportsData[0].id, // Primary sport
-          created_by: "user",
-        })
-        .select()
-        .single();
+      // Check if editing or creating
+      if (isEditing && sessionId && typeof sessionId === "string") {
+        // UPDATE EXISTING SESSION
+        const { error: updateError } = await supabase
+          .from("sessions")
+          .update({
+            title: sessionName,
+            scheduled_date: scheduledDate,
+            scheduled_time: scheduledTime,
+            duration_seconds: durationSeconds,
+            sport_id: sportsData[0].id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", sessionId);
 
-      if (sessionError) {
-        setSubmitError("Erreur lors de la création de la séance");
-        return;
-      }
-
-      // Insert session blocks if any
-      if (trainingBlocks.length > 0) {
-        const blocks = trainingBlocks.map((block, index) => ({
-          session_id: sessionData.id,
-          title: block.title,
-          sequence_order: index,
-        }));
-
-        const { error: blocksError } = await supabase
-          .from("session_blocks")
-          .insert(blocks);
-
-        if (blocksError) {
-          setSubmitError("Séance créée, mais erreur lors de l'ajout des blocs");
+        if (updateError) {
+          setSubmitError("Erreur lors de la mise à jour de la séance");
           return;
+        }
+
+        // Delete existing blocks and exercises, then insert new ones
+        // First, get all block IDs for this session
+        const { data: existingBlocks } = await supabase
+          .from("session_blocks")
+          .select("id")
+          .eq("session_id", sessionId);
+
+        if (existingBlocks && existingBlocks.length > 0) {
+          const blockIds = existingBlocks.map((b) => b.id);
+
+          // Delete all exercises for these blocks
+          await supabase
+            .from("session_exercises")
+            .delete()
+            .in("session_block_id", blockIds);
+
+          // Delete all blocks
+          await supabase.from("session_blocks").delete().in("id", blockIds);
+        }
+
+        // Insert new blocks
+        const storeBlocks = createSessionStore.sessionData?.blocks || [];
+        if (storeBlocks.length > 0) {
+          // Insert blocks with description and intensity
+          const blocks = storeBlocks.map((block, index) => ({
+            session_id: sessionId,
+            title: block.title,
+            description: block.description,
+            intensity_id: block.intensity?.id,
+            sequence_order: index,
+          }));
+
+          const { data: insertedBlocks, error: blocksError } = await supabase
+            .from("session_blocks")
+            .insert(blocks)
+            .select();
+
+          if (blocksError) {
+            setSubmitError("Erreur lors de la mise à jour des blocs");
+            return;
+          }
+
+          // Insert exercises for each block
+          for (let i = 0; i < storeBlocks.length; i++) {
+            const block = storeBlocks[i];
+            const insertedBlockId = insertedBlocks?.[i]?.id;
+
+            if (insertedBlockId && block.exercises.length > 0) {
+              const exercises = block.exercises.map((exercise, index) => ({
+                session_block_id: insertedBlockId,
+                name: exercise.text,
+                sequence_order: index,
+              }));
+
+              const { error: exercisesError } = await supabase
+                .from("session_exercises")
+                .insert(exercises);
+
+              if (exercisesError) {
+                console.error("Error inserting exercises:", exercisesError);
+              }
+            }
+          }
+        }
+      } else {
+        // CREATE NEW SESSION
+        if (!sessionName) {
+          return;
+        }
+
+        const { data: sessionData, error: sessionError } = await supabase
+          .from("sessions")
+          .insert({
+            coach_id: coachId,
+            title: sessionName,
+            session_type: "individual",
+            session_status: "upcoming",
+            scheduled_date: scheduledDate,
+            scheduled_time: scheduledTime,
+            duration_seconds: durationSeconds,
+            sport_id: sportsData[0].id,
+          })
+          .select()
+          .single();
+
+        if (sessionError) {
+          setSubmitError("Erreur lors de la création de la séance");
+          return;
+        }
+
+        // Insert session blocks if any
+        const storeBlocks = createSessionStore.sessionData?.blocks || [];
+        if (storeBlocks.length > 0) {
+          // Insert blocks with description and intensity
+          const blocks = storeBlocks.map((block, index) => ({
+            session_id: sessionData.id,
+            title: block.title,
+            description: block.description,
+            intensity_id: block.intensity?.id,
+            sequence_order: index,
+          }));
+
+          const { data: insertedBlocks, error: blocksError } = await supabase
+            .from("session_blocks")
+            .insert(blocks)
+            .select();
+
+          if (blocksError) {
+            setSubmitError("Séance créée, mais erreur lors de l'ajout des blocs");
+            return;
+          }
+
+          // Insert exercises for each block
+          for (let i = 0; i < storeBlocks.length; i++) {
+            const block = storeBlocks[i];
+            const insertedBlockId = insertedBlocks?.[i]?.id;
+
+            if (insertedBlockId && block.exercises.length > 0) {
+              const exercises = block.exercises.map((exercise, index) => ({
+                session_block_id: insertedBlockId,
+                name: exercise.text,
+                sequence_order: index,
+                // exercise_library_id: exercise.id, // Uncomment if exercises are linked to library
+              }));
+
+              const { error: exercisesError } = await supabase
+                .from("session_exercises")
+                .insert(exercises);
+
+              if (exercisesError) {
+                console.error("Error inserting exercises:", exercisesError);
+                // Don't fail the entire operation if exercises fail
+              }
+            }
+          }
         }
       }
 
@@ -295,6 +595,12 @@ export default function CreateSession() {
         <View className="flex-row items-center">
           <Pressable
             onPress={() => {
+              // for edit mode, there's only 1 step
+              if (isEditing) {
+                router.back();
+                return;
+              }
+
               if (currentStep === 1) {
                 router.back();
               } else {
@@ -317,7 +623,7 @@ export default function CreateSession() {
       {/* Main Content */}
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-4 pb-32 pt-2"
+        contentContainerClassName="px-4 pb-48 pt-2"
         showsVerticalScrollIndicator={false}
       >
         {currentStep === 1 ? (
@@ -483,7 +789,12 @@ export default function CreateSession() {
             <Input
               label="Nom de la séance"
               value={sessionName}
-              onChangeText={setSessionName}
+              error={errors.sessionName}
+              onChangeText={(text) => {
+                setSessionName(text);
+                createSessionStore.setSessionName(text);
+                setErrors((prev) => ({ ...prev, sessionName: undefined }));
+              }}
             />
 
             {/* Training Blocks Section */}
@@ -493,7 +804,7 @@ export default function CreateSession() {
               </Text>
 
               <View className="gap-2">
-                {trainingBlocks.map((block) => (
+                {createSessionStore.sessionData?.blocks.map((block) => (
                   <SessionBlock
                     key={block.id}
                     block={block}
@@ -502,6 +813,10 @@ export default function CreateSession() {
                     }}
                   />
                 ))}
+
+                {errors.blocks && (
+                  <Text className="text-error text-sm">{errors.blocks}</Text>
+                )}
 
                 {/* Add Block Button */}
                 <Button
@@ -525,47 +840,111 @@ export default function CreateSession() {
                       </View>
                     </View>
 
-                    <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
+                    <Pressable
+                      onPress={() => setShowMoreSport(true)}
+                      className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
+                    >
                       {/* Block Content */}
                       <View className="flex-1 gap-1">
                         <Text
                           numberOfLines={1}
                           className="text-sm text-subtleText"
                         >
-                          Choix de thématique
+                          Sport
                         </Text>
 
                         <View className="flex-row gap-1.5 items-center">
                           <IcCycling />
                           <Text className="text-base font-semibold text-secondary flex-1">
-                            Cyclisme
+                            {selectedSports[0]?.text || "--"}
                           </Text>
                           <IcPencil size={24} />
                         </View>
                       </View>
-                    </View>
+                    </Pressable>
 
-                    <View className="border border-stroke rounded-xl p-3 flex-row items-center gap-2">
-                      {/* Block Content */}
-                      <View className="flex-1 gap-1">
-                        <Text
-                          numberOfLines={1}
-                          className="text-sm text-subtleText"
+                    <DatePicker
+                      selectedDate={selectedDate}
+                      onSelect={setSelectedDate}
+                      renderTrigger={({ onPress, formattedDate }) => (
+                        <Pressable
+                          onPress={onPress}
+                          className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
                         >
-                          Date
-                        </Text>
+                          {/* Block Content */}
+                          <View className="flex-1 gap-1">
+                            <Text
+                              numberOfLines={1}
+                              className="text-sm text-subtleText"
+                            >
+                              Date
+                            </Text>
 
-                        <View className="flex-row gap-1.5 items-center">
-                          <Text className="text-accent text-base font-medium">
-                            Le
-                          </Text>
-                          <Text className="text-base font-semibold text-secondary flex-1">
-                            25/04/2025
-                          </Text>
-                          <IcPencil size={24} />
+                            <View className="flex-row gap-1.5 items-center">
+                              <Text className="text-accent text-base font-medium">
+                                Le
+                              </Text>
+                              <Text className="text-base font-semibold text-secondary flex-1">
+                                {formattedDate || "--/--/----"}
+                              </Text>
+                              <IcPencil size={24} />
+                            </View>
+                          </View>
+                        </Pressable>
+                      )}
+                    />
+
+                    {/* Time Section - Commented out for now */}
+                    {/* <View className="border border-stroke rounded-xl p-3 gap-1">
+                      <Text numberOfLines={1} className="text-sm text-subtleText">
+                        Heure
+                      </Text>
+
+                      <View className="flex-row items-center gap-2">
+                        <Text
+                          className="text-sm font-medium text-accent"
+                          style={{ width: 24 }}
+                        >
+                          De
+                        </Text>
+                        <View className="flex-1">
+                          <Input
+                            value={timeRange?.start}
+                            placeholder="10:00"
+                            inputClassName="text-center text-base"
+                            asPressable
+                            onPress={() => {
+                              setSelectedTime({
+                                id: "time",
+                                type: "start",
+                                value: timeRange?.start || "10:00",
+                              });
+                            }}
+                          />
+                        </View>
+                        <Text
+                          className="text-sm font-medium text-accent text-center"
+                          style={{ width: 16 }}
+                        >
+                          à
+                        </Text>
+                        <View className="flex-1">
+                          <Input
+                            value={timeRange?.end}
+                            asPressable
+                            onPress={() =>
+                              setSelectedTime({
+                                id: "time",
+                                type: "end",
+                                value: timeRange?.end || "11:00",
+                              })
+                            }
+                            placeholder="11:00"
+                            inputClassName="text-center text-base"
+                          />
                         </View>
                       </View>
-                    </View>
+                    </View> */}
                   </>
                 )}
               </View>
@@ -580,7 +959,7 @@ export default function CreateSession() {
           size="large"
           text="Supprimer ma séance"
           type="tertiary"
-          onPress={() => {}}
+          onPress={() => setShowSessionDeleteConfirmation(true)}
           className={clsx({
             hidden: !isEditing,
           })}
@@ -596,12 +975,29 @@ export default function CreateSession() {
           type="primary"
           size="large"
           loading={isSubmitting}
+          disabled={isSubmitting}
           onPress={() => {
+            console.log("=== Button pressed ===");
+            console.log("currentStep:", currentStep);
+            console.log("sessionName:", sessionName);
+            console.log("isEditing:", isEditing);
+            console.log("sessionId:", sessionId);
+
             if (currentStep === 1) {
+              console.log("Going to step 1 validation");
               if (validateStep1()) {
+                console.log("Step 1 validated, going to step 2");
+                // Save step 1 data to store
+                createSessionStore.setStep1Data({
+                  theme: selectedTheme!,
+                  sports: selectedSports,
+                  date: selectedDate,
+                  timeRange: timeRange || null,
+                });
                 setCurrentStep(2);
               }
             } else {
+              console.log("Calling handleSubmit");
               handleSubmit();
             }
           }}
@@ -611,22 +1007,49 @@ export default function CreateSession() {
         )}
       </View>
 
+      {/* Block Delete Modal */}
       <ConfirmActionModal
-        name="confirm-delete-ref"
+        name="confirm-delete-block-modal"
+        title="Supprimer ce bloc ?"
+        message="Cette action est définitive. Le bloc sera retiré de ta séance."
+        confirm={{
+          text: "Supprimer le bloc",
+          isDestructive: true,
+          onPress: () => {
+            createSessionStore.removeBlock(selectedBlockForDelete?.id || "");
+            setSelectedBlockForDelete(undefined);
+          },
+        }}
+        show={showDeleteConfirmation}
+      />
+
+      {/* Session Delete Modal */}
+      <ConfirmActionModal
+        name="confirm-delete-session-modal"
         title="Supprimer cette séance ?"
         message="Cette action est définitive. La séance sera retirée de ta
       planification."
         confirm={{
           text: "Supprimer la séance",
           isDestructive: true,
-          onPress: () => {
-            setTrainingBlocks((blocks) =>
-              blocks.filter((x) => x.id !== selectedBlockForDelete?.id),
-            );
-            setSelectedBlockForDelete(undefined);
+          onPress: async () => {
+            if (isEditing && sessionId && typeof sessionId === "string") {
+              // Delete from database
+              const { error } = await supabase
+                .from("sessions")
+                .delete()
+                .eq("id", sessionId);
+
+              if (error) {
+                console.error("Error deleting session:", error);
+                return;
+              }
+            }
+            setShowSessionDeleteConfirmation(false);
+            router.back();
           },
         }}
-        show={showDeleteConfirmation}
+        show={showSessionDeleteConfirmation}
       />
 
       <TimerPickerModal
@@ -662,6 +1085,7 @@ export default function CreateSession() {
         selectedChoices={selectedSports}
         onSelected={(selected) => setSelectedSports(selected as TChoice[])}
         onDismiss={() => setShowMoreSport(false)}
+        singleChoice
       />
     </View>
   );

@@ -26,51 +26,43 @@ export interface SessionWithCreator extends Session {
 export interface CalendarDay {
   date: Date;
   day: string;
-  isCurrentMonth: boolean;
+  title: string;
   isToday: boolean;
   isSelected: boolean;
   activities: ("blue" | "orange" | "grey" | "green")[];
 }
 
-interface UseAgendaCalendarReturn {
-  currentDate: Date;
+interface UseWeekCalendarReturn {
+  currentWeekStart: Date;
   selectedDate: Date;
-  currentMonthLabel: string;
-  weekDays: string[];
-  calendarWeeks: CalendarDay[][];
+  weekDays: CalendarDay[];
   selectedDateSessions: SessionWithCreator[];
   goToToday: () => void;
-  goToNextMonth: () => void;
-  goToPrevMonth: () => void;
+  goToNextWeek: () => void;
+  goToPrevWeek: () => void;
   selectDate: (date: Date) => void;
   isLoading: boolean;
   refreshSessions: () => Promise<void>;
 }
 
-export function useAgendaCalendar(
+export function useWeekCalendar(
   userId: string | undefined,
-): UseAgendaCalendarReturn {
-  const [currentDate, setCurrentDate] = useState(dayjs());
+): UseWeekCalendarReturn {
+  const [currentWeekStart, setCurrentWeekStart] = useState(
+    dayjs().startOf("week"),
+  );
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [sessions, setSessions] = useState<SessionWithCreator[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Week days starting Monday (France)
-  const weekDays = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
-
-  // Current month label (e.g., "Avril 2025")
-  const currentMonthLabel = currentDate
-    .format("MMMM YYYY")
-    .replace(/^\w/, (c) => c.toUpperCase());
-
-  // Fetch sessions for the current visible month (needed for calendar dots)
+  // Fetch sessions for the current visible week
   const fetchSessions = useCallback(async () => {
     if (!userId) return;
 
     setIsLoading(true);
     try {
-      const monthStart = currentDate.startOf("month").format("YYYY-MM-DD");
-      const monthEnd = currentDate.endOf("month").format("YYYY-MM-DD");
+      const weekStart = currentWeekStart.format("YYYY-MM-DD");
+      const weekEnd = currentWeekStart.add(6, "day").format("YYYY-MM-DD");
 
       const { data, error } = await supabase
         .from("sessions")
@@ -82,8 +74,8 @@ export function useAgendaCalendar(
           )
         `)
         .eq("coach_id", userId)
-        .gte("scheduled_date", monthStart)
-        .lte("scheduled_date", monthEnd)
+        .gte("scheduled_date", weekStart)
+        .lte("scheduled_date", weekEnd)
         .order("scheduled_date", { ascending: true });
 
       if (error) throw error;
@@ -93,14 +85,14 @@ export function useAgendaCalendar(
     } finally {
       setIsLoading(false);
     }
-  }, [currentDate, userId]);
+  }, [currentWeekStart, userId]);
 
   // Refresh sessions
   const refreshSessions = async () => {
     await fetchSessions();
   };
 
-  // Fetch sessions when screen comes into focus or when current month/user changes
+  // Fetch sessions when screen comes into focus or when week/user changes
   useFocusEffect(
     useCallback(() => {
       fetchSessions();
@@ -115,17 +107,10 @@ export function useAgendaCalendar(
     });
   }, [sessions, selectedDate]);
 
-  // Generate calendar weeks
-  const calendarWeeks = useMemo<CalendarDay[][]>(() => {
-    const monthStart = currentDate.startOf("month");
-
-    // Get the first day of the calendar (might be in previous month)
-    // In France, week starts on Monday (weekday() where 0 = Sunday, 1 = Monday)
-    const firstDayOfWeek = monthStart.weekday(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const calendarStart = monthStart.subtract(
-      firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1,
-      "day",
-    );
+  // Generate week days (Monday to Sunday)
+  const weekDays = useMemo<CalendarDay[]>(() => {
+    // Week day titles (Lun, Mar, etc.)
+    const weekDayTitles = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
     // Build a map of sessions by date for activity dots
     const sessionsByDate = new Map<
@@ -142,41 +127,38 @@ export function useAgendaCalendar(
       sessionsByDate.get(dateKey)?.push(color);
     });
 
-    // Generate 6 weeks (42 days) to cover all possibilities
-    const weeks: CalendarDay[][] = [];
-    for (let week = 0; week < 6; week++) {
-      const weekDays: CalendarDay[] = [];
-      for (let day = 0; day < 7; day++) {
-        const dayDate = calendarStart.add(week * 7 + day, "day");
-        const dateKey = dayDate.format("YYYY-MM-DD");
-        weekDays.push({
-          date: dayDate.toDate(),
-          day: dayDate.format("D"),
-          isCurrentMonth: dayDate.month() === currentDate.month(),
-          isToday: dayDate.isSame(dayjs(), "day"),
-          isSelected: dayDate.isSame(selectedDate, "day"),
-          activities: sessionsByDate.get(dateKey) || [],
-        });
-      }
-      weeks.push(weekDays);
+    // Generate 7 days for the current week (Monday to Sunday)
+    const days: CalendarDay[] = [];
+    for (let i = 0; i < 7; i++) {
+      const dayDate = currentWeekStart.add(i, "day");
+      const dateKey = dayDate.format("YYYY-MM-DD");
+      days.push({
+        date: dayDate.toDate(),
+        day: dayDate.format("D"),
+        title: weekDayTitles[i],
+        isToday: dayDate.isSame(dayjs(), "day"),
+        isSelected: dayDate.isSame(selectedDate, "day"),
+        activities: sessionsByDate.get(dateKey) || [],
+      });
     }
 
-    return weeks;
-  }, [currentDate, selectedDate, sessions]);
+    return days;
+  }, [currentWeekStart, selectedDate, sessions]);
 
   // Navigation handlers
   const goToToday = () => {
     const today = dayjs();
-    setCurrentDate(today);
+    const weekStart = today.startOf("week");
+    setCurrentWeekStart(weekStart);
     setSelectedDate(today);
   };
 
-  const goToNextMonth = () => {
-    setCurrentDate((prev) => prev.add(1, "month"));
+  const goToNextWeek = () => {
+    setCurrentWeekStart((prev) => prev.add(1, "week"));
   };
 
-  const goToPrevMonth = () => {
-    setCurrentDate((prev) => prev.subtract(1, "month"));
+  const goToPrevWeek = () => {
+    setCurrentWeekStart((prev) => prev.subtract(1, "week"));
   };
 
   const selectDate = (date: Date) => {
@@ -184,15 +166,13 @@ export function useAgendaCalendar(
   };
 
   return {
-    currentDate: currentDate.toDate(),
+    currentWeekStart: currentWeekStart.toDate(),
     selectedDate: selectedDate.toDate(),
-    currentMonthLabel,
     weekDays,
-    calendarWeeks,
     selectedDateSessions,
     goToToday,
-    goToNextMonth,
-    goToPrevMonth,
+    goToNextWeek,
+    goToPrevWeek,
     selectDate,
     isLoading,
     refreshSessions,

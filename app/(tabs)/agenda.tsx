@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, View, FlatList } from "react-native";
+import { View, FlatList } from "react-native";
 import Text from "@/components/text";
 import { ActivityCard } from "@/components/agenda/activity-card";
 import { AgendaCalendarView } from "@/components/agenda/agenda-calendar-view";
@@ -44,19 +44,29 @@ export default function Agenda() {
   // Mock activities for display - will be replaced with real session data later
   const todayActivities =
     selectedDateSessions.length > 0
-      ? selectedDateSessions.map((session) => ({
-          title: session.title,
-          sessionTitle: session.description || "",
-          coachName: "", // Will be populated from coach_id
-          color: session.activity_color || ColorConst.primary,
-          icon:
-            session.session_status === "completed" ? (
-              <IcCheckCircleFilled size={16} />
-            ) : undefined,
-        }))
+      ? selectedDateSessions.map((session) => {
+          // Get coach name from creator (coach) data
+          const firstName = session.coach?.first_name;
+          const displayName = session.coach?.display_name;
+          const coachName = firstName || displayName || "";
+          const formattedCoachName = coachName ? `Par ${coachName}` : "";
+
+          return {
+            id: session.id, // Include session ID for editing
+            title: session.title,
+            sessionTitle: session.description || "",
+            coachName: formattedCoachName,
+            color: session.activity_color || ColorConst.primary,
+            icon:
+              session.session_status === "completed" ? (
+                <IcCheckCircleFilled size={16} />
+              ) : undefined,
+          };
+        })
       : // Fallback mock data for UI testing when no sessions exist
         [
           {
+            id: "mock-1",
             title: "Hyrox (programme)",
             sessionTitle: "Hyrox Paris Grand palais",
             coachName: "Par Enguerrand Aucher",
@@ -64,18 +74,21 @@ export default function Agenda() {
             icon: <IcHyrox size={16} />,
           },
           {
+            id: "mock-2",
             title: "Préparation physique (individu/programmation)",
             sessionTitle: "Souplesse / flexion cheville",
             coachName: "Par Enguerrand Aucher",
             color: ColorConst.tertiary,
           },
           {
+            id: "mock-3",
             title: "Préparation physique (perso)",
             sessionTitle: "Souplesse / flexion cheville",
             coachName: "Par Enguerrand Aucher",
             color: ColorConst.tertiary,
           },
           {
+            id: "mock-4",
             title: "Préparation physique (perso done)",
             sessionTitle: "Souplesse / flexion cheville",
             coachName: "Par Enguerrand Aucher",
@@ -113,7 +126,7 @@ export default function Agenda() {
           {/* Activities list */}
           <FlatList
             data={todayActivities}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(_item, index) => index.toString()}
             renderItem={({ item, index }) => (
               <ActivityCard
                 title={item.title}
@@ -124,7 +137,7 @@ export default function Agenda() {
                 onLongPress={() =>
                   router.push({
                     pathname: ROUTE.CREATE_SESSION,
-                    params: { mode: "edit" },
+                    params: { mode: "edit", sessionId: item.id },
                   })
                 }
                 onPress={() => {

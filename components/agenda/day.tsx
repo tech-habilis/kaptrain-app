@@ -38,7 +38,7 @@ export function Day({
         clsx({
           "bg-secondary": isSelected,
           "opacity-60": !isCurrentMonth,
-        })
+        }),
       )}
     >
       {/* Activity indicators */}
@@ -49,7 +49,7 @@ export function Day({
             clsx({
               "top-0": activities.length <= 2,
               "-top-0.5": activities.length === 3,
-            })
+            }),
           )}
         >
           {activities.slice(0, 3).map((status, index) => (
@@ -71,7 +71,7 @@ export function Day({
             "text-primary font-bold": isToday && !isSelected,
             "text-text": !isSelected && !isToday && isCurrentMonth,
             "text-subtleText": !isCurrentMonth,
-          })
+          }),
         )}
       >
         {day}

@@ -280,12 +280,6 @@ export const ALL_SPORTS: SportOption[] = [
 ];
 
 export const zoneReference = [
-  // {
-  //   zone: "Zones",
-  //   percentage: "Pourcentage VMA",
-  //   targetPace: "Allure cible (km/h)",
-  //   color: ColorConst.secondary,
-  // },
   {
     id: "id-Z1",
     zone: "Z1",
@@ -335,6 +329,16 @@ export const zoneReference = [
     targetPace: "1:30",
     color: "#BA0003",
   },
+];
+
+export const zoneReferenceWithHeader = [
+  {
+    zone: "Zones",
+    percentage: "Pourcentage VMA",
+    targetPace: "Allure cible (km/h)",
+    color: ColorConst.secondary,
+  },
+  ...zoneReference,
 ];
 
 export const intensityOptions: TChoice[] = [

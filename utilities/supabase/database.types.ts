@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -327,6 +307,30 @@ export type Database = {
           },
         ]
       }
+      intensity_references: {
+        Row: {
+          id: string
+          is_active: boolean | null
+          name_en: string | null
+          name_fr: string
+          sort_order: number | null
+        }
+        Insert: {
+          id: string
+          is_active?: boolean | null
+          name_en?: string | null
+          name_fr: string
+          sort_order?: number | null
+        }
+        Update: {
+          id?: string
+          is_active?: boolean | null
+          name_en?: string | null
+          name_fr?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           coach_connection_id: string
@@ -592,6 +596,7 @@ export type Database = {
           color: string | null
           description: string | null
           id: string
+          intensity_id: string | null
           sequence_order: number
           session_id: string
           title: string
@@ -600,6 +605,7 @@ export type Database = {
           color?: string | null
           description?: string | null
           id?: string
+          intensity_id?: string | null
           sequence_order: number
           session_id: string
           title: string
@@ -608,11 +614,19 @@ export type Database = {
           color?: string | null
           description?: string | null
           id?: string
+          intensity_id?: string | null
           sequence_order?: number
           session_id?: string
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "session_blocks_intensity_id_fkey"
+            columns: ["intensity_id"]
+            isOneToOne: false
+            referencedRelation: "intensity_references"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "session_blocks_session_id_fkey"
             columns: ["session_id"]
@@ -771,10 +785,9 @@ export type Database = {
       sessions: {
         Row: {
           activity_color: string | null
-          coach_id: string | null
+          coach_id: string
           completed_at: string | null
           created_at: string | null
-          created_by: Database["public"]["Enums"]["user_role"]
           description: string | null
           duration_seconds: number | null
           id: string
@@ -789,14 +802,12 @@ export type Database = {
           title: string
           updated_at: string | null
           user_feedback: string | null
-          user_id: string
         }
         Insert: {
           activity_color?: string | null
-          coach_id?: string | null
+          coach_id: string
           completed_at?: string | null
           created_at?: string | null
-          created_by: Database["public"]["Enums"]["user_role"]
           description?: string | null
           duration_seconds?: number | null
           id?: string
@@ -811,14 +822,12 @@ export type Database = {
           title: string
           updated_at?: string | null
           user_feedback?: string | null
-          user_id: string
         }
         Update: {
           activity_color?: string | null
-          coach_id?: string | null
+          coach_id?: string
           completed_at?: string | null
           created_at?: string | null
-          created_by?: Database["public"]["Enums"]["user_role"]
           description?: string | null
           duration_seconds?: number | null
           id?: string
@@ -833,7 +842,6 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_feedback?: string | null
-          user_id?: string
         }
         Relationships: [
           {
@@ -862,13 +870,6 @@ export type Database = {
             columns: ["sport_id"]
             isOneToOne: false
             referencedRelation: "sports"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sessions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1505,9 +1506,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       connection_status: ["pending", "accepted", "declined", "blocked"],
@@ -1559,4 +1557,3 @@ export const Constants = {
     },
   },
 } as const
-
