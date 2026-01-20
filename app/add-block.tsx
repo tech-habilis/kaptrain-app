@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Dropdown from "@/components/dropdown";
-import { choicesToExercises, TChoice } from "@/types";
+import { TChoice } from "@/types";
 import BottomSheetModal from "@/components/bottom-sheet-modal";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import Input from "@/components/input";
@@ -421,10 +421,12 @@ export default function AddBlock() {
         {/* Exercises Section */}
         <View className="gap-3">
           <ExerciseCards
-            exercises={choicesToExercises(
-              selectedExercises,
-              availableExercises,
-            )}
+            exercises={selectedExercises.map((choice) => ({
+              id: choice.id,
+              title: choice.text,
+              image: require("../assets/images/exercise-example-1.png"),
+              isFavorite: false,
+            }))}
             onRemoveExercise={(id) => {
               removeExercise(id);
               setErrors((prev) => ({ ...prev, exercises: undefined }));
