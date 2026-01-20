@@ -34,6 +34,8 @@ interface CreateSessionState {
   setSessionName: (name: string) => void;
   addBlock: (block: SessionBlockData) => void;
   updateBlock: (id: string, block: SessionBlockData) => void;
+  setBlocks: (blocks: SessionBlockData[]) => void;
+  reorderBlocks: (from: number, to: number) => void;
   removeBlock: (id: string) => void;
   reset: () => void;
 }
@@ -88,6 +90,29 @@ export const useCreateSessionStore = create<CreateSessionState>((set) => ({
         blocks: state.sessionData!.blocks.map((b) => (b.id === id ? block : b)),
       },
     }));
+  },
+
+  setBlocks: (blocks) => {
+    set((state) => ({
+      sessionData: {
+        ...state.sessionData!,
+        blocks,
+      },
+    }));
+  },
+
+  reorderBlocks: (from, to) => {
+    set((state) => {
+      const blocks = [...state.sessionData!.blocks];
+      const [movedBlock] = blocks.splice(from, 1);
+      blocks.splice(to, 0, movedBlock);
+      return {
+        sessionData: {
+          ...state.sessionData!,
+          blocks,
+        },
+      };
+    });
   },
 
   removeBlock: (id) => {

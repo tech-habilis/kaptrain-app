@@ -14,9 +14,13 @@ import type { SessionBlockData } from "@/stores/create-session-store";
 const SessionBlock = ({
   block,
   onClickDelete,
+  drag,
+  isActive,
 }: {
   block: SessionBlockData;
   onClickDelete: () => void;
+  drag?: () => void;
+  isActive?: boolean;
 }) => {
   const [showMenu, setShowMenu] = useState(false);
 
@@ -27,8 +31,14 @@ const SessionBlock = ({
       })}
     >
       <Pressable
-        className="border border-stroke rounded-xl p-3 flex-row items-center gap-2 w-full"
+        className={clsx(
+          "border border-stroke rounded-xl p-3 flex-row items-center gap-2 w-full",
+          {
+            "opacity-50": isActive,
+          }
+        )}
         onLongPress={() => setShowMenu(!showMenu)}
+        {...(drag && { onLongPress: drag })}
       >
         {/* Drag Handle */}
         <View className="size-8 rotate-90 items-center justify-center cla">

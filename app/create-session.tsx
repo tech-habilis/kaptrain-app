@@ -30,6 +30,9 @@ import {
   useCreateSessionStore,
   type SessionBlockData,
 } from "@/stores/create-session-store";
+import DraggableFlatList, {
+  RenderItemParams,
+} from "react-native-draggable-flatlist";
 
 // Validation schema
 const createSessionSchema = z.object({
@@ -73,6 +76,7 @@ export default function CreateSession() {
   const [selectedTheme, setSelectedTheme] = useState<TChoice>();
   const [selectedSports, setSelectedSports] = useState<TChoice[]>([]);
   const [showMoreSport, setShowMoreSport] = useState(false);
+  const [showAdditionalInfo, setShowAdditionalInfo] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
 
@@ -125,6 +129,7 @@ export default function CreateSession() {
   }, [selectedSports, unselectedSports]);
 
   const [isFetching, setIsFetching] = useState(false);
+  const [hasLoadedSessionData, setHasLoadedSessionData] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -172,15 +177,17 @@ export default function CreateSession() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run once on mount
 
-  // Initialize store on mount
+  // Initialize store on mount (only for create mode, not edit mode)
   useEffect(() => {
-    createSessionStore.initializeSession();
+    if (!isEditing) {
+      createSessionStore.initializeSession();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isEditing]);
 
-  // Load existing session data when in edit mode
+  // Load existing session data when in edit mode (only once)
   useEffect(() => {
-    if (isEditing && sessionId && typeof sessionId === "string") {
+    if (isEditing && sessionId && typeof sessionId === "string" && !hasLoadedSessionData) {
       const loadSessionData = async () => {
         setIsFetching(true);
         try {
@@ -254,6 +261,7 @@ export default function CreateSession() {
 
           if (blocksData && blocksData.length > 0) {
             // Convert to SessionBlockData format
+            const blockDataArray: SessionBlockData[] = [];
             for (const block of blocksData) {
               // Fetch intensity reference if intensity_id exists
               let intensity = { id: "id-Aucun", text: "Aucun" };
@@ -279,15 +287,18 @@ export default function CreateSession() {
                   text: exercise.name,
                 })) || [];
 
-              const blockData: SessionBlockData = {
+              blockDataArray.push({
                 id: block.id,
                 title: block.title || "",
                 description: block.description || "",
                 intensity,
                 exercises,
-              };
-              createSessionStore.addBlock(blockData);
+              });
             }
+
+            // Set all blocks at once to preserve order
+            createSessionStore.setBlocks(blockDataArray);
+            setHasLoadedSessionData(true);
           }
         } catch (error) {
           console.error("Error loading session:", error);
@@ -299,7 +310,7 @@ export default function CreateSession() {
       loadSessionData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, sessionId]);
+  }, [isEditing, sessionId, hasLoadedSessionData]);
 
   // Sync store data to local state (for when returning from add-block)
   useEffect(() => {
@@ -339,16 +350,7 @@ export default function CreateSession() {
   };
 
   const handleSubmit = async () => {
-    console.log("=== handleSubmit called ===");
-    console.log("isEditing:", isEditing);
-    console.log("sessionId:", sessionId);
-
     setSubmitError(undefined);
-
-    // Console.log the overall data from store
-    const sessionData = createSessionStore.sessionData;
-    console.log("=== CREATE SESSION DATA ===");
-    console.log(JSON.stringify(sessionData, null, 2));
 
     const userId = session?.user?.id;
     if (!userId) {
@@ -359,7 +361,6 @@ export default function CreateSession() {
     // Assert userId is non-null after the check
     const coachId: string = userId;
 
-    console.log("Starting submit...");
     setIsSubmitting(true);
 
     try {
@@ -373,9 +374,7 @@ export default function CreateSession() {
         timeRange,
       });
 
-      console.log("Validation result:", validationResult.success);
       if (!validationResult.success) {
-        console.log("Validation errors:", validationResult.error.issues);
         // Set field-specific errors
         const newErrors: typeof errors = {};
         validationResult.error.issues.forEach((issue) => {
@@ -393,7 +392,6 @@ export default function CreateSession() {
       }
 
       const data = validationResult.data;
-      console.log("Validation passed, data:", data);
 
       // Get sport IDs from database
       const { data: sportsData, error: sportsError } = await supabase
@@ -440,56 +438,44 @@ export default function CreateSession() {
           return;
         }
 
-        // Delete existing blocks and exercises, then insert new ones
-        // First, get all block IDs for this session
-        const { data: existingBlocks } = await supabase
-          .from("session_blocks")
-          .select("id")
-          .eq("session_id", sessionId);
-
-        if (existingBlocks && existingBlocks.length > 0) {
-          const blockIds = existingBlocks.map((b) => b.id);
-
-          // Delete all exercises for these blocks
-          await supabase
-            .from("session_exercises")
-            .delete()
-            .in("session_block_id", blockIds);
-
-          // Delete all blocks
-          await supabase.from("session_blocks").delete().in("id", blockIds);
-        }
-
-        // Insert new blocks
+        // Update existing blocks instead of deleting and recreating
         const storeBlocks = createSessionStore.sessionData?.blocks || [];
         if (storeBlocks.length > 0) {
-          // Insert blocks with description and intensity
-          const blocks = storeBlocks.map((block, index) => ({
-            session_id: sessionId,
-            title: block.title,
-            description: block.description,
-            intensity_id: block.intensity?.id,
-            sequence_order: index,
-          }));
+          // Update blocks with description, intensity, and sequence_order
+          for (let index = 0; index < storeBlocks.length; index++) {
+            const block = storeBlocks[index];
 
-          const { data: insertedBlocks, error: blocksError } = await supabase
-            .from("session_blocks")
-            .insert(blocks)
-            .select();
+            const { error: updateError } = await supabase
+              .from("session_blocks")
+              .update({
+                title: block.title,
+                description: block.description,
+                intensity_id: block.intensity?.id,
+                sequence_order: index,
+              })
+              .eq("id", block.id);
 
-          if (blocksError) {
-            setSubmitError("Erreur lors de la mise à jour des blocs");
-            return;
+            if (updateError) {
+              console.error("Error updating block:", updateError);
+              setSubmitError("Erreur lors de la mise à jour des blocs");
+              return;
+            }
           }
 
-          // Insert exercises for each block
+          // Update exercises for each block
           for (let i = 0; i < storeBlocks.length; i++) {
             const block = storeBlocks[i];
-            const insertedBlockId = insertedBlocks?.[i]?.id;
 
-            if (insertedBlockId && block.exercises.length > 0) {
+            // Delete existing exercises for this block
+            await supabase
+              .from("session_exercises")
+              .delete()
+              .eq("session_block_id", block.id);
+
+            // Insert new exercises
+            if (block.exercises.length > 0) {
               const exercises = block.exercises.map((exercise, index) => ({
-                session_block_id: insertedBlockId,
+                session_block_id: block.id,
                 name: exercise.text,
                 sequence_order: index,
               }));
@@ -803,16 +789,41 @@ export default function CreateSession() {
                 Déroulé de la séance
               </Text>
 
-              <View className="gap-2">
-                {createSessionStore.sessionData?.blocks.map((block) => (
-                  <SessionBlock
-                    key={block.id}
-                    block={block}
-                    onClickDelete={() => {
-                      setSelectedBlockForDelete(block);
-                    }}
-                  />
-                ))}
+              <View>
+                <DraggableFlatList
+                  data={createSessionStore.sessionData?.blocks || []}
+                  renderItem={({
+                    item,
+                    drag,
+                    isActive,
+                  }: RenderItemParams<SessionBlockData>) => (
+                    <View className="mb-2">
+                      <SessionBlock
+                        block={item}
+                        drag={drag}
+                        isActive={isActive}
+                        onClickDelete={() => {
+                          setSelectedBlockForDelete(item);
+                        }}
+                      />
+                    </View>
+                  )}
+                  keyExtractor={(item, index) => `${item.id}-${index}`}
+                  onDragEnd={(event: any) => {
+                    // Method 1: Use from/to if available
+                    if (event?.data?.from !== undefined && event?.data?.to !== undefined) {
+                      createSessionStore.reorderBlocks(event.data.from, event.data.to);
+                    }
+                    // Method 2: Fallback - directly use reordered data array
+                    else if (Array.isArray(event?.data)) {
+                      createSessionStore.setBlocks(event.data);
+                    }
+                    // Method 3: Check if event itself has from/to
+                    else if (event?.from !== undefined && event?.to !== undefined) {
+                      createSessionStore.reorderBlocks(event.from, event.to);
+                    }
+                  }}
+                />
 
                 {errors.blocks && (
                   <Text className="text-error text-sm">{errors.blocks}</Text>
@@ -831,44 +842,27 @@ export default function CreateSession() {
 
                 {isEditing && (
                   <>
-                    <View className="flex-row justify-between items-center mt-8">
+                    <Pressable
+                      onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
+                      className="flex-row justify-between items-center mt-8"
+                    >
                       <Text className="text-accent">
                         Informations complémentaires
                       </Text>
-                      <View className="-rotate-90">
+                      <View
+                        className={clsx({
+                          "-rotate-90": showAdditionalInfo,
+                          "rotate-90": !showAdditionalInfo,
+                        })}
+                      >
                         <IcArrowLeft />
-                      </View>
-                    </View>
-
-                    <Pressable
-                      onPress={() => setShowMoreSport(true)}
-                      className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
-                    >
-                      {/* Block Content */}
-                      <View className="flex-1 gap-1">
-                        <Text
-                          numberOfLines={1}
-                          className="text-sm text-subtleText"
-                        >
-                          Sport
-                        </Text>
-
-                        <View className="flex-row gap-1.5 items-center">
-                          <IcCycling />
-                          <Text className="text-base font-semibold text-secondary flex-1">
-                            {selectedSports[0]?.text || "--"}
-                          </Text>
-                          <IcPencil size={24} />
-                        </View>
                       </View>
                     </Pressable>
 
-                    <DatePicker
-                      selectedDate={selectedDate}
-                      onSelect={setSelectedDate}
-                      renderTrigger={({ onPress, formattedDate }) => (
+                    {showAdditionalInfo && (
+                      <View className="gap-2 mt-2">
                         <Pressable
-                          onPress={onPress}
+                          onPress={() => setShowMoreSport(true)}
                           className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
                         >
                           {/* Block Content */}
@@ -877,22 +871,51 @@ export default function CreateSession() {
                               numberOfLines={1}
                               className="text-sm text-subtleText"
                             >
-                              Date
+                              Sport
                             </Text>
 
                             <View className="flex-row gap-1.5 items-center">
-                              <Text className="text-accent text-base font-medium">
-                                Le
-                              </Text>
+                              <IcCycling />
                               <Text className="text-base font-semibold text-secondary flex-1">
-                                {formattedDate || "--/--/----"}
+                                {selectedSports[0]?.text || "--"}
                               </Text>
                               <IcPencil size={24} />
                             </View>
                           </View>
                         </Pressable>
-                      )}
-                    />
+
+                        <DatePicker
+                          selectedDate={selectedDate}
+                          onSelect={setSelectedDate}
+                          renderTrigger={({ onPress, formattedDate }) => (
+                            <Pressable
+                              onPress={onPress}
+                              className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
+                            >
+                              {/* Block Content */}
+                              <View className="flex-1 gap-1">
+                                <Text
+                                  numberOfLines={1}
+                                  className="text-sm text-subtleText"
+                                >
+                                  Date
+                                </Text>
+
+                                <View className="flex-row gap-1.5 items-center">
+                                  <Text className="text-accent text-base font-medium">
+                                    Le
+                                  </Text>
+                                  <Text className="text-base font-semibold text-secondary flex-1">
+                                    {formattedDate || "--/--/----"}
+                                  </Text>
+                                  <IcPencil size={24} />
+                                </View>
+                              </View>
+                            </Pressable>
+                          )}
+                        />
+                      </View>
+                    )}
 
                     {/* Time Section - Commented out for now */}
                     {/* <View className="border border-stroke rounded-xl p-3 gap-1">
