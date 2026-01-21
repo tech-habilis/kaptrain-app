@@ -35,6 +35,7 @@ import "dayjs/locale/fr";
 import { SessionCard } from "@/components/agenda/session-card";
 import { useTimerStore } from "@/stores/timer-store";
 import { TimerType } from "@/hooks/use-workout-timer";
+import clsx from "clsx";
 
 // Timer type mapping from display name to database value
 const TIMER_TYPE_MAP: Record<string, TimerType> = {
@@ -144,7 +145,10 @@ const Agenda = () => {
 
 export default function HomeScreen() {
   const { session } = useSession();
-  const { timerConfig, initializeTimer, reset: resetTimerStore } = useTimerStore();
+  const showWidget = useTimerStore((state) => state.showWidget);
+  const timerConfig = useTimerStore((state) => state.timerConfig);
+  const initializeTimer = useTimerStore((state) => state.initializeTimer);
+  const resetTimerStore = useTimerStore((state) => state.reset);
   const [haveUnread] = useState(true);
   const showTimersRef = useRef<RawBottomSheetModalType>(null);
   const resetTimerRef = useRef<RawBottomSheetModalType>(null);
@@ -184,139 +188,147 @@ export default function HomeScreen() {
       <ScrollView>
         <StatusBar style="dark" />
         <ImageBackground source={require("../../assets/images/home-hero.png")}>
-          <View className="px-4 pt-safe pb-14 flex-row gap-3 items-center">
-          <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
+          <View
+            className={clsx("px-4 pb-14 flex-row gap-3 items-center", {
+              "pt-6": showWidget,
+              "pt-safe": !showWidget,
+            })}
+          >
+            <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
-          <View className="gap-1.5 flex-1">
-            <RawText className="text-white text-xl font-bold" numberOfLines={1}>
-              <Text>common.hello</Text>{" "}
-              {session?.user?.name?.split(" ")?.[0] || ""} !
-            </RawText>
-            <Chip
-              text="Forme excellente"
-              leftIcon={<IcSmiley />}
-              className="bg-green-50 border-[#00A71C] self-start"
+            <View className="gap-1.5 flex-1">
+              <RawText
+                className="text-white text-xl font-bold"
+                numberOfLines={1}
+              >
+                <Text>common.hello</Text>{" "}
+                {session?.user?.name?.split(" ")?.[0] || ""} !
+              </RawText>
+              <Chip
+                text="Forme excellente"
+                leftIcon={<IcSmiley />}
+                className="bg-green-50 border-[#00A71C] self-start"
+              />
+            </View>
+
+            <View className="flex-row items-center">
+              <Pressable
+                className="p-2"
+                onPress={() => {
+                  router.push(ROUTE.MESSAGING);
+                }}
+              >
+                <IcMessage />
+              </Pressable>
+              <Pressable
+                className="p-2"
+                onPress={() => router.push(ROUTE.NOTIFICATIONS)}
+              >
+                <IcBell haveUnread={haveUnread} />
+              </Pressable>
+            </View>
+          </View>
+        </ImageBackground>
+
+        <Agenda />
+
+        {/* wellness tracking (mon suivi de forme) */}
+        <FitnessTracking />
+
+        {/* Statistics Section (Mes statistiques) */}
+        <Statistics />
+
+        {/* timer */}
+        <ImageBackground
+          source={require("../../assets/images/timer-hero.png")}
+          className="p-4 rounded-xl bg-white"
+        >
+          <View className="p-4">
+            <Text className="text-white font-bold text-base">
+              Besoin d&apos;un timer ?
+            </Text>
+            <Text className="text-white mt-1 font-medium">
+              Lance un chrono pour structurer ta séance.
+            </Text>
+            <Button
+              type="secondary"
+              size="small"
+              text="Choisir un timer"
+              className="mt-3"
+              onPress={handleOpenTimerSheet}
             />
           </View>
-
-          <View className="flex-row items-center">
-            <Pressable
-              className="p-2"
-              onPress={() => {
-                router.push(ROUTE.MESSAGING);
-              }}
-            >
-              <IcMessage />
-            </Pressable>
-            <Pressable
-              className="p-2"
-              onPress={() => router.push(ROUTE.NOTIFICATIONS)}
-            >
-              <IcBell haveUnread={haveUnread} />
-            </Pressable>
-          </View>
-        </View>
-      </ImageBackground>
-
-      <Agenda />
-
-      {/* wellness tracking (mon suivi de forme) */}
-      <FitnessTracking />
-
-      {/* Statistics Section (Mes statistiques) */}
-      <Statistics />
-
-      {/* timer */}
-      <ImageBackground
-        source={require("../../assets/images/timer-hero.png")}
-        className="p-4 rounded-xl bg-white"
-      >
-        <View className="p-4">
-          <Text className="text-white font-bold text-base">
-            Besoin d&apos;un timer ?
-          </Text>
-          <Text className="text-white mt-1 font-medium">
-            Lance un chrono pour structurer ta séance.
-          </Text>
-          <Button
-            type="secondary"
-            size="small"
-            text="Choisir un timer"
-            className="mt-3"
-            onPress={handleOpenTimerSheet}
-          />
-        </View>
         </ImageBackground>
-    </ScrollView>
+      </ScrollView>
 
-    {/* Timer selection bottom sheet */}
-    <BottomSheetModal
-      ref={showTimersRef}
-      name="show-timer-ref"
-      snapPoints={["45%"]}
-      className="pb-safe"
-    >
-      <Text className="font-bold text-lg text-secondary">
-        Ajouter un timer
-      </Text>
+      {/* Timer selection bottom sheet */}
+      <BottomSheetModal
+        ref={showTimersRef}
+        name="show-timer-ref"
+        snapPoints={["45%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-lg text-secondary">
+          Ajouter un timer
+        </Text>
 
-      <Choices
-        numColumns={2}
-        data={TIMER_OPTIONS.map((name, index) => ({
-          id: `timer-${index}`,
-          text: name,
-        }))}
-        type="secondary"
-        className="mt-3"
-        itemClassName="bg-secondary"
-        itemTextClassName="text-white"
-        onChange={(choice) => {
-          handleTimerSelect(choice.text);
-        }}
-      />
-    </BottomSheetModal>
-
-    {/* Erase timer bottom sheet */}
-    <BottomSheetModal
-      ref={resetTimerRef}
-      name="reset-timer-ref"
-      snapPoints={["32%"]}
-      className="pb-safe"
-    >
-      <Text className="font-bold text-lg text-secondary">
-        Écraser le chrono actuel ?
-      </Text>
-      <Text className="mt-1 text-accent text-base">
-        Lancer un nouveau chrono remplacera celui en cours. Es-tu sûr de
-        vouloir continuer ?
-      </Text>
-
-      <View className="grow" />
-
-      <View className="flex-row items-center pt-6 gap-3 bg-white">
-        <Pressable
-          className="p-3"
-          onPress={() => {
-            resetTimerRef.current?.dismiss();
-          }}
-        >
-          <IcClock color={ColorConst.primary} size={32} />
-        </Pressable>
-        <Button
+        <Choices
+          numColumns={2}
+          data={TIMER_OPTIONS.map((name, index) => ({
+            id: `timer-${index}`,
+            text: name,
+          }))}
           type="secondary"
-          text="Écraser le chrono en cours"
-          className="flex-1"
-          onPress={() => {
-            // Remove the current timer from store
-            resetTimerStore();
-
-            // Dismiss erase timer modal and show timer selection
-            resetTimerRef.current?.dismiss();
-            showTimersRef.current?.present();
+          className="mt-3"
+          itemClassName="bg-secondary"
+          itemTextClassName="text-white"
+          onChange={(choice) => {
+            handleTimerSelect(choice.text);
           }}
         />
-      </View>
-    </BottomSheetModal>
+      </BottomSheetModal>
+
+      {/* Erase timer bottom sheet */}
+      <BottomSheetModal
+        ref={resetTimerRef}
+        name="reset-timer-ref"
+        snapPoints={["32%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-lg text-secondary">
+          Écraser le chrono actuel ?
+        </Text>
+        <Text className="mt-1 text-accent text-base">
+          Lancer un nouveau chrono remplacera celui en cours. Es-tu sûr de
+          vouloir continuer ?
+        </Text>
+
+        <View className="grow" />
+
+        <View className="flex-row items-center pt-6 gap-3 bg-white">
+          <Pressable
+            className="p-3"
+            onPress={() => {
+              resetTimerRef.current?.dismiss();
+            }}
+          >
+            <IcClock color={ColorConst.primary} size={32} />
+          </Pressable>
+          <Button
+            type="secondary"
+            text="Écraser le chrono en cours"
+            className="flex-1"
+            onPress={() => {
+              // Remove the current timer from store
+              resetTimerStore();
+
+              // Dismiss erase timer modal and show timer selection
+              resetTimerRef.current?.dismiss();
+              showTimersRef.current?.present();
+            }}
+          />
+        </View>
+      </BottomSheetModal>
     </>
   );
 }

@@ -22,12 +22,9 @@ const TIMER_LABELS: Record<TimerType, string> = {
 };
 
 function TimerWidgetContent() {
-  const {
-    timerConfig,
-    showWidget,
-    setShowWidget,
-    reset: resetTimerStore,
-  } = useTimerStore();
+  const timerConfig = useTimerStore((state) => state.timerConfig);
+  const showWidget = useTimerStore((state) => state.showWidget);
+  const setShowWidget = useTimerStore((state) => state.setShowWidget);
 
   // Get timer config with defaults
   const timerType: TimerType = timerConfig?.timerType || "tabata";
@@ -82,7 +79,7 @@ function TimerWidgetContent() {
 
   const theme = getTheme();
   const close = () => {
-    resetTimerStore();
+    setShowWidget(false);
   };
 
   const handleReset = () => {
@@ -188,7 +185,8 @@ function TimerWidgetContent() {
 }
 
 export default function TimerWidget() {
-  const { timerConfig, showWidget } = useTimerStore();
+  const timerConfig = useTimerStore((state) => state.timerConfig);
+  const showWidget = useTimerStore((state) => state.showWidget);
 
   if (!timerConfig || !showWidget) return null;
 

@@ -106,7 +106,7 @@ export default function TimerExpanded() {
         <Pressable onPress={router.back} className="p-2">
           <IcArrowLeft />
         </Pressable>
-        <Text className="text-secondary text-lg font-bold">
+        <Text className="text-secondary text-lg font-futura-bold">
           {getTimerLabel()}
         </Text>
       </View>
@@ -236,15 +236,19 @@ export default function TimerExpanded() {
           )}
 
         <View className="flex-row justify-center items-center ml-3">
-          <Text className="text-secondary font-semibold text-[80px]">
+          <View className="w-28 items-center justify-center">
+          <Text className="text-secondary font-inter-semibold text-[80px]">
             {formattedMinutes}
           </Text>
-          <RawText className="text-secondary font-semibold text-[80px]">
+          </View>
+          <RawText className="text-secondary font-inter-semibold text-[80px]">
             :
           </RawText>
-          <Text className="text-secondary font-semibold text-[80px]">
+          <View className="w-28 items-center justify-center">
+          <Text className="text-secondary font-inter-semibold text-[80px]">
             {formattedSeconds}
-          </Text>
+              </Text>
+          </View>
         </View>
       </View>
 

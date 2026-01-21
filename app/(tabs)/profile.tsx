@@ -14,6 +14,7 @@ import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { useSession } from "@/contexts/auth-context";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
+import { useTimerStore } from "@/stores/timer-store";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -50,11 +51,15 @@ const profileMenu = [
 export default function ProfileScreen() {
   const { session } = useSession();
   const { setCurrentStep } = useCompleteProfileStore();
+  const showWidget = useTimerStore((state) => state.showWidget);
   return (
     <View className="flex-1">
       <StatusBar style="light" />
       <ImageBackground source={require("../../assets/images/profile-hero.png")}>
-        <View className="px-4 pt-safe pb-6 flex-row gap-3 items-center">
+        <View className={clsx("px-4 pb-6 flex-row gap-3 items-center", {
+          "pt-4": showWidget,
+          "pt-safe": !showWidget,
+        })}>
           <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
           <View className="gap-1.5 flex-1">

@@ -86,7 +86,7 @@ const ProgramSection = ({
 export default function Library() {
   const tabs = ["Exercices", "Programmes"];
   const [tab, setTab] = useState(tabs[0]);
-  const { showWidget } = useTimerStore();
+  const showWidget = useTimerStore((state) => state.showWidget);
 
   const menu = [
     {
@@ -258,6 +258,7 @@ export default function Library() {
   return (
     <ScrollView
       className={clsx("bg-white", {
+        "pt-4": showWidget,
         "pt-safe": !showWidget,
       })}
     >

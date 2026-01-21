@@ -15,6 +15,8 @@ import { useSession } from "@/contexts/auth-context";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { useProfileStore } from "@/stores/profile-store";
+import clsx from "clsx";
+import { useTimerStore } from "@/stores/timer-store";
 
 // Set dayjs locale to French
 dayjs.locale("fr");
@@ -22,6 +24,7 @@ dayjs.locale("fr");
 export default function Agenda() {
   const { session } = useSession();
   const { profile } = useProfileStore();
+  const showWidget = useTimerStore((state) => state.showWidget);
   const userId = session?.user?.id;
 
   const {
@@ -115,7 +118,12 @@ export default function Agenda() {
   return (
     <>
       <StatusBar style="dark" />
-      <View className="bg-white pt-safe px-4 flex-1">
+      <View
+        className={clsx("bg-white px-4 flex-1", {
+          "pt-4": showWidget,
+          "pt-safe": !showWidget,
+        })}
+      >
         {/* Calendar Section */}
         <AgendaCalendarView
           currentMonthLabel={currentMonthLabel}
