@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { useTimerStore } from "@/stores/timer-store";
 
 export type TimerState =
   | "default"
@@ -122,7 +123,7 @@ export interface UseWorkoutTimerReturn {
   /**
    * Start the timer (with countdown for interval timers)
    */
-  start: () => void;
+  startWithCountdown: () => void;
 
   /**
    * Pause the timer
@@ -160,9 +161,9 @@ export interface UseWorkoutTimerReturn {
   currentPhaseTab: string | null;
 
   /**
-   * Start the timer without a countdown
+   * Start the timer immediately (no countdown, skips "starting" state)
    */
-  startWithoutCountdown: () => void;
+  startImmediately: () => void;
 
   /**
    * Rounds completed (for AMRAP)
@@ -195,38 +196,109 @@ export function useWorkoutTimer({
   onPhaseChange,
   onRoundChange,
 }: UseWorkoutTimerOptions): UseWorkoutTimerReturn {
-  const [state, setState] = useState<TimerState>(initialState);
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(
-    timerType === "countdown" || timerType === "amrap"
-      ? durationSeconds || 60
-      : timerType === "stopwatch"
-        ? 0
-        : effortSeconds,
-  );
-  const [round, setRound] = useState<number>(initialRound);
-  const [phase, setPhase] = useState<TimerPhase>("effort");
-  const [startingIn, setStartingIn] = useState(COUNTDOWN_TO_START);
-  const [roundsCompleted, setRoundsCompleted] = useState<number>(0);
+  const timerStore = useTimerStore();
 
+  // Local refs for intervals (not shared in store)
   const mainIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
     null,
   );
   const startingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Get state from store
+  const state = timerStore.runtimeState;
+  const remainingSeconds = timerStore.remainingSeconds;
+  const round = timerStore.round;
+  const phase = timerStore.phase;
+  const startingIn = timerStore.startingIn;
+  const roundsCompleted = timerStore.roundsCompleted;
+  const timerInitialized = timerStore.timerInitialized;
+  const intervalActive = timerStore.intervalActive;
+  const startingIntervalActive = timerStore.startingIntervalActive;
+
+  // Initialize state on first render if not already set
+  useEffect(() => {
+    if (!timerInitialized) {
+      if (timerType === "countdown" || timerType === "amrap") {
+        timerStore.setTimerRemainingSeconds(durationSeconds || 60);
+      } else if (timerType === "stopwatch") {
+        timerStore.setTimerRemainingSeconds(0);
+      } else {
+        timerStore.setTimerRemainingSeconds(effortSeconds);
+      }
+      timerStore.setTimerRound(initialRound);
+      timerStore.setRuntimeState(initialState);
+      timerStore.setTimerInitialized(true);
+    }
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [timerInitialized]);
+
   // Sync remainingSeconds with props when timer is in default state
   useEffect(() => {
-    if (state === "default") {
+    if (state === "default" && timerInitialized) {
       if (timerType === "countdown" || timerType === "amrap") {
-        setRemainingSeconds(durationSeconds || 60);
+        timerStore.setTimerRemainingSeconds(durationSeconds || 60);
       } else if (timerType === "stopwatch") {
-        setRemainingSeconds(0);
+        timerStore.setTimerRemainingSeconds(0);
       } else {
-        // For interval timers (tabata, custom, emom)
-        setRemainingSeconds(effortSeconds);
+        timerStore.setTimerRemainingSeconds(effortSeconds);
       }
     }
-  }, [durationSeconds, effortSeconds, timerType, state]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [durationSeconds, effortSeconds, timerType, state, timerInitialized]);
+
+  // Resume timer if state is running but no interval is active
+  useEffect(() => {
+    if (state === "running" && !intervalActive && !mainIntervalRef.current) {
+      timerStore.setIntervalActive(true);
+      mainIntervalRef.current = setInterval(() => {
+        if (timerType === "stopwatch") {
+          timerStore.incrementTimerRemainingSeconds();
+        } else {
+          timerStore.decrementTimerRemainingSeconds();
+        }
+      }, 1000);
+    }
+
+    // Resume countdown if state is starting but no interval is active
+    if (
+      state === "starting" &&
+      !startingIntervalActive &&
+      !startingIntervalRef.current
+    ) {
+      timerStore.setStartingIntervalActive(true);
+      startingIntervalRef.current = setInterval(() => {
+        timerStore.decrementTimerStartingIn();
+      }, 1000);
+
+      // Calculate remaining countdown time
+      const remainingCountdown = startingIn * 1000;
+
+      startingTimeoutRef.current = setTimeout(() => {
+        if (startingIntervalRef.current) {
+          clearInterval(startingIntervalRef.current);
+          startingIntervalRef.current = null;
+        }
+        timerStore.setRuntimeState("running");
+        onStarted?.();
+        timerStore.setTimerStartingIn(COUNTDOWN_TO_START);
+        timerStore.setStartingIntervalActive(false);
+
+        timerStore.setIntervalActive(true);
+        mainIntervalRef.current = setInterval(() => {
+          timerStore.decrementTimerRemainingSeconds();
+        }, 1000);
+      }, remainingCountdown);
+    }
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [
+    state,
+    timerType,
+    startingIn,
+    onStarted,
+    intervalActive,
+    startingIntervalActive,
+  ]);
 
   const minutes = Math.floor(remainingSeconds / 60);
   const seconds = remainingSeconds % 60;
@@ -259,34 +331,37 @@ export function useWorkoutTimer({
       : phaseTabs?.[0] || null;
 
   const clearCountdown = useCallback(() => {
-    setStartingIn(COUNTDOWN_TO_START);
+    timerStore.setTimerStartingIn(COUNTDOWN_TO_START);
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, []);
 
-  const start = useCallback(() => {
+  const startWithCountdown = useCallback(() => {
     // For stopwatch and countdown, start immediately without countdown
     if (
       timerType === "stopwatch" ||
       timerType === "countdown" ||
       timerType === "amrap"
     ) {
-      setState("running");
+      timerStore.setRuntimeState("running");
+      timerStore.setIntervalActive(true);
       onStarted?.();
 
       mainIntervalRef.current = setInterval(() => {
         if (timerType === "stopwatch") {
-          setRemainingSeconds((prev) => prev + 1);
+          timerStore.incrementTimerRemainingSeconds();
         } else {
-          setRemainingSeconds((prev) => prev - 1);
+          timerStore.decrementTimerRemainingSeconds();
         }
       }, 1000);
       return;
     }
 
     // For interval timers, use countdown
-    setState("starting");
+    timerStore.setRuntimeState("starting");
+    timerStore.setStartingIntervalActive(true);
 
     startingIntervalRef.current = setInterval(() => {
-      setStartingIn((prev) => prev - 1);
+      timerStore.decrementTimerStartingIn();
     }, 1000);
 
     startingTimeoutRef.current = setTimeout(() => {
@@ -294,65 +369,77 @@ export function useWorkoutTimer({
         clearInterval(startingIntervalRef.current);
         startingIntervalRef.current = null;
       }
-      setState("running");
+      timerStore.setRuntimeState("running");
+      timerStore.setStartingIntervalActive(false);
+      timerStore.setIntervalActive(true);
       onStarted?.();
       clearCountdown();
 
       mainIntervalRef.current = setInterval(() => {
-        setRemainingSeconds((prev) => prev - 1);
+        timerStore.decrementTimerRemainingSeconds();
       }, 1000);
     }, COUNTDOWN_TO_START * 1000);
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [timerType, onStarted, clearCountdown]);
 
-  const startWithoutCountdown = useCallback(() => {
-    setState("running");
+  const startImmediately = useCallback(() => {
+    timerStore.setRuntimeState("running");
+    timerStore.setIntervalActive(true);
     onStarted?.();
     clearCountdown();
 
     if (timerType === "stopwatch") {
       mainIntervalRef.current = setInterval(() => {
-        setRemainingSeconds((prev) => prev + 1);
+        timerStore.incrementTimerRemainingSeconds();
       }, 1000);
     } else {
       mainIntervalRef.current = setInterval(() => {
-        setRemainingSeconds((prev) => prev - 1);
+        timerStore.decrementTimerRemainingSeconds();
       }, 1000);
     }
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [timerType, onStarted, clearCountdown]);
 
   const pause = useCallback(() => {
-    setState("paused");
+    timerStore.setRuntimeState("paused");
+    timerStore.setIntervalActive(false);
     if (mainIntervalRef.current) {
       clearInterval(mainIntervalRef.current);
       mainIntervalRef.current = null;
     }
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, []);
 
   const resume = useCallback(() => {
-    setState("running");
+    timerStore.setRuntimeState("running");
+    timerStore.setIntervalActive(true);
     if (timerType === "stopwatch") {
       mainIntervalRef.current = setInterval(() => {
-        setRemainingSeconds((prev) => prev + 1);
+        timerStore.incrementTimerRemainingSeconds();
       }, 1000);
     } else {
       mainIntervalRef.current = setInterval(() => {
-        setRemainingSeconds((prev) => prev - 1);
+        timerStore.decrementTimerRemainingSeconds();
       }, 1000);
     }
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [timerType]);
 
   const reset = useCallback(() => {
-    setState("default");
-    setRemainingSeconds(
-      timerType === "countdown" || timerType === "amrap"
-        ? durationSeconds || 60
-        : timerType === "stopwatch"
-          ? 0
-          : effortSeconds,
-    );
-    setRound(initialRound);
-    setPhase("effort");
-    setRoundsCompleted(0);
+    timerStore.setRuntimeState("default");
+    timerStore.setIntervalActive(false);
+    timerStore.setStartingIntervalActive(false);
+    timerStore.setStartingTimeoutActive(false);
+    if (timerType === "countdown" || timerType === "amrap") {
+      timerStore.setTimerRemainingSeconds(durationSeconds || 60);
+    } else if (timerType === "stopwatch") {
+      timerStore.setTimerRemainingSeconds(0);
+    } else {
+      timerStore.setTimerRemainingSeconds(effortSeconds);
+    }
+    timerStore.setTimerRound(initialRound);
+    timerStore.setTimerPhase("effort");
+    timerStore.setTimerRoundsCompleted(0);
     clearCountdown();
 
     if (mainIntervalRef.current) {
@@ -367,14 +454,17 @@ export function useWorkoutTimer({
       clearTimeout(startingTimeoutRef.current);
       startingTimeoutRef.current = null;
     }
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [timerType, durationSeconds, effortSeconds, initialRound, clearCountdown]);
 
   const incrementRound = useCallback(() => {
-    setRoundsCompleted((prev) => prev + 1);
+    timerStore.incrementTimerRoundsCompleted();
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, []);
 
   const decrementRound = useCallback(() => {
-    setRoundsCompleted((prev) => Math.max(0, prev - 1));
+    timerStore.decrementTimerRoundsCompleted();
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, []);
 
   // Cleanup interval when paused
@@ -394,8 +484,8 @@ export function useWorkoutTimer({
       (timerType === "countdown" || timerType === "amrap") &&
       remainingSeconds <= 0
     ) {
-      setState("completed");
-      setRemainingSeconds(0);
+      timerStore.setRuntimeState("completed");
+      timerStore.setTimerRemainingSeconds(0);
       if (mainIntervalRef.current) {
         clearInterval(mainIntervalRef.current);
         mainIntervalRef.current = null;
@@ -414,13 +504,13 @@ export function useWorkoutTimer({
       if (phase === "effort") {
         if (timerType === "emom") {
           // EMOM: Switch to rest for remainder of minute
-          setPhase("rest");
-          setRemainingSeconds(60 - effortSeconds);
+          timerStore.setTimerPhase("rest");
+          timerStore.setTimerRemainingSeconds(60 - effortSeconds);
           onPhaseChange?.("rest");
         } else {
           // Tabata/Custom: Switch to rest
-          setPhase("rest");
-          setRemainingSeconds(restSeconds);
+          timerStore.setTimerPhase("rest");
+          timerStore.setTimerRemainingSeconds(restSeconds);
           onPhaseChange?.("rest");
         }
       } else {
@@ -428,8 +518,8 @@ export function useWorkoutTimer({
         const nextRound = round + 1;
         if (nextRound >= totalRounds) {
           // All rounds completed
-          setState("completed");
-          setRemainingSeconds(0);
+          timerStore.setRuntimeState("completed");
+          timerStore.setTimerRemainingSeconds(0);
           if (mainIntervalRef.current) {
             clearInterval(mainIntervalRef.current);
             mainIntervalRef.current = null;
@@ -437,14 +527,15 @@ export function useWorkoutTimer({
           onCompleted?.();
         } else {
           // Start next round
-          setRound(nextRound);
-          setPhase("effort");
-          setRemainingSeconds(effortSeconds);
+          timerStore.setTimerRound(nextRound);
+          timerStore.setTimerPhase("effort");
+          timerStore.setTimerRemainingSeconds(effortSeconds);
           onPhaseChange?.("effort");
           onRoundChange?.(nextRound);
         }
       }
     }
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     state,
     remainingSeconds,
@@ -462,19 +553,24 @@ export function useWorkoutTimer({
   // Cleanup all intervals on unmount
   useEffect(() => {
     return () => {
+      // Only clear global flags if this component had the active interval
       if (mainIntervalRef.current) {
         clearInterval(mainIntervalRef.current);
         mainIntervalRef.current = null;
+        timerStore.setIntervalActive(false);
       }
       if (startingIntervalRef.current) {
         clearInterval(startingIntervalRef.current);
         startingIntervalRef.current = null;
+        timerStore.setStartingIntervalActive(false);
       }
       if (startingTimeoutRef.current) {
         clearTimeout(startingTimeoutRef.current);
         startingTimeoutRef.current = null;
+        timerStore.setStartingTimeoutActive(false);
       }
     };
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, []);
 
   return {
@@ -487,7 +583,7 @@ export function useWorkoutTimer({
     formattedSeconds,
     minutes,
     seconds,
-    start,
+    startWithCountdown,
     pause,
     resume,
     reset,
@@ -495,7 +591,7 @@ export function useWorkoutTimer({
     isPaused: state === "paused",
     phaseTabs,
     currentPhaseTab,
-    startWithoutCountdown,
+    startImmediately,
     roundsCompleted,
     incrementRound,
     decrementRound,

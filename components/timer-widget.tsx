@@ -42,7 +42,6 @@ function TimerWidgetContent() {
     round,
     formattedMinutes,
     formattedSeconds,
-    start,
     pause,
     resume,
     reset,
@@ -50,6 +49,7 @@ function TimerWidgetContent() {
     totalSeconds,
     isPaused,
     roundsCompleted,
+    startImmediately,
   } = useWorkoutTimer({
     timerType,
     effortSeconds,
@@ -92,7 +92,7 @@ function TimerWidgetContent() {
 
   const handleStart = () => {
     setShowWidget(true);
-    start();
+    startImmediately();
   };
 
   // Get display label based on timer type

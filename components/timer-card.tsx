@@ -109,7 +109,7 @@ export default function TimerCard({
     startingIn,
     formattedMinutes,
     formattedSeconds,
-    start: startTimer,
+    startImmediately,
     pause: pauseTimer,
     resume: resumeTimer,
     reset: resetTimer,
@@ -152,7 +152,9 @@ export default function TimerCard({
     if (state === "running" || state === "paused") {
       // Interval timers in rest phase use rest theme
       if (
-        (timerType === "tabata" || timerType === "custom" || timerType === "emom") &&
+        (timerType === "tabata" ||
+          timerType === "custom" ||
+          timerType === "emom") &&
         phase === "rest"
       ) {
         return TabataTheme.rest.cardBackgroundColor;
@@ -170,7 +172,9 @@ export default function TimerCard({
     if (state === "running" || state === "paused") {
       // Interval timers in rest phase use rest theme
       if (
-        (timerType === "tabata" || timerType === "custom" || timerType === "emom") &&
+        (timerType === "tabata" ||
+          timerType === "custom" ||
+          timerType === "emom") &&
         phase === "rest"
       ) {
         return TabataTheme.rest.borderColor;
@@ -420,7 +424,7 @@ export default function TimerCard({
                 ? pauseTimer
                 : state === "paused"
                   ? resumeTimer
-                  : startTimer
+                  : startImmediately
           }
           className={clsx({
             grow: ["completed", "default"].includes(state),
