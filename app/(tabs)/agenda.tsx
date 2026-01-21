@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { View, FlatList, ScrollView } from "react-native";
 import Text from "@/components/text";
-import { ActivityCard } from "@/components/agenda/activity-card";
+import { SessionCard } from "@/components/agenda/session-card";
 import { AgendaCalendarView } from "@/components/agenda/agenda-calendar-view";
 import IcHyrox from "@/components/icons/hyrox";
 import IcPlus from "@/components/icons/plus";
@@ -41,8 +41,8 @@ export default function Agenda() {
     .format("D MMMM YYYY")
     .replace(/^\w/, (c) => c.toUpperCase());
 
-  // Activities for display - uses real session data when available
-  type ActivityItem = {
+  // Sessions for display - uses real session data when available
+  type SessionItem = {
     id: string;
     sessionId: string | null;
     title: string;
@@ -52,7 +52,7 @@ export default function Agenda() {
     icon?: React.JSX.Element;
   };
 
-  const todayActivities: ActivityItem[] =
+  const todaySessions: SessionItem[] =
     selectedDateSessions.length > 0
       ? selectedDateSessions.map((session) => {
           // Get coach name from creator (coach) data
@@ -127,7 +127,7 @@ export default function Agenda() {
           goToPrevMonth={goToPrevMonth}
         />
 
-        {/* Daily Activities Section */}
+        {/* Daily Sessions Section */}
         <View className="gap-4 mb-24">
           {/* Section header */}
           <View className="flex-row items-center justify-between">
@@ -138,13 +138,13 @@ export default function Agenda() {
           </View>
 
           <ScrollView>
-            {/* Activities list */}
+            {/* Sessions list */}
             <FlatList
-              data={todayActivities}
+              data={todaySessions}
               className="pb-40"
               keyExtractor={(_item, index) => index.toString()}
               renderItem={({ item, index }) => (
-                <ActivityCard
+                <SessionCard
                   title={item.title}
                   description={item.sessionTitle}
                   coachName={item.coachName}
