@@ -41,8 +41,18 @@ export default function Agenda() {
     .format("D MMMM YYYY")
     .replace(/^\w/, (c) => c.toUpperCase());
 
-  // Mock activities for display - will be replaced with real session data later
-  const todayActivities =
+  // Activities for display - uses real session data when available
+  type ActivityItem = {
+    id: string;
+    sessionId: string | null;
+    title: string;
+    sessionTitle: string;
+    coachName: string;
+    color: string;
+    icon?: React.JSX.Element;
+  };
+
+  const todayActivities: ActivityItem[] =
     selectedDateSessions.length > 0
       ? selectedDateSessions.map((session) => {
           // Get coach name from creator (coach) data
@@ -52,7 +62,8 @@ export default function Agenda() {
           const formattedCoachName = coachName ? `Par ${coachName}` : "";
 
           return {
-            id: session.id, // Include session ID for editing
+            id: session.id,
+            sessionId: session.id, // Add sessionId for navigation
             title: session.title,
             sessionTitle: session.description || "",
             coachName: formattedCoachName,
@@ -67,6 +78,7 @@ export default function Agenda() {
         [
           {
             id: "mock-1",
+            sessionId: null, // No real session ID for mocks
             title: "Hyrox (programme)",
             sessionTitle: "Hyrox Paris Grand palais",
             coachName: "Par Enguerrand Aucher",
@@ -75,6 +87,7 @@ export default function Agenda() {
           },
           {
             id: "mock-2",
+            sessionId: null,
             title: "Préparation physique (individu/programmation)",
             sessionTitle: "Souplesse / flexion cheville",
             coachName: "Par Enguerrand Aucher",
@@ -82,6 +95,7 @@ export default function Agenda() {
           },
           {
             id: "mock-3",
+            sessionId: null,
             title: "Préparation physique (perso)",
             sessionTitle: "Souplesse / flexion cheville",
             coachName: "Par Enguerrand Aucher",
@@ -89,6 +103,7 @@ export default function Agenda() {
           },
           {
             id: "mock-4",
+            sessionId: null,
             title: "Préparation physique (perso done)",
             sessionTitle: "Souplesse / flexion cheville",
             coachName: "Par Enguerrand Aucher",
@@ -98,10 +113,10 @@ export default function Agenda() {
         ];
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="bg-white">
       <StatusBar style="dark" />
 
-      <View className="flex-1 pt-safe px-4">
+      <View className="h-fit pt-safe px-4">
         {/* Calendar Section */}
         <AgendaCalendarView
           currentMonthLabel={currentMonthLabel}
@@ -141,17 +156,26 @@ export default function Agenda() {
                   })
                 }
                 onPress={() => {
-                  if (index === 0) {
-                    router.push(ROUTE.SESSION_VIEW);
-                  } else if (index === 1) {
-                    router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
-                  } else if (index === 2) {
-                    router.push(ROUTE.SESSION_VIEW_PERSONAL);
-                  } else if (index === 3) {
+                  // For real sessions, navigate to individualized view with session ID
+                  if (item.sessionId) {
                     router.push({
-                      pathname: ROUTE.SESSION_VIEW_PERSONAL,
-                      params: { status: "done" },
+                      pathname: ROUTE.SESSION_VIEW_INDIVIDUALIZED,
+                      params: { sessionId: item.sessionId },
                     });
+                  } else {
+                    // Fallback navigation for mock data (preserves original UI behavior)
+                    if (index === 0) {
+                      router.push(ROUTE.SESSION_VIEW);
+                    } else if (index === 1) {
+                      router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
+                    } else if (index === 2) {
+                      router.push(ROUTE.SESSION_VIEW_PERSONAL);
+                    } else if (index === 3) {
+                      router.push({
+                        pathname: ROUTE.SESSION_VIEW_PERSONAL,
+                        params: { status: "done" },
+                      });
+                    }
                   }
                 }}
               />

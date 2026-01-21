@@ -43,15 +43,7 @@ export function Day({
     >
       {/* Activity indicators */}
       {activities.length > 0 && (
-        <View
-          className={cn(
-            "absolute flex-row gap-0.75",
-            clsx({
-              "top-0": activities.length <= 2,
-              "-top-0.5": activities.length === 3,
-            }),
-          )}
-        >
+        <View className="absolute flex-row gap-0.75 top-0">
           {activities.slice(0, 3).map((status, index) => (
             <View
               key={index}

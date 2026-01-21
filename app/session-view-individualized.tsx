@@ -1,25 +1,70 @@
 import Button, { ButtonIcon } from "@/components/button";
+import BottomSheetModal, {
+  RawBottomSheetModalType,
+} from "@/components/bottom-sheet-modal";
 import { Chip } from "@/components/chip";
+import { Choices } from "@/components/choices";
+import ConfirmActionModal from "@/components/confirm-action-modal";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcChat from "@/components/icons/chat";
 import IcClock from "@/components/icons/clock";
 import IcFile from "@/components/icons/file";
-import IcHyrox from "@/components/icons/hyrox";
+import IcLightning from "@/components/icons/lightning";
 import IcPencil from "@/components/icons/pencil";
 import { SessionCard } from "@/components/session";
+import TimerCard from "@/components/timer-card";
 import Text from "@/components/text";
-import getExercises from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
-import { ExerciseItem } from "@/types";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { supabase } from "@/utilities/supabase";
+import { Database } from "@/utilities/supabase/database.types";
+import { TimerType } from "@/hooks/use-workout-timer";
 
-const exercises = getExercises({ isGridView: false });
+type SessionExercise = Database["public"]["Tables"]["session_exercises"]["Row"];
+type SessionTimerConfig = Database["public"]["Tables"]["session_timer_configs"]["Row"];
+type Session = Database["public"]["Tables"]["sessions"]["Row"];
+type Sport = Database["public"]["Tables"]["sports"]["Row"];
+
+interface SessionWithRelations extends Session {
+  sport: Sport | null;
+}
+
+interface BlockWithExercises {
+  id: string;
+  session_id: string;
+  title: string;
+  description: string | null;
+  color: string | null;
+  intensity_id: string | null;
+  sequence_order: number;
+  exercises: SessionExercise[];
+}
+
+// Timer type mapping from display name to database value
+const TIMER_TYPE_MAP: Record<string, string> = {
+  "Chronomètre": "stopwatch",
+  "Minuteur": "countdown",
+  "EMOM": "emom",
+  "AMRAP": "amrap",
+  "Tabata": "tabata",
+  "Personnalisé": "custom",
+};
+
+// Available timer options
+const TIMER_OPTIONS = Object.keys(TIMER_TYPE_MAP);
 
 export default function SessionViewIndividualized() {
+  const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
+
   const [expandedSections, setExpandedSections] = useState<{
     [key: number]: boolean;
   }>({});
@@ -27,34 +72,123 @@ export default function SessionViewIndividualized() {
     [key: number]: boolean;
   }>({});
 
-  const sessionData: {
-    title: string;
-    description: string;
-    exercises: ExerciseItem[];
-    haveNote: boolean;
-  }[] = [
-    {
-      title: "Échauffement",
-      description:
-        "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: exercises,
-      haveNote: true,
-    },
-    {
-      title: "Hyrox Grand Palais",
-      description:
-        "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: exercises,
-      haveNote: false,
-    },
-    {
-      title: "Récupération",
-      description:
-        "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-      exercises: exercises,
-      haveNote: false,
-    },
-  ];
+  const showTimersRef = useRef<RawBottomSheetModalType>(null);
+  const resetTimerRef = useRef<RawBottomSheetModalType>(null);
+  const [showDeleteTabata, setShowDeleteTabata] = useState(false);
+
+  // Data state
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<SessionWithRelations | null>(null);
+  const [blocks, setBlocks] = useState<BlockWithExercises[]>([]);
+  const [timerConfig, setTimerConfig] = useState<SessionTimerConfig | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Timer selection state
+  const [selectedTimerType, setSelectedTimerType] = useState<string | null>(null);
+
+  // Handle opening timer bottom sheet
+  const handleOpenTimerSheet = () => {
+    // Check if a timer already exists
+    const hasTimer = selectedTimerType || timerConfig;
+
+    if (hasTimer) {
+      // If timer exists, show reset/erase timer bottom sheet
+      resetTimerRef.current?.present();
+    } else {
+      // If no timer, show timer selection bottom sheet
+      showTimersRef.current?.present();
+    }
+  };
+
+  // Handle timer type selection
+  const handleTimerSelect = (timerName: string) => {
+    const timerType = TIMER_TYPE_MAP[timerName];
+    if (timerType) {
+      setSelectedTimerType(timerType);
+      showTimersRef.current?.dismiss();
+    }
+  };
+
+  // Fetch session data
+  useEffect(() => {
+    const fetchSessionData = async () => {
+      if (!sessionId) {
+        setError("No session ID provided");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Fetch session with sport
+        const { data: sessionData, error: sessionError } = await supabase
+          .from("sessions")
+          .select(`
+            *,
+            sport:sports(*)
+          `)
+          .eq("id", sessionId)
+          .single();
+
+        if (sessionError) throw sessionError;
+        if (!sessionData) throw new Error("Session not found");
+
+        setSession(sessionData as SessionWithRelations);
+
+        // Fetch session blocks with exercises
+        const { data: blocksData, error: blocksError } = await supabase
+          .from("session_blocks")
+          .select(`
+            *,
+            session_exercises(*)
+          `)
+          .eq("session_id", sessionId)
+          .order("sequence_order", { ascending: true });
+
+        if (blocksError) throw blocksError;
+
+        // Transform the data to match BlockWithExercises interface
+        const transformedBlocks = (blocksData || []).map((block: any) => ({
+          id: block.id,
+          session_id: block.session_id,
+          title: block.title,
+          description: block.description,
+          color: block.color,
+          intensity_id: block.intensity_id,
+          sequence_order: block.sequence_order,
+          exercises: block.session_exercises || [],
+        }));
+
+        setBlocks(transformedBlocks);
+
+        // Fetch timer config
+        const { data: timerData, error: timerError } = await supabase
+          .from("session_timer_configs")
+          .select("*")
+          .eq("session_id", sessionId)
+          .maybeSingle();
+
+        if (timerError && timerError.code !== "PGRST116") {
+          // PGRST116 = "not found" which is acceptable
+          throw timerError;
+        }
+
+        setTimerConfig(timerData);
+        if (timerData) {
+          setSelectedTimerType(timerData.timer_type);
+        }
+      } catch (err) {
+        console.error("Error fetching session:", err);
+        setError(err instanceof Error ? err.message : "Failed to load session");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessionData();
+  }, [sessionId]);
 
   const toggleExpanded = (index: number) => {
     setExpandedSections((prev) => ({
@@ -70,9 +204,59 @@ export default function SessionViewIndividualized() {
     }));
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <ActivityIndicator size="large" color={ColorConst.primary} />
+        <Text className="text-subtleText text-base mt-4">
+          Chargement de la séance...
+        </Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error || !session) {
+    return (
+      <View className="flex-1 bg-white px-4 pt-safe">
+        <StatusBar style="auto" />
+        <View className="flex-row items-center gap-1 mb-6">
+          <Pressable onPress={router.back} className="p-2">
+            <IcArrowLeft color={ColorConst.secondary} />
+          </Pressable>
+          <Text className="text-lg font-bold text-secondary flex-1">
+            Séance du jour
+          </Text>
+        </View>
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-error text-lg mb-4">Erreur</Text>
+          <Text className="text-subtleText text-base text-center mb-6">
+            {error || "Séance non trouvée"}
+          </Text>
+          <Button text="Retour" type="secondary" onPress={router.back} />
+        </View>
+      </View>
+    );
+  }
+
+  // Calculate duration in minutes
+  const durationMinutes = session.duration_seconds
+    ? Math.round(session.duration_seconds / 60)
+    : null;
+
+  // Format scheduled date
+  const formattedDate = session.scheduled_date
+    ? new Date(session.scheduled_date).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "";
+
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
       <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1"
@@ -81,7 +265,7 @@ export default function SessionViewIndividualized() {
         >
           {/* Header */}
           <View className="bg-[#F6F7FC] pt-safe pb-4 px-4">
-            <View className="flex-row gap-1 items-center ">
+            <View className="flex-row gap-1 items-center">
               <Pressable onPress={router.back} className="p-2">
                 <IcArrowLeft />
               </Pressable>
@@ -95,31 +279,58 @@ export default function SessionViewIndividualized() {
           {/* Title Section */}
           <View className="px-4 pt-6">
             <View className="flex-row items-center gap-2">
-              <IcHyrox />
+              <IcLightning size={24} color={ColorConst.tertiary} />
               <Text className="text-base font-bold text-text flex-1">
-                Hyrox
+                {session.title}
               </Text>
 
-              <Chip text="19/04/2025" className="bg-light" />
+              {formattedDate && (
+                <Chip text={formattedDate} className="bg-light" />
+              )}
             </View>
-            <Text className="text-sm text-text italic mt-1">
-              Par Enguerrand Aucher
+            <Text className="text-sm text-text mt-1">
+              {(session.sport?.name_fr ?? "Séance") || "Séance"}{" "}
+              {durationMinutes && `- Environ ${durationMinutes} minutes`}
             </Text>
+            {session.description && (
+              <Text className="text-sm text-subtleText mt-2">
+                {session.description}
+              </Text>
+            )}
           </View>
+
+          {/* Timer card if configured */}
+          {(selectedTimerType || timerConfig) && (
+            <TimerCard
+              className="mx-4 mt-6"
+              timerType={(selectedTimerType || timerConfig?.timer_type) as TimerType}
+              effortSeconds={timerConfig?.work_seconds ?? 20}
+              restSeconds={timerConfig?.rest_seconds ?? 10}
+              durationSeconds={timerConfig?.duration_seconds ?? 60}
+              totalRounds={timerConfig?.rounds ?? 8}
+              onClose={() => {
+                setSelectedTimerType(null);
+                setShowDeleteTabata(false);
+              }}
+              onModify={() => router.push(ROUTE.MODIFY_TIMER)}
+              onStarted={() => {
+                console.log("Timer started!");
+              }}
+            />
+          )}
 
           {/* Session Sections */}
           <View className="gap-2 px-4 mt-4">
-            {sessionData.map((section, index) => (
+            {blocks.map((block, index) => (
               <SessionCard
-                key={index}
-                title={section.title}
+                key={block.id}
+                title={block.title}
+                description={block.description || ""}
                 isCompleted={completedSections[index] || false}
                 onToggleComplete={() => toggleCompleted(index)}
                 isExpanded={expandedSections[index] || false}
                 onToggleExpand={() => toggleExpanded(index)}
-                exercises={section.exercises}
-                description={section.description}
-                haveNote={section.haveNote}
+                exercises={block.exercises || []}
               />
             ))}
           </View>
@@ -131,11 +342,14 @@ export default function SessionViewIndividualized() {
             <IcChat />
           </ButtonIcon>
 
-          <View className="px-4 pb-safe  flex-row items-center p-4 gap-3 bg-white">
+          <View className="px-4 pb-safe flex-row items-center p-4 gap-3 bg-white">
             <View className="flex-row items-center gap-3">
-              <View className="p-3">
+              <Pressable
+                className="p-3"
+                onPress={handleOpenTimerSheet}
+              >
                 <IcClock size={32} />
-              </View>
+              </Pressable>
               <Pressable
                 className="p-3"
                 onPress={() => router.push(ROUTE.NOTE_HISTORY)}
@@ -143,10 +357,116 @@ export default function SessionViewIndividualized() {
                 <IcFile size={32} color={ColorConst.accent} />
               </Pressable>
             </View>
-            <Button type="secondary" text="J’ai terminé" className="flex-1" />
+            <Button
+              type="secondary"
+              text="J'ai terminé"
+              className="flex-1"
+              onPress={() => router.push(ROUTE.SESSION_ENDED_FORM)}
+            />
           </View>
         </View>
       </View>
+
+      <BottomSheetModal
+        ref={showTimersRef}
+        name="show-timer-ref"
+        snapPoints={["50%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-lg text-secondary">
+          Ajouter un timer
+        </Text>
+
+        <Choices
+          numColumns={2}
+          data={TIMER_OPTIONS.map((name, index) => ({
+            id: `timer-${index}`,
+            text: name,
+          }))}
+          type="secondary"
+          className="mt-3"
+          itemClassName="bg-secondary"
+          itemTextClassName="text-white"
+          onChange={(choice) => {
+            handleTimerSelect(choice.text);
+          }}
+        />
+
+        <View className="pb-safe flex-row items-center py-4 gap-3 bg-white">
+          <Pressable
+            className="p-3"
+            onPress={() => {
+              showTimersRef.current?.dismiss();
+            }}
+          >
+            <IcClock color={ColorConst.primary} size={32} />
+          </Pressable>
+          <Button
+            type="secondary"
+            text="J'ai terminé"
+            className="flex-1"
+            onPress={() => {
+              showTimersRef.current?.dismiss();
+              router.push(ROUTE.SESSION_ENDED_FORM);
+            }}
+          />
+        </View>
+      </BottomSheetModal>
+
+      <BottomSheetModal
+        ref={resetTimerRef}
+        name="reset-timer-ref"
+        snapPoints={["32%"]}
+        className="pb-safe"
+      >
+        <Text className="font-bold text-lg text-secondary">
+          Écraser le chrono actuel ?
+        </Text>
+        <Text className="mt-1 text-accent text-base">
+          Lancer un nouveau chrono remplacera celui en cours. Es-tu sûr de
+          vouloir continuer ?
+        </Text>
+
+        <View className="grow" />
+
+        <View className="flex-row items-center pt-6 gap-3 bg-white">
+          <Pressable
+            className="p-3"
+            onPress={() => {
+              resetTimerRef.current?.dismiss();
+            }}
+          >
+            <IcClock color={ColorConst.primary} size={32} />
+          </Pressable>
+          <Button
+            type="secondary"
+            text="Écraser le chrono en cours"
+            className="flex-1"
+            onPress={() => {
+              // Remove the current timer
+              setSelectedTimerType(null);
+              setTimerConfig(null);
+
+              // Dismiss erase timer modal and show timer selection
+              resetTimerRef.current?.dismiss();
+              showTimersRef.current?.present();
+            }}
+          />
+        </View>
+      </BottomSheetModal>
+
+      <ConfirmActionModal
+        height="40%"
+        show={showDeleteTabata}
+        onCancel={() => setShowDeleteTabata(false)}
+        name="confirm-delete-tabata"
+        title="Arrêter le timer ?"
+        message="Tu es sur le point de fermer ton timer en cours. Tu confirmes ?"
+        confirm={{
+          text: "Oui, fermer le timer",
+          isDestructive: false,
+        }}
+      />
     </>
   );
 }

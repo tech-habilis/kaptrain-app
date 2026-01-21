@@ -11,6 +11,7 @@ import IcTrash from "./icons/trash";
 import type { SessionBlockData } from "@/stores/create-session-store";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  SnappySpringConfig,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -42,14 +43,17 @@ const SessionBlock = ({
       const newTranslateX = Math.min(0, event.translationX);
 
       // Limit the swipe to the delete button width
-      translateX.value = Math.max(-DELETE_BUTTON_WIDTH, newTranslateX);
+      const clampedTranslateX = Math.max(-DELETE_BUTTON_WIDTH, newTranslateX);
+
+      // Apply spring animation for smooth follow gesture
+      translateX.value = withSpring(clampedTranslateX, SnappySpringConfig);
     })
     .onEnd(() => {
       // Snap to either 0 (hidden) or -DELETE_BUTTON_WIDTH (revealed)
       if (translateX.value < -SNAP_THRESHOLD) {
-        translateX.value = withSpring(-DELETE_BUTTON_WIDTH);
+        translateX.value = withSpring(-DELETE_BUTTON_WIDTH, SnappySpringConfig);
       } else {
-        translateX.value = withSpring(0);
+        translateX.value = withSpring(0, SnappySpringConfig);
       }
     });
 

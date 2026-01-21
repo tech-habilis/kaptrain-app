@@ -1044,6 +1044,9 @@ export default function CreateSession() {
           },
         }}
         show={showDeleteConfirmation}
+        onCancel={() => {
+          setSelectedBlockForDelete(undefined);
+        }}
       />
 
       {/* Session Delete Modal */}
