@@ -7,7 +7,13 @@ export type TimerState =
   | "paused"
   | "completed";
 
-export type TimerType = "stopwatch" | "countdown" | "emom" | "amrap" | "tabata" | "custom";
+export type TimerType =
+  | "stopwatch"
+  | "countdown"
+  | "emom"
+  | "amrap"
+  | "tabata"
+  | "custom";
 export type TimerPhase = "effort" | "rest";
 
 export interface UseWorkoutTimerOptions {
@@ -203,7 +209,9 @@ export function useWorkoutTimer({
   const [roundsCompleted, setRoundsCompleted] = useState<number>(0);
 
   const mainIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
   const startingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Sync remainingSeconds with props when timer is in default state
@@ -256,7 +264,11 @@ export function useWorkoutTimer({
 
   const start = useCallback(() => {
     // For stopwatch and countdown, start immediately without countdown
-    if (timerType === "stopwatch" || timerType === "countdown" || timerType === "amrap") {
+    if (
+      timerType === "stopwatch" ||
+      timerType === "countdown" ||
+      timerType === "amrap"
+    ) {
       setState("running");
       onStarted?.();
 
@@ -394,7 +406,9 @@ export function useWorkoutTimer({
 
     // Interval timers (tabata, custom, emom)
     if (
-      (timerType === "tabata" || timerType === "custom" || timerType === "emom") &&
+      (timerType === "tabata" ||
+        timerType === "custom" ||
+        timerType === "emom") &&
       remainingSeconds <= 0
     ) {
       if (phase === "effort") {

@@ -1,9 +1,6 @@
 import { View, Pressable, Text as RawText } from "react-native";
 import Text from "@/components/text";
-import {
-  useWorkoutTimer,
-  TimerType,
-} from "@/hooks/use-workout-timer";
+import { useWorkoutTimer, TimerType } from "@/hooks/use-workout-timer";
 import IcPause from "./icons/pause";
 import { IcReset } from "./icons/repeat";
 import { TabataTheme } from "@/constants/tabata-theme";
@@ -24,8 +21,13 @@ const TIMER_LABELS: Record<TimerType, string> = {
   custom: "Personnalisé",
 };
 
-export default function TimerWidget() {
-  const { timerConfig, showWidget, setShowWidget } = useTimerStore();
+function TimerWidgetContent() {
+  const {
+    timerConfig,
+    showWidget,
+    setShowWidget,
+    reset: resetTimerStore,
+  } = useTimerStore();
 
   // Get timer config with defaults
   const timerType: TimerType = timerConfig?.timerType || "tabata";
@@ -80,8 +82,7 @@ export default function TimerWidget() {
 
   const theme = getTheme();
   const close = () => {
-    reset();
-    setShowWidget(false);
+    resetTimerStore();
   };
 
   const handleReset = () => {
@@ -104,10 +105,7 @@ export default function TimerWidget() {
     if (timerType === "amrap") {
       return `${roundsCompleted} tours`;
     }
-    if (
-      timerType === "stopwatch" ||
-      timerType === "countdown"
-    ) {
+    if (timerType === "stopwatch" || timerType === "countdown") {
       return null;
     }
     return `Tours ${round + 1}/${totalRounds}`;
@@ -170,9 +168,15 @@ export default function TimerWidget() {
             <IcReset />
           </Pressable>
           <Pressable
-            onPress={state === "default" ? handleStart : isPaused ? resume : pause}
+            onPress={
+              state === "default" ? handleStart : isPaused ? resume : pause
+            }
           >
-            {isPaused ? <IcPause size={32} /> : <IcPlay size={32} />}
+            {!isPaused && state !== "default" ? (
+              <IcPause size={32} />
+            ) : (
+              <IcPlay size={32} />
+            )}
           </Pressable>
           <Pressable onPress={close}>
             <IcClose size={32} />
@@ -181,4 +185,13 @@ export default function TimerWidget() {
       </View>
     </Pressable>
   );
+}
+
+export default function TimerWidget() {
+  const { timerConfig, showWidget } = useTimerStore();
+
+  if (!timerConfig || !showWidget) return null;
+
+  // Use timer ID as key to force remount when timer is recreated
+  return <TimerWidgetContent key={timerConfig.id} />;
 }

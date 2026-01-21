@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { TimerType } from "@/hooks/use-workout-timer";
 
 export interface TimerConfig {
+  id?: string;
   timerType: TimerType;
   effortSeconds: number;
   restSeconds: number;
@@ -33,7 +34,8 @@ export const useTimerStore = create<TimerState>((set) => ({
   showWidget: false,
 
   initializeTimer: (config) => {
-    set({ timerConfig: config, showWidget: true });
+    const configWithId = { ...config, id: Date.now().toString() };
+    set({ timerConfig: configWithId, showWidget: true });
   },
 
   setTimerType: (timerType) => {
@@ -70,9 +72,7 @@ export const useTimerStore = create<TimerState>((set) => ({
 
   setRounds: (rounds) => {
     set((state) => ({
-      timerConfig: state.timerConfig
-        ? { ...state.timerConfig, rounds }
-        : null,
+      timerConfig: state.timerConfig ? { ...state.timerConfig, rounds } : null,
     }));
   },
 
