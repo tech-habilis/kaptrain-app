@@ -11,13 +11,12 @@ import IcClock from "@/components/icons/clock";
 import IcFile from "@/components/icons/file";
 import IcLightning from "@/components/icons/lightning";
 import IcPencil from "@/components/icons/pencil";
-import { SessionCard } from "@/components/session";
 import TimerCard from "@/components/timer-card";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -28,6 +27,7 @@ import { StatusBar } from "expo-status-bar";
 import { supabase } from "@/utilities/supabase";
 import { Database } from "@/utilities/supabase/database.types";
 import { TimerType } from "@/hooks/use-workout-timer";
+import { TrainingBlockCard } from "@/components/session";
 
 type SessionExercise = Database["public"]["Tables"]["session_exercises"]["Row"];
 type SessionTimerConfig = Database["public"]["Tables"]["session_timer_configs"]["Row"];
@@ -82,6 +82,18 @@ export default function SessionViewIndividualized() {
   const [blocks, setBlocks] = useState<BlockWithExercises[]>([]);
   const [timerConfig, setTimerConfig] = useState<SessionTimerConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const sessionExerciseToExerciseItem = useMemo(() => {
+    return (sessionExercise: SessionExercise) => {
+      return {
+        id: sessionExercise.id,
+        title: sessionExercise.name,
+        image: '',
+        icon: undefined,
+        isFavorite: false,
+      };
+    };
+  }, []);
 
   // Timer selection state
   const [selectedTimerType, setSelectedTimerType] = useState<string | null>(null);
@@ -333,7 +345,7 @@ export default function SessionViewIndividualized() {
           {/* Session Sections */}
           <View className="gap-2 px-4 mt-4">
             {blocks.map((block, index) => (
-              <SessionCard
+              <TrainingBlockCard
                 key={block.id}
                 title={block.title}
                 description={block.description || ""}
@@ -341,7 +353,7 @@ export default function SessionViewIndividualized() {
                 onToggleComplete={() => toggleCompleted(index)}
                 isExpanded={expandedSections[index] || false}
                 onToggleExpand={() => toggleExpanded(index)}
-                exercises={block.exercises || []}
+                exercises={block.exercises.map(sessionExerciseToExerciseItem) || []}
               />
             ))}
           </View>

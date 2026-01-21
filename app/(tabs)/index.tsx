@@ -10,7 +10,6 @@ import IcMessage from "@/components/icons/message";
 import IcSmiley from "@/components/icons/smiley";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
-import { ActivityCard } from "@/components/agenda/activity-card";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
@@ -28,6 +27,7 @@ import Avatar from "@/components/avatar";
 import { useWeekCalendar } from "@/hooks/use-week-calendar";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
+import { SessionCard } from "@/components/agenda/session-card";
 
 // Set dayjs locale to French
 dayjs.locale("fr");
@@ -36,11 +36,8 @@ const Agenda = () => {
   const { session } = useSession();
   const userId = session?.user?.id;
 
-  const {
-    weekDays,
-    selectedDate,
-    selectedDateSessions,
-  } = useWeekCalendar(userId);
+  const { weekDays, selectedDate, selectedDateSessions } =
+    useWeekCalendar(userId);
 
   // Format selected date for display (e.g., "Aujourd'hui" or "19 avril")
   const getSelectedDateLabel = () => {
@@ -97,12 +94,18 @@ const Agenda = () => {
               data={activities}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <ActivityCard
+                <SessionCard
                   title={item.title}
                   description={item.sessionTitle}
                   coachName={item.coachName}
                   borderColor={item.color}
                   icon={item.icon}
+                  onPress={() =>
+                    router.push({
+                      pathname: ROUTE.SESSION_VIEW_INDIVIDUALIZED,
+                      params: { sessionId: item.id },
+                    })
+                  }
                 />
               )}
               ItemSeparatorComponent={() => <View className="h-2" />}
