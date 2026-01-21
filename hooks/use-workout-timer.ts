@@ -206,6 +206,20 @@ export function useWorkoutTimer({
   const startingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Sync remainingSeconds with props when timer is in default state
+  useEffect(() => {
+    if (state === "default") {
+      if (timerType === "countdown" || timerType === "amrap") {
+        setRemainingSeconds(durationSeconds || 60);
+      } else if (timerType === "stopwatch") {
+        setRemainingSeconds(0);
+      } else {
+        // For interval timers (tabata, custom, emom)
+        setRemainingSeconds(effortSeconds);
+      }
+    }
+  }, [durationSeconds, effortSeconds, timerType, state]);
+
   const minutes = Math.floor(remainingSeconds / 60);
   const seconds = remainingSeconds % 60;
   const formattedMinutes = minutes.toString().padStart(2, "0");

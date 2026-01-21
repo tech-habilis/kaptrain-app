@@ -1,4 +1,9 @@
-import { View, Pressable, Text as RawText, TouchableOpacity } from "react-native";
+import {
+  View,
+  Pressable,
+  Text as RawText,
+  TouchableOpacity,
+} from "react-native";
 import Text from "@/components/text";
 import Button from "@/components/button";
 import { ColorConst } from "@/constants/theme";
@@ -11,7 +16,11 @@ import Tabs from "./tabs";
 import { IcReset } from "./icons/repeat";
 import IcPause from "./icons/pause";
 import CircularProgress from "./charts/circular-progress";
-import { useWorkoutTimer, TimerState, TimerType } from "@/hooks/use-workout-timer";
+import {
+  useWorkoutTimer,
+  TimerState,
+  TimerType,
+} from "@/hooks/use-workout-timer";
 import { TabataTheme } from "@/constants/tabata-theme";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
@@ -139,7 +148,11 @@ export default function TimerCard({
 
   // Get background color based on timer type and state
   const getBackgroundColor = (): string => {
-    if (timerType === "stopwatch" || timerType === "countdown" || timerType === "amrap") {
+    if (
+      timerType === "stopwatch" ||
+      timerType === "countdown" ||
+      timerType === "amrap"
+    ) {
       return state === "running" || state === "paused"
         ? "#FFFFFF"
         : TabataTheme.default.backgroundColor;
@@ -152,7 +165,11 @@ export default function TimerCard({
 
   // Get border color based on timer type and state
   const getBorderColor = (): string => {
-    if (timerType === "stopwatch" || timerType === "countdown" || timerType === "amrap") {
+    if (
+      timerType === "stopwatch" ||
+      timerType === "countdown" ||
+      timerType === "amrap"
+    ) {
       return state === "running" || state === "paused"
         ? ColorConst.primary
         : TabataTheme.default.borderColor;
@@ -179,7 +196,9 @@ export default function TimerCard({
       <View className="gap-2">
         {/* Title Row */}
         <View className="flex-row justify-between items-center">
-          <Text className="text-base font-bold text-text">{getTimerLabel()}</Text>
+          <Text className="text-base font-bold text-text">
+            {getTimerLabel()}
+          </Text>
           {onClose && (
             <Pressable
               className="w-6 h-6 items-center justify-center"
@@ -194,23 +213,24 @@ export default function TimerCard({
         {["running", "paused"].includes(state) ? (
           <>
             {/* Phase tabs for interval timers */}
-            {(timerType === "tabata" || timerType === "custom") && phaseTabs && (
-              <Tabs
-                tabs={phaseTabs}
-                selected={currentPhaseTab}
-                onSelected={() => {
-                  // do nothing, tab selection is done by the timer
-                }}
-                selectedClassName="bg-error2"
-                selectedStyle={{
-                  backgroundColor: phaseTheme.tabBackgroundColor,
-                }}
-                textClassName="text-base text-accent font-medium"
-                selectedTextClassName="text-base text-white font-bold"
-                tabClassName="py-[10.5px]"
-                className="mt-0"
-              />
-            )}
+            {(timerType === "tabata" || timerType === "custom") &&
+              phaseTabs && (
+                <Tabs
+                  tabs={phaseTabs}
+                  selected={currentPhaseTab}
+                  onSelected={() => {
+                    // do nothing, tab selection is done by the timer
+                  }}
+                  selectedClassName="bg-error2"
+                  selectedStyle={{
+                    backgroundColor: phaseTheme.tabBackgroundColor,
+                  }}
+                  textClassName="text-base text-accent font-medium"
+                  selectedTextClassName="text-base text-white font-bold"
+                  tabClassName="py-[10.5px]"
+                  className="mt-0"
+                />
+              )}
             {/* EMOM specific display */}
             {timerType === "emom" && (
               <View className="flex-row gap-2">
@@ -278,7 +298,7 @@ export default function TimerCard({
             {timerType === "amrap" && (
               <View className="bg-white border rounded px-2 py-0.5 border-stroke">
                 <Text className="text-sm text-accent">
-                  {`${Math.floor(durationSeconds! / 60)}:${(durationSeconds! % 60).toString().padStart(2, "0")}`}
+                  {`${Math.floor(durationSeconds! / 60)}m ${(durationSeconds! % 60).toString().padStart(2, "0")}s`}
                 </Text>
               </View>
             )}
@@ -286,7 +306,7 @@ export default function TimerCard({
             {timerType === "countdown" && (
               <View className="bg-white border rounded px-2 py-0.5 border-stroke">
                 <Text className="text-sm text-accent">
-                  {`${Math.floor(durationSeconds! / 60)}:${(durationSeconds! % 60).toString().padStart(2, "0")}`}
+                  {`${Math.floor(durationSeconds! / 60)}m ${(durationSeconds! % 60).toString().padStart(2, "0")}s`}
                 </Text>
               </View>
             )}
@@ -298,7 +318,9 @@ export default function TimerCard({
       <View className="items-center gap-4 flex-row justify-center">
         {/* Circular progress for interval timers */}
         {["running", "paused"].includes(state) &&
-          (timerType === "tabata" || timerType === "custom" || timerType === "emom") && (
+          (timerType === "tabata" ||
+            timerType === "custom" ||
+            timerType === "emom") && (
             <CircularProgress
               backgroundColor={phaseTheme.backgroundColor}
               progressColor={phaseTheme.progressColor}
@@ -324,11 +346,13 @@ export default function TimerCard({
         </View>
 
         {/* Round Counter for interval timers */}
-        {timerType !== "amrap" && timerType !== "stopwatch" && timerType !== "countdown" && (
-          <Text className="text-sm font-medium text-accent">
-            {`Tours ${round + 1}/${totalRounds}`}
-          </Text>
-        )}
+        {timerType !== "amrap" &&
+          timerType !== "stopwatch" &&
+          timerType !== "countdown" && (
+            <Text className="text-sm font-medium text-accent">
+              {`Tours ${round + 1}/${totalRounds}`}
+            </Text>
+          )}
       </View>
 
       {/* AMRAP Round Counter Controls */}
@@ -342,7 +366,9 @@ export default function TimerCard({
           </TouchableOpacity>
           <View className="items-center">
             <Text className="text-xs text-subtleText">Rounds</Text>
-            <Text className="text-2xl font-bold text-text">{roundsCompleted}</Text>
+            <Text className="text-2xl font-bold text-text">
+              {roundsCompleted.toString()}
+            </Text>
           </View>
           <TouchableOpacity
             className="w-12 h-12 rounded-full bg-light border-2 border-stroke items-center justify-center"

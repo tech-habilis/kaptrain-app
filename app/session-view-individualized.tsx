@@ -17,20 +17,17 @@ import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { supabase } from "@/utilities/supabase";
 import { Database } from "@/utilities/supabase/database.types";
 import { TimerType } from "@/hooks/use-workout-timer";
 import { TrainingBlockCard } from "@/components/session";
+import { useTimerStore } from "@/stores/timer-store";
 
 type SessionExercise = Database["public"]["Tables"]["session_exercises"]["Row"];
-type SessionTimerConfig = Database["public"]["Tables"]["session_timer_configs"]["Row"];
+type SessionTimerConfig =
+  Database["public"]["Tables"]["session_timer_configs"]["Row"];
 type Session = Database["public"]["Tables"]["sessions"]["Row"];
 type Sport = Database["public"]["Tables"]["sports"]["Row"];
 
@@ -51,12 +48,12 @@ interface BlockWithExercises {
 
 // Timer type mapping from display name to database value
 const TIMER_TYPE_MAP: Record<string, string> = {
-  "Chronomètre": "stopwatch",
-  "Minuteur": "countdown",
-  "EMOM": "emom",
-  "AMRAP": "amrap",
-  "Tabata": "tabata",
-  "Personnalisé": "custom",
+  Chronomètre: "stopwatch",
+  Minuteur: "countdown",
+  EMOM: "emom",
+  AMRAP: "amrap",
+  Tabata: "tabata",
+  Personnalisé: "custom",
 };
 
 // Available timer options
@@ -64,6 +61,11 @@ const TIMER_OPTIONS = Object.keys(TIMER_TYPE_MAP);
 
 export default function SessionViewIndividualized() {
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
+  const {
+    timerConfig: storeTimerConfig,
+    initializeTimer,
+    reset: resetTimerStore,
+  } = useTimerStore();
 
   const [expandedSections, setExpandedSections] = useState<{
     [key: number]: boolean;
@@ -80,7 +82,9 @@ export default function SessionViewIndividualized() {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<SessionWithRelations | null>(null);
   const [blocks, setBlocks] = useState<BlockWithExercises[]>([]);
-  const [timerConfig, setTimerConfig] = useState<SessionTimerConfig | null>(null);
+  const [timerConfig, setTimerConfig] = useState<SessionTimerConfig | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const sessionExerciseToExerciseItem = useMemo(() => {
@@ -88,20 +92,17 @@ export default function SessionViewIndividualized() {
       return {
         id: sessionExercise.id,
         title: sessionExercise.name,
-        image: '',
+        image: "",
         icon: undefined,
         isFavorite: false,
       };
     };
   }, []);
 
-  // Timer selection state
-  const [selectedTimerType, setSelectedTimerType] = useState<string | null>(null);
-
   // Handle opening timer bottom sheet
   const handleOpenTimerSheet = () => {
-    // Check if a timer already exists
-    const hasTimer = selectedTimerType || timerConfig;
+    // Check if a timer already exists in store or database
+    const hasTimer = storeTimerConfig || timerConfig;
 
     if (hasTimer) {
       // If timer exists, show reset/erase timer bottom sheet
@@ -114,9 +115,16 @@ export default function SessionViewIndividualized() {
 
   // Handle timer type selection
   const handleTimerSelect = (timerName: string) => {
-    const timerType = TIMER_TYPE_MAP[timerName];
+    const timerType = TIMER_TYPE_MAP[timerName] as TimerType;
     if (timerType) {
-      setSelectedTimerType(timerType);
+      // Initialize store with default values for the selected timer type
+      initializeTimer({
+        timerType,
+        effortSeconds: 20,
+        restSeconds: 10,
+        durationSeconds: 60,
+        rounds: 8,
+      });
       showTimersRef.current?.dismiss();
     }
   };
@@ -137,10 +145,12 @@ export default function SessionViewIndividualized() {
         // Fetch session with sport
         const { data: sessionData, error: sessionError } = await supabase
           .from("sessions")
-          .select(`
+          .select(
+            `
             *,
             sport:sports(*)
-          `)
+          `,
+          )
           .eq("id", sessionId)
           .single();
 
@@ -152,10 +162,12 @@ export default function SessionViewIndividualized() {
         // Fetch session blocks with exercises
         const { data: blocksData, error: blocksError } = await supabase
           .from("session_blocks")
-          .select(`
+          .select(
+            `
             *,
             session_exercises(*)
-          `)
+          `,
+          )
           .eq("session_id", sessionId)
           .order("sequence_order", { ascending: true });
 
@@ -189,7 +201,14 @@ export default function SessionViewIndividualized() {
 
         setTimerConfig(timerData);
         if (timerData) {
-          setSelectedTimerType(timerData.timer_type);
+          // Initialize the store with timer config from database
+          initializeTimer({
+            timerType: timerData.timer_type as TimerType,
+            effortSeconds: timerData.work_seconds ?? 20,
+            restSeconds: timerData.rest_seconds ?? 10,
+            durationSeconds: timerData.duration_seconds ?? 60,
+            rounds: timerData.rounds ?? 8,
+          });
         }
       } catch (err) {
         console.error("Error fetching session:", err);
@@ -200,7 +219,7 @@ export default function SessionViewIndividualized() {
     };
 
     fetchSessionData();
-  }, [sessionId]);
+  }, [sessionId, initializeTimer]);
 
   const toggleExpanded = (index: number) => {
     setExpandedSections((prev) => ({
@@ -312,6 +331,7 @@ export default function SessionViewIndividualized() {
               )}
             </View>
             <Text className="text-sm text-text mt-1">
+              {/* TODO: check why sport is empty */}
               {(session.sport?.name_fr ?? "Séance") || "Séance"}{" "}
               {durationMinutes && `- Environ ${durationMinutes} minutes`}
             </Text>
@@ -323,19 +343,21 @@ export default function SessionViewIndividualized() {
           </View>
 
           {/* Timer card if configured */}
-          {(selectedTimerType || timerConfig) && (
+          {storeTimerConfig && (
             <TimerCard
               className="mx-4 mt-6"
-              timerType={(selectedTimerType || timerConfig?.timer_type) as TimerType}
-              effortSeconds={timerConfig?.work_seconds ?? 20}
-              restSeconds={timerConfig?.rest_seconds ?? 10}
-              durationSeconds={timerConfig?.duration_seconds ?? 60}
-              totalRounds={timerConfig?.rounds ?? 8}
+              timerType={storeTimerConfig.timerType}
+              effortSeconds={storeTimerConfig.effortSeconds}
+              restSeconds={storeTimerConfig.restSeconds}
+              durationSeconds={storeTimerConfig.durationSeconds}
+              totalRounds={storeTimerConfig.rounds}
               onClose={() => {
-                setSelectedTimerType(null);
+                resetTimerStore();
                 setShowDeleteTabata(false);
               }}
-              onModify={() => router.push(ROUTE.MODIFY_TIMER)}
+              onModify={() => {
+                router.push(ROUTE.MODIFY_TIMER);
+              }}
               onStarted={() => {
                 console.log("Timer started!");
               }}
@@ -353,7 +375,9 @@ export default function SessionViewIndividualized() {
                 onToggleComplete={() => toggleCompleted(index)}
                 isExpanded={expandedSections[index] || false}
                 onToggleExpand={() => toggleExpanded(index)}
-                exercises={block.exercises.map(sessionExerciseToExerciseItem) || []}
+                exercises={
+                  block.exercises.map(sessionExerciseToExerciseItem) || []
+                }
               />
             ))}
           </View>
@@ -367,10 +391,7 @@ export default function SessionViewIndividualized() {
 
           <View className="px-4 pb-safe flex-row items-center p-4 gap-3 bg-white">
             <View className="flex-row items-center gap-3">
-              <Pressable
-                className="p-3"
-                onPress={handleOpenTimerSheet}
-              >
+              <Pressable className="p-3" onPress={handleOpenTimerSheet}>
                 <IcClock size={32} />
               </Pressable>
               <Pressable
@@ -466,9 +487,8 @@ export default function SessionViewIndividualized() {
             text="Écraser le chrono en cours"
             className="flex-1"
             onPress={() => {
-              // Remove the current timer
-              setSelectedTimerType(null);
-              setTimerConfig(null);
+              // Remove the current timer from store
+              resetTimerStore();
 
               // Dismiss erase timer modal and show timer selection
               resetTimerRef.current?.dismiss();
