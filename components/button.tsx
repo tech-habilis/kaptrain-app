@@ -13,7 +13,7 @@ import { ColorConst } from "@/constants/theme";
 import { clsx } from "clsx";
 
 const button = tv({
-  base: "font-bold flex flex-row justify-center items-center",
+  base: "font-inter-bold flex flex-row justify-center items-center",
   variants: {
     type: {
       primary: "bg-primary",
@@ -50,13 +50,13 @@ const button = tv({
 });
 
 const buttonText = tv({
-  base: "text-white text-center font-bold",
+  base: "text-white text-center font-inter-bold",
   variants: {
     type: {
       primary: "text-white",
       secondary: "",
       tertiary: "",
-      link: "text-primary font-semibold",
+      link: "text-primary font-inter-semibold",
       secondaryV2: "text-secondary-500",
     },
     size: {
@@ -68,7 +68,7 @@ const buttonText = tv({
     {
       type: ["tertiary", "secondaryV2"],
       size: "small",
-      class: "font-medium",
+      class: "font-inter-medium",
     },
     {
       type: ["secondary", "tertiary"],

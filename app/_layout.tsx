@@ -20,6 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Platform } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { useFonts } from "expo-font";
 
 /**
  * Place all initialization logic here for easier management
@@ -39,6 +40,22 @@ initializeApp();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    // Futura fonts
+    "Futura-Book": require("../assets/fonts/FuturaBook.ttf"),
+    "Futura-Medium": require("../assets/fonts/FuturaMedium.ttf"),
+    "Futura-Demi": require("../assets/fonts/FuturaDemi.ttf"),
+    "Futura-Bold": require("../assets/fonts/FuturaBold.ttf"),
+    // Inter fonts
+    "Inter_18pt-Regular": require("../assets/fonts/Inter_18pt-Regular.ttf"),
+    "Inter_18pt-Medium": require("../assets/fonts/Inter_18pt-Medium.ttf"),
+    "Inter_18pt-SemiBold": require("../assets/fonts/Inter_18pt-SemiBold.ttf"),
+    "Inter_18pt-Bold": require("../assets/fonts/Inter_18pt-Bold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <SessionProvider>
@@ -73,7 +90,7 @@ function RootNavigator() {
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Protected guard={showCompleteProfileForm}>
-        <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
+          <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
         </Stack.Protected>
 
         <Stack.Screen name={ROUTE_NAME.TABS} />

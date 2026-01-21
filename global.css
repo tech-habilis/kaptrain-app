@@ -1,21 +1,33 @@
-@import 'tailwindcss';
-@import 'uniwind';
+@import "tailwindcss";
+@import "uniwind";
 
 @theme {
-  --color-primary: #457CE2;
-  --color-secondary: #06234B;
-  --color-tertiary: #FF9E69;
-  --color-decorative: #FFD1A7;
-  --color-text: #04152D;
+  --color-primary: #457ce2;
+  --color-secondary: #06234b;
+  --color-tertiary: #ff9e69;
+  --color-decorative: #ffd1a7;
+  --color-text: #04152d;
   --color-subtleText: #727988;
-  --color-stroke: #E5E5EB;
-  --color-accent: #424F65;
-  --color-light: #EEEFF9;
-  --color-warmLight: #FFF7F3;
-  --color-success: #4FD365;
-  --color-error: #FF604B;
-  --color-secondary-500: #1A1C1E;
-  --color-secondary-grey: #BABABA;
-  --color-green: #3FA951;
-  --color-error2: #E32828;
+  --color-stroke: #e5e5eb;
+  --color-accent: #424f65;
+  --color-light: #eeeff9;
+  --color-warmLight: #fff7f3;
+  --color-success: #4fd365;
+  --color-error: #ff604b;
+  --color-secondary-500: #1a1c1e;
+  --color-secondary-grey: #bababa;
+  --color-green: #3fa951;
+  --color-error2: #e32828;
+
+  /* Font families - Futura */
+  --font-futura: "Futura-Book";
+  --font-futura-medium: "Futura-Medium";
+  --font-futura-semibold: "Futura-Demi";
+  --font-futura-bold: "Futura-Bold";
+
+  /* Font families - Inter */
+  --font-inter: "Inter_18pt-Regular";
+  --font-inter-medium: "Inter_18pt-Medium";
+  --font-inter-semibold: "Inter_18pt-SemiBold";
+  --font-inter-bold: "Inter_18pt-Bold";
 }
