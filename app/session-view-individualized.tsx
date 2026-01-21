@@ -65,6 +65,7 @@ export default function SessionViewIndividualized() {
     timerConfig: storeTimerConfig,
     initializeTimer,
     reset: resetTimerStore,
+    setShowWidget,
   } = useTimerStore();
 
   const [expandedSections, setExpandedSections] = useState<{
@@ -356,6 +357,7 @@ export default function SessionViewIndividualized() {
               onClose={() => {
                 resetTimerStore();
                 setShowDeleteTabata(false);
+                setShowWidget(false);
               }}
               onModify={() => {
                 router.push(ROUTE.MODIFY_TIMER);

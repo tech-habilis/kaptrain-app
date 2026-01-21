@@ -13,6 +13,9 @@ interface TimerState {
   // Timer configuration
   timerConfig: TimerConfig | null;
 
+  // Widget visibility
+  showWidget: boolean;
+
   // Actions
   initializeTimer: (config: TimerConfig) => void;
   setTimerType: (timerType: TimerType) => void;
@@ -21,14 +24,16 @@ interface TimerState {
   setDurationSeconds: (seconds: number) => void;
   setRounds: (rounds: number) => void;
   updateConfig: (config: Partial<TimerConfig>) => void;
+  setShowWidget: (show: boolean) => void;
   reset: () => void;
 }
 
 export const useTimerStore = create<TimerState>((set) => ({
   timerConfig: null,
+  showWidget: false,
 
   initializeTimer: (config) => {
-    set({ timerConfig: config });
+    set({ timerConfig: config, showWidget: true });
   },
 
   setTimerType: (timerType) => {
@@ -79,7 +84,11 @@ export const useTimerStore = create<TimerState>((set) => ({
     }));
   },
 
+  setShowWidget: (show) => {
+    set({ showWidget: show });
+  },
+
   reset: () => {
-    set({ timerConfig: null });
+    set({ timerConfig: null, showWidget: true });
   },
 }));

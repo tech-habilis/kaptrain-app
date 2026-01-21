@@ -4,14 +4,15 @@ import IcCheck from "@/components/icons/check";
 import IcClock from "@/components/icons/clock";
 import IcLightning from "@/components/icons/lightning";
 import IcLove from "@/components/icons/love";
-import TabataWidget from "@/components/tabata-widget";
 import Tabs from "@/components/tabs";
 import Text from "@/components/text";
 import { programs } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
+import { useTimerStore } from "@/stores/timer-store";
 import { ProgramSectionProps } from "@/types";
 import { hexToRgba } from "@/utilities/cn";
+import clsx from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -85,6 +86,7 @@ const ProgramSection = ({
 export default function Library() {
   const tabs = ["Exercices", "Programmes"];
   const [tab, setTab] = useState(tabs[0]);
+  const { showWidget } = useTimerStore();
 
   const menu = [
     {
@@ -254,29 +256,29 @@ export default function Library() {
   };
 
   return (
-    <View className="bg-white">
-      <StatusBar style="dark" />
+    <ScrollView
+      className={clsx("bg-white", {
+        "pt-safe": !showWidget,
+      })}
+    >
+      <StatusBar style="auto" />
+      <View className="px-4">
+        <Text className="font-bold text-lg text-secondary">Bibliothèque</Text>
+        <Text className="text-subtleText text-base mt-1">
+          Choisis les exercices et les programmes qui t’aideront à atteindre tes
+          objectifs
+        </Text>
 
-      <TabataWidget />
-      <ScrollView className="bg-white pt-4">
-        <View className="px-4">
-          <Text className="font-bold text-lg text-secondary">Bibliothèque</Text>
-          <Text className="text-subtleText text-base mt-1">
-            Choisis les exercices et les programmes qui t’aideront à atteindre
-            tes objectifs
-          </Text>
+        <Tabs
+          tabs={tabs}
+          onSelected={setTab}
+          selected={tab}
+          className="w-full my-4"
+          textClassName="font-semibold"
+        />
+      </View>
 
-          <Tabs
-            tabs={tabs}
-            onSelected={setTab}
-            selected={tab}
-            className="w-full my-4"
-            textClassName="font-semibold"
-          />
-        </View>
-
-        {renderTabContent()}
-      </ScrollView>
-    </View>
+      {renderTabContent()}
+    </ScrollView>
   );
 }
