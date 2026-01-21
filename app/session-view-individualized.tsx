@@ -117,10 +117,12 @@ export default function SessionViewIndividualized() {
   const handleTimerSelect = (timerName: string) => {
     const timerType = TIMER_TYPE_MAP[timerName] as TimerType;
     if (timerType) {
-      // Initialize store with default values for the selected timer type
+      // Set default values based on timer type
+      const isEmom = timerType === "emom";
+
       initializeTimer({
         timerType,
-        effortSeconds: 20,
+        effortSeconds: isEmom ? 40 : 20, // EMOM defaults to 40s work
         restSeconds: 10,
         durationSeconds: 60,
         rounds: 8,

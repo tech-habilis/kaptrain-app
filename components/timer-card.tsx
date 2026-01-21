@@ -2,14 +2,14 @@ import {
   View,
   Pressable,
   Text as RawText,
-  TouchableOpacity,
+  // TouchableOpacity,
 } from "react-native";
 import Text from "@/components/text";
 import Button from "@/components/button";
 import { ColorConst } from "@/constants/theme";
 import IcClose from "@/components/icons/close";
-import IcPlus from "@/components/icons/plus";
-import IcMinus from "@/components/icons/minus";
+// import IcPlus from "@/components/icons/plus";
+// import IcMinus from "@/components/icons/minus";
 import { clsx } from "clsx";
 import { BlurView } from "expo-blur";
 import Tabs from "./tabs";
@@ -117,8 +117,8 @@ export default function TimerCard({
     phaseTabs,
     currentPhaseTab,
     roundsCompleted,
-    incrementRound,
-    decrementRound,
+    // incrementRound,
+    // decrementRound,
   } = useWorkoutTimer({
     timerType,
     durationSeconds,
@@ -148,36 +148,38 @@ export default function TimerCard({
 
   // Get background color based on timer type and state
   const getBackgroundColor = (): string => {
-    if (
-      timerType === "stopwatch" ||
-      timerType === "countdown" ||
-      timerType === "amrap"
-    ) {
-      return state === "running" || state === "paused"
-        ? "#FFFFFF"
-        : TabataTheme.default.backgroundColor;
+    // Use effort theme for all timers when running, except during rest phase
+    if (state === "running" || state === "paused") {
+      // Interval timers in rest phase use rest theme
+      if (
+        (timerType === "tabata" || timerType === "custom" || timerType === "emom") &&
+        phase === "rest"
+      ) {
+        return TabataTheme.rest.cardBackgroundColor;
+      }
+      // All other running states use effort theme
+      return TabataTheme.effort.cardBackgroundColor;
     }
-    // Interval timers (tabata, custom, emom)
-    return ["paused", "running"].includes(state)
-      ? phaseTheme.cardBackgroundColor
-      : TabataTheme.default.backgroundColor;
+    // Default state
+    return TabataTheme.default.backgroundColor;
   };
 
   // Get border color based on timer type and state
   const getBorderColor = (): string => {
-    if (
-      timerType === "stopwatch" ||
-      timerType === "countdown" ||
-      timerType === "amrap"
-    ) {
-      return state === "running" || state === "paused"
-        ? ColorConst.primary
-        : TabataTheme.default.borderColor;
+    // Use effort theme for all timers when running, except during rest phase
+    if (state === "running" || state === "paused") {
+      // Interval timers in rest phase use rest theme
+      if (
+        (timerType === "tabata" || timerType === "custom" || timerType === "emom") &&
+        phase === "rest"
+      ) {
+        return TabataTheme.rest.borderColor;
+      }
+      // All other running states use effort theme
+      return TabataTheme.effort.borderColor;
     }
-    // Interval timers (tabata, custom, emom)
-    return ["paused", "running"].includes(state)
-      ? phaseTheme.borderColor
-      : TabataTheme.default.borderColor;
+    // Default state
+    return TabataTheme.default.borderColor;
   };
 
   return (
@@ -241,7 +243,7 @@ export default function TimerCard({
                 </View>
                 <View className="bg-white border rounded px-2 py-0.5 border-stroke">
                   <Text className="text-sm text-accent">
-                    {phase === "effort" ? "Work" : "Rest"}
+                    {phase === "effort" ? "Effort" : "Repos"}
                   </Text>
                 </View>
               </View>
@@ -284,7 +286,7 @@ export default function TimerCard({
               <>
                 <View className="bg-white border rounded px-2 py-0.5 border-stroke">
                   <Text className="text-sm text-accent">
-                    {`Work ${effortSeconds}s`}
+                    {`Effort ${effortSeconds}s`}
                   </Text>
                 </View>
                 <View className="bg-white border border-stroke rounded px-2 py-0.5">
@@ -298,7 +300,7 @@ export default function TimerCard({
             {timerType === "amrap" && (
               <View className="bg-white border rounded px-2 py-0.5 border-stroke">
                 <Text className="text-sm text-accent">
-                  {`${Math.floor(durationSeconds! / 60)}m ${(durationSeconds! % 60).toString().padStart(2, "0")}s`}
+                  {`${Math.floor(durationSeconds! / 60)} min`}
                 </Text>
               </View>
             )}
@@ -306,7 +308,7 @@ export default function TimerCard({
             {timerType === "countdown" && (
               <View className="bg-white border rounded px-2 py-0.5 border-stroke">
                 <Text className="text-sm text-accent">
-                  {`${Math.floor(durationSeconds! / 60)}m ${(durationSeconds! % 60).toString().padStart(2, "0")}s`}
+                  {`${Math.floor(durationSeconds! / 60)} min`}
                 </Text>
               </View>
             )}
@@ -355,8 +357,8 @@ export default function TimerCard({
           )}
       </View>
 
-      {/* AMRAP Round Counter Controls */}
-      {timerType === "amrap" && state !== "completed" && (
+      {/* AMRAP Round Counter Controls - hidden for now */}
+      {/* {timerType === "amrap" && state !== "completed" && (
         <View className="flex-row items-center justify-center gap-6">
           <TouchableOpacity
             className="w-12 h-12 rounded-full bg-light border-2 border-stroke items-center justify-center"
@@ -377,7 +379,7 @@ export default function TimerCard({
             <IcPlus size={20} color={ColorConst.accent} />
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
 
       {/* Action Buttons */}
       <View
@@ -389,15 +391,15 @@ export default function TimerCard({
           <Pressable onPress={resetTimer}>
             <IcReset />
           </Pressable>
-        ) : (
+        ) : timerType !== "stopwatch" ? (
           <Button
             text="Modifier"
             type="secondary"
             size="small"
             onPress={onModify}
-            className="grow"
+            className="grow bg-white"
           />
-        )}
+        ) : null}
         <Button
           leftIcon={state === "running" ? <IcPause /> : null}
           text={

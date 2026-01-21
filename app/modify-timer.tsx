@@ -7,6 +7,7 @@ import { useTimerStore } from "@/stores/timer-store";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
 // Timer type labels in French
 const TIMER_LABELS = {
@@ -25,13 +26,14 @@ export default function ModifyTimer() {
     setRestSeconds,
     setDurationSeconds,
     setRounds: setStoreRounds,
+    setTimerType,
   } = useTimerStore();
 
   // Local state for modal display
   const [effort, setEffort] = useState(20);
   const [repos, setRepos] = useState(10);
   const [rounds, setLocalRounds] = useState(8);
-  const [duration, setDuration] = useState(60); // For countdown (minuteur) in seconds
+  const [durationMinutes, setDurationMinutes] = useState(1); // For countdown/AMRAP in minutes (user-facing)
 
   const [showTimerModal, setShowTimerModal] = useState(false);
   const [showReposModal, setShowReposModal] = useState(false);
@@ -44,7 +46,8 @@ export default function ModifyTimer() {
       setEffort(timerConfig.effortSeconds);
       setRepos(timerConfig.restSeconds);
       setLocalRounds(timerConfig.rounds);
-      setDuration(timerConfig.durationSeconds);
+      // Convert seconds to minutes for countdown/AMRAP user display
+      setDurationMinutes(Math.round(timerConfig.durationSeconds / 60));
     }
   }, [timerConfig]);
 
@@ -52,6 +55,8 @@ export default function ModifyTimer() {
   const isCountdown = timerConfig?.timerType === "countdown";
   const isStopwatch = timerConfig?.timerType === "stopwatch";
   const isAmrap = timerConfig?.timerType === "amrap";
+  const isEmom = timerConfig?.timerType === "emom";
+  const isTabata = timerConfig?.timerType === "tabata";
 
   const screenTitle = timerConfig
     ? TIMER_LABELS[timerConfig.timerType]
@@ -62,20 +67,27 @@ export default function ModifyTimer() {
       ? "Le chronomètre compte le temps écoulé."
       : isAmrap
         ? "Règle la durée de ton AMRAP."
-        : "Paramètre ton timer selon tes objectifs.";
+        : isTabata
+          ? "Le format Tabata est préréglé sur 20s d'effort, 10s de repos, 8 tours. Modifie pour passer en mode personnalisé."
+          : "Paramètre ton timer selon tes objectifs.";
 
   const handleSave = () => {
     // Update store with local state values
     if (timerConfig) {
-      if (!isCountdown && !isStopwatch && !isAmrap) {
-        // For interval timers (tabata, custom, emom)
+      if (isCountdown || isAmrap) {
+        // For countdown and amrap - convert minutes to seconds
+        setDurationSeconds(durationMinutes * 60);
+      } else if (isEmom) {
+        // For EMOM - effort and rounds (rest is automatic: 60 - effort)
+        setEffortSeconds(effort);
+        setStoreRounds(rounds);
+      } else if (timerConfig.timerType === "custom") {
+        // For custom - effort, repos, and rounds
         setEffortSeconds(effort);
         setRestSeconds(repos);
         setStoreRounds(rounds);
-      } else if (isCountdown || isAmrap) {
-        // For countdown and amrap
-        setDurationSeconds(duration);
       }
+      // Tabata is preset and doesn't save
     }
     router.back();
   };
@@ -84,15 +96,23 @@ export default function ModifyTimer() {
     setLocalRounds(value);
   };
 
+  // Switch from Tabata to Custom when user modifies any input
+  const handleTabataModify = () => {
+    if (timerConfig?.timerType === "tabata") {
+      setTimerType("custom");
+    }
+  };
+
   return (
     <BasicScreen title={screenTitle} description={screenDescription}>
+      <StatusBar style="dark" />
       <View className="px-4 pt-6 pb-safe flex-1 gap-6">
         {isCountdown || isAmrap ? (
-          // Countdown/AMRAP - only show duration input
+          // Countdown/AMRAP - only show duration input in minutes
           <>
             <Input
-              label="Temps"
-              value={`${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}`}
+              label="Durée"
+              value={`${durationMinutes} minute${durationMinutes > 1 ? "s" : ""}`}
               readOnly
               onPress={() => setShowDurationModal(true)}
             />
@@ -104,8 +124,55 @@ export default function ModifyTimer() {
               Le chronomètre n&apos;a pas besoin de configuration.
             </Text>
           </View>
+        ) : isEmom ? (
+          // EMOM - only effort and rounds (rest is automatic)
+          <>
+            <Input
+              label="Temps d'effort"
+              value={`${effort} secondes`}
+              readOnly
+              onPress={() => setShowTimerModal(true)}
+            />
+            <Input
+              label="Nombre de tours"
+              value={`${rounds}`}
+              readOnly
+              onPress={() => setShowRoundsModal(true)}
+            />
+          </>
+        ) : isTabata ? (
+          // Tabata - show preset values, modifying switches to custom
+          <>
+            <Input
+              label="Temps d'effort"
+              value={`${effort} secondes`}
+              readOnly
+              onPress={() => {
+                handleTabataModify();
+                setShowTimerModal(true);
+              }}
+            />
+            <Input
+              label="Temps de repos"
+              value={`${repos} secondes`}
+              readOnly
+              onPress={() => {
+                handleTabataModify();
+                setShowReposModal(true);
+              }}
+            />
+            <Input
+              label="Nombre de tours"
+              value={`${rounds}`}
+              readOnly
+              onPress={() => {
+                handleTabataModify();
+                setShowRoundsModal(true);
+              }}
+            />
+          </>
         ) : (
-          // Other timers - show effort, repos, and rounds
+          // Custom - show effort, repos, and rounds (editable)
           <>
             <Input
               label="Temps d'effort"
@@ -141,19 +208,19 @@ export default function ModifyTimer() {
       {/* Duration modal for countdown/AMRAP timer */}
       {(isCountdown || isAmrap) && (
         <CircularValueModal
-          value={duration}
-          setValue={setDuration}
-          maxValue={3600} // Max 1 hour
-          title="Indique la durée"
+          value={durationMinutes}
+          setValue={setDurationMinutes}
+          maxValue={60} // Max 60 minutes (1 hour)
+          title="Indique la durée en minutes"
           show={showDurationModal}
           onConfirm={() => setShowDurationModal(false)}
           onCancel={() => setShowDurationModal(false)}
-          unit="sec"
+          unit="min"
         />
       )}
 
-      {/* Effort modal (for non-countdown/non-stopwatch/non-amrap timers) */}
-      {!isCountdown && !isStopwatch && !isAmrap && (
+      {/* Effort modal (for EMOM, custom, and tabata timers) */}
+      {(isEmom || timerConfig?.timerType === "custom" || isTabata) && (
         <CircularValueModal
           value={effort}
           setValue={setEffort}
@@ -166,8 +233,8 @@ export default function ModifyTimer() {
         />
       )}
 
-      {/* Repos modal (for interval timers) */}
-      {!isCountdown && !isStopwatch && !isAmrap && (
+      {/* Repos modal (for custom and tabata timers only - not EMOM) */}
+      {(timerConfig?.timerType === "custom" || isTabata) && (
         <CircularValueModal
           value={repos}
           setValue={setRepos}
@@ -180,8 +247,8 @@ export default function ModifyTimer() {
         />
       )}
 
-      {/* Rounds modal (for interval timers) */}
-      {!isCountdown && !isStopwatch && !isAmrap && (
+      {/* Rounds modal (for EMOM, custom, and tabata timers) */}
+      {(isEmom || timerConfig?.timerType === "custom" || isTabata) && (
         <CircularValueModal
           value={rounds}
           setValue={handleRoundsChange}
