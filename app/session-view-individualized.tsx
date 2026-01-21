@@ -272,7 +272,18 @@ export default function SessionViewIndividualized() {
               <Text className="text-lg font-bold text-secondary flex-1">
                 Séance du jour
               </Text>
-              <IcPencil size={24} />
+              <Pressable
+                onPress={() => {
+                  if (sessionId) {
+                    router.push({
+                      pathname: ROUTE.CREATE_SESSION,
+                      params: { mode: "edit", sessionId },
+                    });
+                  }
+                }}
+              >
+                <IcPencil size={24} />
+              </Pressable>
             </View>
           </View>
 

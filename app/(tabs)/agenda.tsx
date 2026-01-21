@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { View, FlatList } from "react-native";
+import { View, FlatList, ScrollView } from "react-native";
 import Text from "@/components/text";
 import { ActivityCard } from "@/components/agenda/activity-card";
 import { AgendaCalendarView } from "@/components/agenda/agenda-calendar-view";
@@ -113,10 +113,9 @@ export default function Agenda() {
         ];
 
   return (
-    <View className="bg-white">
+    <>
       <StatusBar style="dark" />
-
-      <View className="h-fit pt-safe px-4">
+      <View className="bg-white pt-safe px-4 flex-1">
         {/* Calendar Section */}
         <AgendaCalendarView
           currentMonthLabel={currentMonthLabel}
@@ -138,60 +137,62 @@ export default function Agenda() {
             {/* Placeholder for "Tout voir" button - currently hidden as per Figma */}
           </View>
 
-          {/* Activities list */}
-          <FlatList
-            data={todayActivities}
-            keyExtractor={(_item, index) => index.toString()}
-            renderItem={({ item, index }) => (
-              <ActivityCard
-                title={item.title}
-                description={item.sessionTitle}
-                coachName={item.coachName}
-                borderColor={item.color}
-                icon={item.icon}
-                onLongPress={() =>
-                  router.push({
-                    pathname: ROUTE.CREATE_SESSION,
-                    params: { mode: "edit", sessionId: item.id },
-                  })
-                }
-                onPress={() => {
-                  // For real sessions, navigate to individualized view with session ID
-                  if (item.sessionId) {
+          <ScrollView>
+            {/* Activities list */}
+            <FlatList
+              data={todayActivities}
+              className="pb-40"
+              keyExtractor={(_item, index) => index.toString()}
+              renderItem={({ item, index }) => (
+                <ActivityCard
+                  title={item.title}
+                  description={item.sessionTitle}
+                  coachName={item.coachName}
+                  borderColor={item.color}
+                  icon={item.icon}
+                  onLongPress={() =>
                     router.push({
-                      pathname: ROUTE.SESSION_VIEW_INDIVIDUALIZED,
-                      params: { sessionId: item.sessionId },
-                    });
-                  } else {
-                    // Fallback navigation for mock data (preserves original UI behavior)
-                    if (index === 0) {
-                      router.push(ROUTE.SESSION_VIEW);
-                    } else if (index === 1) {
-                      router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
-                    } else if (index === 2) {
-                      router.push(ROUTE.SESSION_VIEW_PERSONAL);
-                    } else if (index === 3) {
-                      router.push({
-                        pathname: ROUTE.SESSION_VIEW_PERSONAL,
-                        params: { status: "done" },
-                      });
-                    }
+                      pathname: ROUTE.CREATE_SESSION,
+                      params: { mode: "edit", sessionId: item.id },
+                    })
                   }
-                }}
-              />
-            )}
-            ItemSeparatorComponent={() => <View className="h-2" />}
-            scrollEnabled={false}
-          />
+                  onPress={() => {
+                    // For real sessions, navigate to individualized view with session ID
+                    if (item.sessionId) {
+                      router.push({
+                        pathname: ROUTE.SESSION_VIEW_INDIVIDUALIZED,
+                        params: { sessionId: item.sessionId },
+                      });
+                    } else {
+                      // Fallback navigation for mock data (preserves original UI behavior)
+                      if (index === 0) {
+                        router.push(ROUTE.SESSION_VIEW);
+                      } else if (index === 1) {
+                        router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
+                      } else if (index === 2) {
+                        router.push(ROUTE.SESSION_VIEW_PERSONAL);
+                      } else if (index === 3) {
+                        router.push({
+                          pathname: ROUTE.SESSION_VIEW_PERSONAL,
+                          params: { status: "done" },
+                        });
+                      }
+                    }
+                  }}
+                />
+              )}
+              ItemSeparatorComponent={() => <View className="h-2" />}
+              scrollEnabled={false}
+            />
+          </ScrollView>
         </View>
       </View>
-
       {profile?.role === "coach" && (
         <SingleFab
           onPress={() => router.push(ROUTE.CREATE_SESSION)}
           icon={<IcPlus size={32} color="white" />}
         />
       )}
-    </View>
+    </>
   );
 }
