@@ -35,6 +35,26 @@
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",
     "emailAndPasswordRequired": "Email and password are required."
   },
+  "validation": {
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordUppercase": "Password must contain at least 1 uppercase letter",
+    "passwordNumber": "Password must contain at least 1 number",
+    "passwordSpecial": "Password must contain at least 1 special character",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email address",
+    "confirmPasswordRequired": "Please confirm your password",
+    "currentPasswordRequired": "Current password is required",
+    "passwordMismatch": "Passwords do not match",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "birthDateRequired": "Date of birth is required",
+    "genderRequired": "Gender is required",
+    "weightRequired": "Weight is required",
+    "sportLevelRequired": "Sport level is required",
+    "atLeastOneSportRequired": "Please select at least one sport",
+    "maxFiveSports": "You can select up to 5 sports"
+  },
   "signUp": {
     "noAccountSignUp": "No account?\nSign up",
     "alreadyHaveAccount": "Already have an account?",
@@ -59,7 +79,7 @@
   },
   "completeProfile": {
     "step1": {
-      "title": "Complete the last\nsteps",
+      "title": "Complete the last steps",
       "description": "Enter your personal information to create your profile.",
       "firstName": "First name",
       "firstNamePlaceholder": "Your first name",
@@ -81,8 +101,8 @@
       "progress": "Step 2/5"
     },
     "step3": {
-      "title": "Choose my level of\nsports practice",
-      "description": "In order to offer you programs\nadapted to your training level.",
+      "title": "Choose my level of sports practice",
+      "description": "In order to offer you programs adapted to your training level.",
       "levelBeginner": "Beginner",
       "levelBeginnerHours": "1 to 2h per week",
       "levelIntermediate": "Intermediate",
@@ -104,7 +124,7 @@
     },
     "step5": {
       "title": "Do you already have a coach?",
-      "description": "If your coach sent you an invitation, enter the code received by\nemail. Otherwise, you can add them later in your profile.",
+      "description": "If your coach sent you an invitation, enter the code received by email. Otherwise, you can add them later in your profile.",
       "invitationCode": "Enter your invitation code",
       "connectToCoach": "Connect to my coach",
       "continueWithoutCoach": "Continue without coach",

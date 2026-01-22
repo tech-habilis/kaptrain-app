@@ -7,6 +7,7 @@ import {
   createContext,
   PropsWithChildren,
   use,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -20,6 +21,7 @@ import {
 import { router } from "expo-router";
 import { toast } from "@/components/toast";
 import { supabase, supabaseUtils } from "@/utilities/supabase";
+import { getUserProfile } from "@/utilities/supabase/profile";
 import { TSession } from "@/types";
 import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
@@ -47,7 +49,11 @@ type TAuthContext = {
   deleteAccount: () => void;
   setSession: (value: TSession | null) => void;
   setFirstOpenTimestamp: () => void;
-  setProfileCompleted: () => void;
+  verifyEmail: (email: string, otp: string) => void;
+  resendEmailVerification: (email: string) => void;
+  resetPassword: (email: string) => void;
+  verifyPasswordResetOtp: (email: string, otp: string) => void;
+  updatePassword: (newPassword: string) => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -57,6 +63,9 @@ type TAuthContext = {
   loggingInWith: TSignInMethod | null;
   isFirstOpen: boolean;
   showCompleteProfileForm: boolean;
+  isResettingPassword: boolean;
+  isUpdatingPassword: boolean;
+  isCheckingProfileCompletion: boolean;
 };
 
 const AuthContext = createContext<TAuthContext>({
@@ -68,7 +77,11 @@ const AuthContext = createContext<TAuthContext>({
   deleteAccount: () => {},
   setSession: () => {},
   setFirstOpenTimestamp: () => {},
-  setProfileCompleted: () => {},
+  verifyEmail: (email: string, otp: string) => {},
+  resendEmailVerification: (email: string) => {},
+  resetPassword: (email: string) => {},
+  verifyPasswordResetOtp: (email: string, otp: string) => {},
+  updatePassword: (newPassword: string) => {},
 
   session: null,
   isLoadingSession: false,
@@ -78,6 +91,9 @@ const AuthContext = createContext<TAuthContext>({
   loggingInWith: null,
   isFirstOpen: false,
   showCompleteProfileForm: false,
+  isResettingPassword: false,
+  isUpdatingPassword: false,
+  isCheckingProfileCompletion: false,
 });
 
 export function useSession() {
@@ -98,6 +114,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isLoggingIn = loggingInWith !== null;
   const [canSignInWithApple, setCanSignInWithApple] = useState(false);
   const [fetchingSession, setFetchingSession] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] = useState(false);
+  const [showCompleteProfileForm, setShowCompleteProfileForm] = useState(false);
   const [
     [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
     setFirstOpenTimestamp,
@@ -105,10 +125,26 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const isFirstOpen =
     !isLoadingFirstOpenTimestamp && firstOpenTimestamp === null;
 
-  const [
-    [isLoadingProfileCompletedAt, profileCompletedAt],
-    setProfileCompletedAt,
-  ] = useStorageState(STORAGE_KEY.PROFILE_COMPLETED_AT);
+  // Function to check if user has completed onboarding
+  const checkProfileCompletion = useCallback(async (userId: string) => {
+    if (!userId) {
+      setShowCompleteProfileForm(true);
+      return;
+    }
+
+    setIsCheckingProfileCompletion(true);
+    try {
+      const profile = await getUserProfile(userId);
+      // Show complete profile form if onboarding_date is not set
+      setShowCompleteProfileForm(!profile.onboarding_date);
+    } catch (error) {
+      console.error("Error checking profile completion:", error);
+      // If error fetching profile, assume not completed and show the form
+      setShowCompleteProfileForm(true);
+    } finally {
+      setIsCheckingProfileCompletion(false);
+    }
+  }, []);
 
   const signInWithApple = async () => {
     try {
@@ -120,24 +156,42 @@ export function SessionProvider({ children }: PropsWithChildren) {
         ],
       });
 
-      const fullName = (
-        (credential.fullName?.givenName || "") +
-        " " +
-        (credential.fullName?.familyName || "")
-      ).trim();
 
-      setSession({
-        accessToken: credential.identityToken,
-        refreshToken: credential.authorizationCode,
-        user: {
-          id: credential.user,
-          email: credential.email,
-          name: fullName.length > 0 ? fullName : null,
-          avatarUrl: null,
-        },
+
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: "apple",
+        token: credential.identityToken!,
       });
 
-      router.replace("/");
+      if (error) {
+        toast.error(error.message);
+        setLoggingInWith(null);
+        return;
+      }
+
+      // Apple only provides the user's name the first time they sign in
+      // If it's available, update the user metadata with it
+      if (credential.fullName) {
+        const nameParts = [];
+        if (credential.fullName.givenName)
+          nameParts.push(credential.fullName.givenName);
+        if (credential.fullName.middleName)
+          nameParts.push(credential.fullName.middleName);
+        if (credential.fullName.familyName)
+          nameParts.push(credential.fullName.familyName);
+        const fullName = nameParts.join(" ");
+        await supabase.auth.updateUser({
+          data: {
+            name: fullName,
+            display_name: fullName,
+            first_name: credential.fullName.givenName,
+            last_name: credential.fullName.familyName,
+          },
+        });
+      }
+
+      setSession(supabaseUtils.toLocalSession(data.session));
+      router.replace(ROUTE.ROOT);
     } catch (e: any) {
       if (e.code === "ERR_REQUEST_CANCELED") {
         // handle that the user canceled the sign-in flow
@@ -145,6 +199,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       } else {
         // handle other errors
         console.error(e);
+        toast.error("Failed to sign in with Apple: " + e.message);
       }
     } finally {
       setLoggingInWith(null);
@@ -163,6 +218,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         });
 
         setSession(supabaseUtils.toLocalSession(data.session));
+        router.replace(ROUTE.ROOT);
       } else {
         // sign in was cancelled by user
       }
@@ -256,7 +312,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
 
     if (!session) {
-      router.push(ROUTE.VERIFY_EMAIL);
+      router.push({
+        pathname: ROUTE.VERIFY_EMAIL,
+        params: { email },
+      });
       setLoggingInWith(null);
       return;
     }
@@ -265,10 +324,106 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setLoggingInWith(null);
   };
 
+  const resendEmailVerification = async (email: string) => {
+    const result = await supabase.auth.resend({
+      email,
+      type: "signup",
+      options: {
+        emailRedirectTo: appScheme + ROUTE_NAME.SIGN_IN, // will redirect to appSheme://sign-in
+      },
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+    } else {
+      toast.success("OTP resent successfully");
+    }
+  };
+
   const deleteAccount = async () => {
     console.info("This feature is not yet implemented.");
     toast.error("This feature is not yet implemented.");
   };
+
+  const verifyEmail = async (email: string, otp: string) => {
+    const result = await supabase.auth.verifyOtp({
+      token: otp,
+      email,
+      type: "email",
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+    } else {
+      setSession(supabaseUtils.toLocalSession(result.data.session));
+      toast.success("OTP verified successfully");
+      router.dismissAll();
+      router.push(ROUTE.EMAIL_VERIFIED);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    setIsResettingPassword(true);
+    const result = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: appScheme + ROUTE_NAME.RESET_PASSWORD,
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+      setIsResettingPassword(false);
+    } else {
+      setIsResettingPassword(false);
+      router.push({ pathname: ROUTE.PASSWORD_RESET_SENT, params: { email } });
+    }
+  };
+
+  const verifyPasswordResetOtp = async (email: string, otp: string) => {
+    setIsResettingPassword(true);
+    const result = await supabase.auth.verifyOtp({
+      token: otp,
+      email,
+      type: "email",
+    });
+
+    if (result.error) {
+      toast.error(result.error.message);
+      setIsResettingPassword(false);
+      return { error: result.error };
+    } else {
+      setSession(supabaseUtils.toLocalSession(result.data.session));
+      setIsResettingPassword(false);
+      router.push(ROUTE.RESET_PASSWORD);
+      return { error: null };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    setIsUpdatingPassword(true);
+    const result = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (result.error) {
+      setIsUpdatingPassword(false);
+    } else {
+      setIsUpdatingPassword(false);
+      router.dismissAll();
+      router.push(ROUTE.PASSWORD_CHANGED);
+    }
+  };
+
+  const fetchSession = useCallback(async () => {
+    setFetchingSession(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+    if (error) {
+      console.error("Error fetching session:", error);
+    }
+    setSession(supabaseUtils.toLocalSession(session));
+    setFetchingSession(false);
+  }, [setSession]);
 
   useEffect(() => {
     AppleAuthentication.isAvailableAsync().then((supported) => {
@@ -278,18 +433,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   // Fetch the session once, and subscribe to auth state changes
   useEffect(() => {
-    const fetchSession = async () => {
-      setFetchingSession(true);
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Error fetching session:", error);
-      }
-      setSession(supabaseUtils.toLocalSession(session));
-      setFetchingSession(false);
-    };
     fetchSession();
 
     const {
@@ -303,7 +446,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setSession]);
+  }, [fetchSession, setSession]);
+
+  // Check profile completion when session user ID changes
+  useEffect(() => {
+    if (session?.user?.id) {
+      checkProfileCompletion(session.user.id);
+    } else {
+      setShowCompleteProfileForm(false);
+    }
+  }, [session?.user?.id, checkProfileCompletion]);
 
   return (
     <AuthContext.Provider
@@ -319,23 +471,27 @@ export function SessionProvider({ children }: PropsWithChildren) {
           const timestamp = Date.now();
           setFirstOpenTimestamp(timestamp.toString());
         },
-        setProfileCompleted: () => {
-          const timestamp = Date.now();
-          setProfileCompletedAt(timestamp.toString());
-        },
+        verifyEmail,
+        resendEmailVerification,
+        resetPassword,
+        verifyPasswordResetOtp,
+        updatePassword,
 
         session,
         isLoadingSession:
           isLoadingSession ||
           fetchingSession ||
           isLoadingFirstOpenTimestamp ||
-          isLoadingProfileCompletedAt,
+          isCheckingProfileCompletion,
         isLoggingIn,
         isLoggedIn: !!session?.accessToken,
         canSignInWithApple,
         loggingInWith,
         isFirstOpen,
-        showCompleteProfileForm: profileCompletedAt === null,
+        showCompleteProfileForm,
+        isResettingPassword,
+        isUpdatingPassword,
+        isCheckingProfileCompletion,
       }}
     >
       {children}

@@ -19,43 +19,67 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          date_of_birth: string | null
+          deleted_at: string | null
           display_name: string | null
           email: string
+          first_name: string | null
+          gender: string | null
           id: string
           is_active: boolean | null
           last_login: string | null
+          last_name: string | null
           name: string | null
+          onboarding_date: string | null
           preferences: Json | null
           role: Database["public"]["Enums"]["user_role"]
+          sport_level: string | null
           updated_at: string | null
+          weight: number | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
+          deleted_at?: string | null
           display_name?: string | null
           email: string
+          first_name?: string | null
+          gender?: string | null
           id: string
           is_active?: boolean | null
           last_login?: string | null
+          last_name?: string | null
           name?: string | null
+          onboarding_date?: string | null
           preferences?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
+          sport_level?: string | null
           updated_at?: string | null
+          weight?: number | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
+          deleted_at?: string | null
           display_name?: string | null
           email?: string
+          first_name?: string | null
+          gender?: string | null
           id?: string
           is_active?: boolean | null
           last_login?: string | null
+          last_name?: string | null
           name?: string | null
+          onboarding_date?: string | null
           preferences?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
+          sport_level?: string | null
           updated_at?: string | null
+          weight?: number | null
         }
         Relationships: []
       }
@@ -67,7 +91,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      user_role: "superadmin" | "admin" | "user"
+      user_role: "admin" | "coach" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -195,7 +219,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      user_role: ["superadmin", "admin", "user"],
+      user_role: ["admin", "coach", "user"],
     },
   },
 } as const

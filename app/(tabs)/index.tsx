@@ -16,15 +16,16 @@ import { ActivityCard } from "@/components/agenda/activity-card";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
-  Image,
   ImageBackground,
   Pressable,
   ScrollView,
   View,
-  Text as RawText
+  Text as RawText,
 } from "react-native";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
+import { useSession } from "@/contexts/auth-context";
+import Avatar from "@/components/avatar";
 
 const Agenda = () => {
   const sessions = [
@@ -146,6 +147,7 @@ const Agenda = () => {
 };
 
 export default function HomeScreen() {
+  const { session } = useSession();
   const [haveUnread, setHaveUnread] = useState(true);
 
   return (
@@ -153,14 +155,12 @@ export default function HomeScreen() {
       <StatusBar style="auto" />
       <ImageBackground source={require("../../assets/images/home-hero.png")}>
         <View className="px-4 pt-safe pb-14 flex-row gap-3 items-center">
-          <Image
-            source={require("../../assets/images/sample-avatar.png")}
-            className="rounded-lg border border-white"
-          />
+          <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
           <View className="gap-1.5 flex-1">
-            <RawText className="text-white text-xl font-bold">
-              <Text>common.hello</Text> Marie !
+            <RawText className="text-white text-xl font-bold" numberOfLines={1}>
+              <Text>common.hello</Text>{" "}
+              {session?.user?.name?.split(" ")?.[0] || ""} !
             </RawText>
             <Chip
               text="Forme excellente"
@@ -170,9 +170,12 @@ export default function HomeScreen() {
           </View>
 
           <View className="flex-row items-center">
-            <Pressable className="p-2" onPress={() => {
-              router.push(ROUTE.MESSAGING)
-            }}>
+            <Pressable
+              className="p-2"
+              onPress={() => {
+                router.push(ROUTE.MESSAGING);
+              }}
+            >
               <IcMessage />
             </Pressable>
             <Pressable

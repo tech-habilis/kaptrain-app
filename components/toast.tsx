@@ -1,6 +1,7 @@
 import {
   toast as rawToast,
   ToastOptions,
+  ToastPosition,
 } from "@backpackapp-io/react-native-toast";
 import { ThemedView } from "./themed-view";
 import { ThemedText } from "./themed-text";
@@ -46,6 +47,7 @@ export const callToast = (
   };
 
   return rawToast(message, {
+    position: ToastPosition.BOTTOM,
     disableShadow: true,
     customToast: (props) => (
       <ThemedView

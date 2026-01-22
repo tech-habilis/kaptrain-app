@@ -1,6 +1,6 @@
 import Button, { ButtonLink } from "@/components/button";
 import IcKaptrain from "@/components/icons/kaptrain";
-import Input from "@/components/input";
+import Input, { PasswordInput } from "@/components/input";
 import { ROUTE } from "@/constants/route";
 import { useSession } from "@/contexts/auth-context";
 import { StatusBar } from "expo-status-bar";
@@ -26,7 +26,6 @@ export default function SignIn() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <View className="w-full h-full flex bg-white">
@@ -65,18 +64,12 @@ export default function SignIn() {
           rightIcon={<IcCheck size={24} />}
           keyboardType="email-address"
         />
-        <Input
+        <PasswordInput
           label="common.password"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword}
           placeholder="common.password"
           className="mt-6"
-          rightIcon={
-            showPassword ? <IcEye size={24} /> : <IcEyeOff size={24} />
-          }
-          onRightIconPress={() => setShowPassword((prev) => !prev)}
-          keyboardType={showPassword ? "visible-password" : undefined}
         />
         <ButtonLink
           href={ROUTE.FORGOT_PASSWORD}
@@ -114,6 +107,8 @@ export default function SignIn() {
           type="secondaryV2"
           className="flex-1"
           leftIcon={<IcGoogle size={20} />}
+          loading={loggingInWith === "google"}
+          disabled={isLoggingIn}
         />
         {canSignInWithApple && (
           <Button
@@ -122,6 +117,8 @@ export default function SignIn() {
             type="secondaryV2"
             className="flex-1"
             leftIcon={<IcApple size={20} />}
+            loading={loggingInWith === "apple"}
+            disabled={isLoggingIn}
           />
         )}
       </View>

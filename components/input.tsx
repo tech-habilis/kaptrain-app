@@ -1,11 +1,20 @@
 import { ColorConst } from "@/constants/theme";
 import cn from "@/utilities/cn";
-import { ComponentProps, ReactNode } from "react";
-import { TextInputProps, TouchableOpacity, View } from "react-native";
+import { ComponentProps, ReactNode, useState } from "react";
+import {
+  Platform,
+  Pressable,
+  TextInputProps,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { tv } from "tailwind-variants";
 import Text from "./text";
 import { useTranslation } from "react-i18next";
+import IcEye from "./icons/eye";
+import IcEyeOff from "./icons/eye-off";
+import { clsx } from "clsx";
 
 const inputWrapper = tv({
   base: "bg-white border border-stroke rounded-lg text-text flex flex-row gap-4 justify-between items-center",
@@ -21,7 +30,7 @@ const inputWrapper = tv({
 });
 
 const input = tv({
-  base: "flex-1 py-4",
+  base: "flex-1 py-4 h-14", // need to set height explicitly to make sure the placeholder does not go down on ios and input collapse on android
   variants: {
     type: {
       default: "",
@@ -45,6 +54,10 @@ export default function Input({
   keyboardType,
   returnKeyType,
   inputClassName = "",
+  error,
+  style,
+  asPressable = false,
+  onPress,
   ...props
 }: TextInputProps &
   ComponentProps<typeof inputWrapper> & {
@@ -54,6 +67,8 @@ export default function Input({
     onRightIconPress?: () => void;
     unit?: string;
     inputClassName?: string;
+    error?: string;
+    asPressable?: boolean;
   }) {
   const { t } = useTranslation();
 
@@ -76,7 +91,7 @@ export default function Input({
 
     if (type === "unit" && unit !== undefined) {
       return (
-        <View className="bg-light py-5 px-[22.5px] justify-center items-center">
+        <View className="bg-light h-14 px-[22.5px] justify-center items-center">
           <Text className="text-accent text-base">{unit}</Text>
         </View>
       );
@@ -90,18 +105,51 @@ export default function Input({
       {label && (
         <Text className="text-accent font-medium text-sm">{label}</Text>
       )}
-      <View className={cn(inputWrapper({ type }))}>
-        {renderLeftSide()}
-        <TextInput
-          className={cn(input({ type }), inputClassName)}
-          placeholderTextColor={ColorConst.subtleText}
-          placeholder={placeholder ? t(placeholder) : undefined}
-          keyboardType={keyboardType || type === "unit" ? "decimal-pad" : undefined}
-          returnKeyType={returnKeyType || type === "unit" ? "done" : undefined}
-          {...props}
-        />
-        {renderRightSide()}
-      </View>
+      <Pressable onPress={asPressable ? onPress : undefined}>
+        <View
+          pointerEvents={asPressable ? "none" : undefined}
+          className={clsx(inputWrapper({ type }), {
+            "border-error2": !!error,
+          })}
+        >
+          {renderLeftSide()}
+          <TextInput
+            className={cn(input({ type }), inputClassName)}
+            placeholderTextColor={ColorConst.subtleText}
+            placeholder={placeholder ? t(placeholder) : undefined}
+            keyboardType={
+              keyboardType !== undefined
+                ? keyboardType
+                : type === "unit"
+                  ? "decimal-pad"
+                  : undefined
+            }
+            returnKeyType={
+              returnKeyType || type === "unit" ? "done" : undefined
+            }
+            onPress={asPressable ? undefined : onPress}
+            style={[style, { lineHeight: Platform.select({ ios: 0 }) }]}
+            {...props}
+          />
+          {renderRightSide()}
+        </View>
+      </Pressable>
+      {error && <Text className="text-error2 text-xs">{error}</Text>}
     </View>
+  );
+}
+
+export function PasswordInput(props: ComponentProps<typeof Input>) {
+  const [showPasswordVisibility, setShowPasswordVisibility] = useState(false);
+
+  return (
+    <Input
+      secureTextEntry={!showPasswordVisibility}
+      rightIcon={showPasswordVisibility ? <IcEye /> : <IcEyeOff />}
+      onRightIconPress={() =>
+        setShowPasswordVisibility(!showPasswordVisibility)
+      }
+      {...props}
+    />
   );
 }

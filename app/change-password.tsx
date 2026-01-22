@@ -1,21 +1,46 @@
 import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
-import IcEye from "@/components/icons/eye";
-import IcEyeOff from "@/components/icons/eye-off";
-import Input from "@/components/input";
+import { PasswordInput } from "@/components/input";
 import { useState } from "react";
 import { View } from "react-native";
+import {
+  changePasswordSchema,
+  type ChangePasswordFormData,
+} from "@/utilities/validation/schema";
+import { useTranslation } from "react-i18next";
 
 export default function ContactSupport() {
-  const [password, setPassword] = useState("");
+  const { t } = useTranslation();
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ChangePasswordFormData, string>>
+  >({});
 
-  const [showPasswordVisibility, setShowPasswordVisibility] = useState(false);
-  const [showNewPasswordVisibility, setShowNewPasswordVisibility] =
-    useState(false);
-  const [showConfirmPasswordVisibility, setShowConfirmPasswordVisibility] =
-    useState(false);
+  const validateForm = () => {
+    const result = changePasswordSchema.safeParse({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof ChangePasswordFormData, string>> =
+        {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0]) {
+          fieldErrors[issue.path[0] as keyof ChangePasswordFormData] =
+            t(issue.message);
+        }
+      });
+      setErrors(fieldErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
+  };
 
   return (
     <BasicScreen
@@ -23,47 +48,53 @@ export default function ContactSupport() {
       description="Pour sécuriser ton compte, choisis un mot de passe fort et unique. Tu peux le changer ici à tout moment."
     >
       <View className="pt-6 px-4 gap-8 flex-1 pb-safe">
-        <Input
-          value={password}
-          onChangeText={setPassword}
+        <PasswordInput
+          value={currentPassword}
+          onChangeText={(text) => {
+            setCurrentPassword(text);
+            if (errors.currentPassword)
+              setErrors((prev) => ({ ...prev, currentPassword: undefined }));
+          }}
           label="Mot de passe actuel"
           placeholder="Écris ton mot de passe actuel"
-          secureTextEntry={!showPasswordVisibility}
-          rightIcon={showPasswordVisibility ? <IcEye /> : <IcEyeOff />}
-          onRightIconPress={() =>
-            setShowPasswordVisibility(!showPasswordVisibility)
-          }
+          error={errors.currentPassword}
         />
-        <Input
+        <PasswordInput
           value={newPassword}
-          onChangeText={setNewPassword}
+          onChangeText={(text) => {
+            setNewPassword(text);
+            if (errors.newPassword)
+              setErrors((prev) => ({ ...prev, newPassword: undefined }));
+          }}
           label="Crée un nouveau mot de passe"
           placeholder="Au moins 8 caractères"
-          secureTextEntry={!showNewPasswordVisibility}
-          rightIcon={showNewPasswordVisibility ? <IcEye /> : <IcEyeOff />}
-          onRightIconPress={() =>
-            setShowNewPasswordVisibility(!showNewPasswordVisibility)
-          }
+          error={errors.newPassword}
         />
-        <Input
+        <PasswordInput
           value={confirmPassword}
-          onChangeText={setConfirmPassword}
+          onChangeText={(text) => {
+            setConfirmPassword(text);
+            if (errors.confirmPassword)
+              setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+          }}
           label="Confirme ton mot de passe"
           placeholder="Répéte le mot de passe"
-          secureTextEntry={!showConfirmPasswordVisibility}
-          rightIcon={showConfirmPasswordVisibility ? <IcEye /> : <IcEyeOff />}
-          onRightIconPress={() =>
-            setShowConfirmPasswordVisibility(!showConfirmPasswordVisibility)
-          }
+          error={errors.confirmPassword}
         />
 
         <View className="grow" />
 
         <Button
+          onPress={() => {
+            if (validateForm()) {
+              // Handle password update logic here
+              console.log("Password updated");
+            }
+          }}
           text="Mettre à jour mon mot de passe"
           className="mb-6"
           disabled={
-            password.length === 0 ||
+            currentPassword.length === 0 ||
             newPassword.length === 0 ||
             confirmPassword.length === 0
           }

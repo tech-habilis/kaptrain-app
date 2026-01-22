@@ -1,3 +1,4 @@
+import Avatar from "@/components/avatar";
 import { Chip } from "@/components/chip";
 import SingleFab from "@/components/fab";
 import IcArrowRight from "@/components/icons/arrow-right";
@@ -11,10 +12,12 @@ import Text from "@/components/text";
 import { mockWeeklyTracking } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
+import { useSession } from "@/contexts/auth-context";
+import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View, Image, ImageBackground, Pressable } from "react-native";
+import { View, ImageBackground, Pressable } from "react-native";
 
 const profileMenu = [
   {
@@ -40,24 +43,23 @@ const profileMenu = [
   {
     icon: <IcLightning size={24} />,
     text: "Mes données physiologiques",
-    onPress: () => router.push(ROUTE.PHYSIOLOGICAL_DATA)
+    onPress: () => router.push(ROUTE.PHYSIOLOGICAL_DATA),
   },
 ];
 
 export default function ProfileScreen() {
+  const { session } = useSession();
+  const { setCurrentStep } = useCompleteProfileStore();
   return (
     <View className="flex-1">
       <StatusBar style="light" />
       <ImageBackground source={require("../../assets/images/profile-hero.png")}>
         <View className="px-4 pt-safe pb-6 flex-row gap-3 items-center">
-          <Image
-            source={require("../../assets/images/sample-avatar.png")}
-            className="rounded-lg border border-white size-14"
-          />
+          <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
           <View className="gap-1.5 flex-1">
-            <Text className="text-white text-xl font-bold">
-              Marie Patouillet
+            <Text className="text-white text-xl font-bold" numberOfLines={1}>
+              {session?.user?.name || session?.user?.email || "User"}
             </Text>
             <Pressable onPress={() => router.push(ROUTE.SUBSCRIPTION)}>
               <Chip
@@ -140,7 +142,13 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      <SingleFab onPress={() => undefined} icon={<IcChat size={32} />} />
+      <SingleFab
+        onPress={() => {
+          setCurrentStep(1);
+          router.push(ROUTE.COMPLETE_PROFILE);
+        }}
+        icon={<IcChat size={32} />}
+      />
     </View>
   );
 }

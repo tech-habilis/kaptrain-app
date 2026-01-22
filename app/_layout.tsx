@@ -51,8 +51,8 @@ export default function RootLayout() {
           <GestureHandlerRootView className="flex-1">
             <BottomSheetModalProvider>
               <SplashScreenController onFinishRender={<RootNavigator />} />
+              <Toasts />
             </BottomSheetModalProvider>
-            <Toasts />
           </GestureHandlerRootView>
         </SafeAreaListener>
         <StatusBar style="auto" />
@@ -73,7 +73,7 @@ function RootNavigator() {
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Protected guard={showCompleteProfileForm}>
-          <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE_1} />
+        <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
         </Stack.Protected>
 
         <Stack.Screen name={ROUTE_NAME.TABS} />

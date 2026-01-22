@@ -408,6 +408,128 @@ Language preference persisted in secure storage. Fallback: French.
 
 ---
 
+## Lessons Learned: Form Validation & Authentication
+
+### 1. Use Dedicated States for Async Operations
+
+**Problem:** Reusing generic states like `loggingInWith` for different operations causes confusion and bugs.
+
+**Solution:** Create dedicated loading states for each operation:
+
+```typescript
+// contexts/auth-context.tsx
+const [isResettingPassword, setIsResettingPassword] = useState(false);
+const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+const resetPassword = async (email: string) => {
+  setIsResettingPassword(true);
+  // ... operation
+  setIsResettingPassword(false);
+};
+
+const updatePassword = async (newPassword: string) => {
+  setIsUpdatingPassword(true);
+  // ... operation
+  setIsUpdatingPassword(false);
+};
+```
+
+**Why:** Makes code intent explicit, prevents bugs where one operation's loading state affects another.
+
+### 2. Form Validation with Zod + i18n
+
+**Pattern:** Create validation schemas with translation keys, then translate error messages:
+
+```typescript
+// utilities/validation/schema.ts
+export const passwordSchema = z
+  .string()
+  .min(1, "validation.passwordRequired")
+  .min(8, "validation.passwordMinLength")
+  .regex(/[A-Z]/, "validation.passwordUppercase")
+  .regex(/[0-9]/, "validation.passwordNumber")
+  .regex(/[^A-Za-z0-9]/, "validation.passwordSpecial");
+
+// Component usage
+const validateForm = () => {
+  const result = schema.safeParse({ email, password });
+  if (!result.success) {
+    result.error.issues.forEach((issue) => {
+      errors[issue.path[0]] = t(issue.message); // Translate the key
+    });
+  }
+};
+```
+
+**Key Points:**
+- Define schemas in `utilities/validation/schema.ts`
+- Export both schema and inferred types
+- Use `result.error.issues` (not `result.error.errors`)
+- Clear errors when user starts typing
+
+### 3. Input Component Error Handling
+
+**Pattern:** Add `error` prop to Input component for consistent error display:
+
+```typescript
+// components/input.tsx
+interface InputProps {
+  error?: string;
+  // ... other props
+}
+
+// Usage
+<Input
+  value={email}
+  onChangeText={(text) => {
+    setEmail(text);
+    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+  }}
+  error={errors.email}
+/>
+```
+
+### 4. React Hooks: Preventing Infinite Loops
+
+**Problem:** Including context functions in `useEffect` dependencies causes infinite re-renders.
+
+**Solution:** Use refs to track operation state and exclude unstable dependencies:
+
+```typescript
+const isVerifyingRef = useRef(false);
+
+useEffect(() => {
+  if (otp.length === OTP_LENGTH && !isVerifyingRef.current) {
+    isVerifyingRef.current = true;
+    verifyOtp(email, otp).finally(() => {
+      isVerifyingRef.current = false;
+    });
+  }
+}, [otp, email]); // Exclude verifyOtp from deps
+/* eslint-disable react-hooks/exhaustive-deps */
+```
+
+**When to use this pattern:**
+- Context functions that are recreated on every render
+- Preventing race conditions in auto-triggering effects
+- When you need to track if an operation is in progress
+
+### 5. Button Disabled State Logic
+
+**Pattern:** Disable button when form is incomplete or loading:
+
+```typescript
+<Button
+  disabled={!email || !password || isSubmitting}
+  loading={isSubmitting}
+  onPress={handleSubmit}
+/>
+```
+
+**Best practice:** Check both form completeness (`!email || !password`) AND loading state.
+
+---
+
 ## Figma Design Slicing Guidelines
 
 ### Session Reflections (My Sports Feature)
