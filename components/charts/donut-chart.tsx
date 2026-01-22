@@ -15,6 +15,7 @@ export interface DonutChartProps {
   showPercentageLabels?: boolean;
   centerContent?: React.ReactNode;
   className?: string;
+  labelFormatter?: (item: DonutChartItem) => string;
 }
 
 export default function DonutChart({
@@ -23,6 +24,7 @@ export default function DonutChart({
   strokeWidth,
   showPercentageLabels = true,
   className,
+  labelFormatter,
 }: DonutChartProps) {
   const [containerSize, setContainerSize] = useState(size || 120);
 
@@ -106,6 +108,7 @@ export default function DonutChart({
       labelX,
       labelY,
       label: item.label,
+      data: item,
     };
 
     currentAngle = endAngle;
@@ -159,7 +162,9 @@ export default function DonutChart({
                   textAnchor="middle"
                   alignmentBaseline="middle"
                 >
-                  {segment.percentage}%
+                  {labelFormatter
+                    ? labelFormatter(segment.data)
+                    : `${segment.percentage}%`}
                 </SvgText>
               </G>
             ))}

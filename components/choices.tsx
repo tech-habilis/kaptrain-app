@@ -4,6 +4,8 @@ import { tv, VariantProps } from "tailwind-variants";
 import cn from "@/utilities/cn";
 import IcCheckboxSelected from "./icons/checkbox-selected";
 import IcCheckbox from "./icons/checkbox";
+import IcRadio from "./icons/radio";
+import IcRadioSelected from "./icons/radio-selected";
 
 export interface TChoice {
   text: string;
@@ -18,6 +20,7 @@ const choiceWrapper = tv({
       default: "",
       secondary: "flex-row items-center px-4",
       multipleChoice: "flex-row items-center px-3",
+      radio: "flex-row items-center px-4",
     },
     selected: {
       true: "border-2 border-primary bg-light",
@@ -37,6 +40,7 @@ const choiceText = tv({
       default: "",
       secondary: "text-base font-bold",
       multipleChoice: "",
+      radio: "text-base font-medium",
     },
     selected: {
       true: "text-text",
@@ -51,6 +55,10 @@ const choiceText = tv({
     {
       type: "multipleChoice",
       className: "text-text",
+    },
+    {
+      type: "radio",
+      className: "text-secondary",
     },
   ],
   defaultVariants: {
@@ -107,6 +115,19 @@ export const Choices = ({
             <IcCheckboxSelected size={24} />
           ) : (
             <IcCheckbox size={24} />
+          )}
+        </View>
+      );
+    }
+
+    if (type === "radio") {
+      const isSelected = choice.text === selectedChoice?.text;
+      return (
+        <View className="flex-1 flex-row justify-end items-center">
+          {isSelected ? (
+            <IcRadioSelected size={24} />
+          ) : (
+            <IcRadio size={24} />
           )}
         </View>
       );
