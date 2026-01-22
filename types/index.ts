@@ -46,3 +46,27 @@ export type ProgramSectionProps = {
   description?: string;
   programs: ProgramItem[];
 };
+
+export interface TChoice {
+  text: string;
+  secondaryText?: string;
+  leftIcon?: React.ReactNode;
+}
+
+export interface Exercise {
+  id: string;
+  title: string;
+  image: string;
+}
+
+export interface ISessionNote {
+  title: string;
+  date: string;
+  text: string;
+}
+
+export interface SessionNoteCardProps {
+  sessionTitle: string;
+  date: string;
+  notes: ISessionNote[];
+}

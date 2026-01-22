@@ -2,10 +2,9 @@ import Button from "@/components/button";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcCheck from "@/components/icons/check";
 import IcClock from "@/components/icons/clock";
-import IcClockRound from "@/components/icons/clock-round";
-import IcFire from "@/components/icons/fire";
 import IcLightning from "@/components/icons/lightning";
 import IcLove from "@/components/icons/love";
+import TabataWidget from "@/components/tabata-widget";
 import Tabs from "@/components/tabs";
 import Text from "@/components/text";
 import { programs } from "@/constants/mock";
@@ -255,8 +254,10 @@ export default function Library() {
   };
 
   return (
-    <ScrollView className="pt-safe bg-white">
+    <ScrollView className="bg-white">
       <StatusBar style="auto" />
+
+      <TabataWidget />
 
       <View className="px-4">
         <Text className="font-bold text-lg text-secondary">Bibliothèque</Text>

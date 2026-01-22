@@ -22,7 +22,9 @@ export const ColorConst = {
   // others
   link: '#04152D',
   secondary500: '#1A1C1E',
-  secondaryGrey: '#BABABA'
+  secondaryGrey: '#BABABA',
+  green: "#3FA951", // "sucess" in figma
+  error2: "#E32828" // error too in figma, same name as #FF604B
 }
 
 const tintColorLight = ColorConst.secondary

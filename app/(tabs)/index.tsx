@@ -2,7 +2,6 @@ import Button from "@/components/button";
 import { Chip } from "@/components/chip";
 import FitnessTracking from "@/components/home/fitness-tracking";
 import Statistics from "@/components/home/statistics";
-import IcArrowLeft from "@/components/icons/arrow-left";
 import IcBell from "@/components/icons/bell";
 import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
 import IcCycling from "@/components/icons/cycling";
@@ -12,8 +11,8 @@ import IcMuscular from "@/components/icons/muscular";
 import IcSmiley from "@/components/icons/smiley";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
-import cn from "@/utilities/cn";
-import { clsx } from "clsx";
+import { Day, ActivityStatus } from "@/components/agenda/day";
+import { ActivityCard } from "@/components/agenda/activity-card";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
@@ -23,6 +22,8 @@ import {
   ScrollView,
   View,
 } from "react-native";
+import { router } from "expo-router";
+import { ROUTE } from "@/constants/route";
 
 const Agenda = () => {
   const sessions = [
@@ -32,7 +33,7 @@ const Agenda = () => {
       coachName: "Par Enguerrand Aucher",
       color: ColorConst.tertiary,
       icon: <IcMuscular size={16} />,
-      status: "completed",
+      status: "completed" as const,
     },
     {
       title: "Cyclisme",
@@ -40,38 +41,58 @@ const Agenda = () => {
       coachName: "Par Enguerrand Aucher",
       color: ColorConst.primary,
       icon: <IcCycling size={16} />,
-      status: "pending",
+      status: "pending" as const,
     },
   ];
+
+  // Helper function to convert session color to activity status
+  const getActivityStatus = (color: string): ActivityStatus => {
+    if (color === ColorConst.tertiary) return "orange";
+    if (color === ColorConst.primary) return "blue";
+    return "grey";
+  };
 
   const days = [
     {
       title: "Lun",
-      sessions: [sessions[1]],
+      day: "7",
+      activities: [getActivityStatus(sessions[1].color)],
     },
     {
       title: "Mar",
-      sessions: [sessions[0], sessions[1]],
+      day: "8",
+      activities: [
+        getActivityStatus(sessions[0].color),
+        getActivityStatus(sessions[1].color),
+      ],
     },
     {
       title: "Mer",
-      sessions: [],
+      day: "9",
+      activities: [],
     },
     {
       title: "Jeu",
-      sessions: [sessions[0], sessions[1]],
+      day: "10",
+      activities: [
+        getActivityStatus(sessions[0].color),
+        getActivityStatus(sessions[1].color),
+      ],
     },
     {
       title: "Ven",
-      sessions: [sessions[1]],
+      day: "11",
+      activities: [getActivityStatus(sessions[1].color)],
     },
     {
       title: "Sam",
-      sessions: [],
+      day: "12",
+      activities: [],
     },
     {
       title: "Dim",
-      sessions: [],
+      day: "13",
+      activities: [],
     },
   ];
 
@@ -84,25 +105,12 @@ const Agenda = () => {
           return (
             <View key={index} className="items-center gap-2.25">
               <Text>{day.title}</Text>
-              <View
-                className={cn(
-                  "size-8 items-center justify-center relative",
-                  clsx({ "bg-secondary rounded-full": isToday }),
-                )}
-              >
-                <View className="absolute -top-1 flex-row gap-0.5">
-                  {day.sessions.map((activity, index) => (
-                    <View
-                      key={index}
-                      className="size-2 rounded-full border border-light"
-                      style={{ backgroundColor: activity.color }}
-                    />
-                  ))}
-                </View>
-                <Text className={clsx({ "text-white font-bold": isToday })}>
-                  {(index + 7).toString()}
-                </Text>
-              </View>
+              <Day
+                day={day.day}
+                isToday={isToday}
+                isCurrentMonth={true}
+                activities={day.activities}
+              />
             </View>
           );
         })}
@@ -115,39 +123,19 @@ const Agenda = () => {
           <View className="w-0.5 flex-1 bg-stroke" />
         </View>
         <View className="flex-1">
-          <Text className="text-accent mb-3">Aujourd’hui</Text>
+          <Text className="text-accent mb-3">Aujourd&apos;hui</Text>
 
           {sessions.map((activity, index) => (
-            <View
-              key={index}
-              className="bg-white border border-stroke rounded-[14px] mt-2 flex-row items-center justify-between"
-            >
-              <View
-                className="pl-3 rounded-[14px] border-l-4 py-1.5"
-                style={{
-                  borderColor: activity.color,
-                }}
-              >
-                <View className="flex-row gap-1 items-center">
-                  {activity.status === "completed" ? (
-                    <IcCheckCircleFilled size={16} />
-                  ) : (
-                    activity.icon
-                  )}
-                  <Text className="font-bold">{activity.title}</Text>
-                </View>
-
-                <Text className="text-subtleText text-xs mt-1">
-                  {activity.sessionTitle}
-                </Text>
-                <Text className="text-text text-[10px] mt-0.5 italic">
-                  {activity.coachName}
-                </Text>
-              </View>
-
-              <View className="rotate-180 mr-3">
-                <IcArrowLeft />
-              </View>
+            <View key={index} className="mt-2">
+              <ActivityCard
+                title={activity.title}
+                description={activity.sessionTitle}
+                coachName={activity.coachName}
+                borderColor={activity.color}
+                icon={activity.icon}
+                status={activity.status}
+                completedIcon={<IcCheckCircleFilled size={16} />}
+              />
             </View>
           ))}
         </View>
@@ -181,7 +169,9 @@ export default function HomeScreen() {
           </View>
 
           <View className="flex-row items-center">
-            <Pressable className="p-2">
+            <Pressable className="p-2" onPress={() => {
+              router.push(ROUTE.UPGRADE_PLAN)
+            }}>
               <IcMessage />
             </Pressable>
             <Pressable

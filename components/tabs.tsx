@@ -11,13 +11,21 @@ export default function Tabs({
   selected,
   onSelected,
   className = "",
+  tabClassName = "",
   textClassName = "",
+  selectedClassName = "bg-secondary",
+  selectedTextClassName = "text-white",
+  selectedStyle,
 }: {
   tabs: TTab[];
   selected: TTab;
   onSelected: (tab: TTab) => void;
-  className?: string;
+    className?: string;
+  tabClassName?: string;
   textClassName?: string;
+  selectedClassName?: string;
+  selectedTextClassName?: string;
+  selectedStyle?: object;
 }) {
   const [width, setWidth] = useState(0);
 
@@ -34,16 +42,19 @@ export default function Tabs({
       {tabs.map((tab, index) => (
         <Pressable
           key={index}
-          className={clsx("p-3 items-center justify-center rounded-md", {
-            "bg-secondary": tab === selected,
+          className={clsx("p-3 items-center justify-center rounded-md", tabClassName, {
+            [selectedClassName]: tab === selected,
           })}
           style={{
             width: width / tabs.length,
+            ...(tab === selected && selectedStyle ? selectedStyle : {}),
           }}
           onPress={() => onSelected(tab)}
         >
           <Text
-            className={clsx({ "text-white": tab === selected }, textClassName)}
+            className={clsx(textClassName, {
+              [selectedTextClassName]: tab === selected,
+            })}
           >
             {tab}
           </Text>

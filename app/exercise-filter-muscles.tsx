@@ -1,6 +1,7 @@
 import Button from "@/components/button";
 import { Chip } from "@/components/chip";
-import { Choices, TChoice } from "@/components/choices";
+import { Choices } from "@/components/choices";
+import { TChoice } from "@/types";
 import IcAbmat from "@/components/icons/abmat";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import IcBar from "@/components/icons/bar";
