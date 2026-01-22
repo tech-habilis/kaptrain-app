@@ -23,6 +23,7 @@ export const editProfileSchema = z.object({
   sportLevel: z.string().min(1, "validation.sportLevelRequired"),
   height: z.string().optional(),
   inWheelchair: z.boolean().optional(),
+  phone: z.string().min(1, "validation.phoneRequired"),
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;

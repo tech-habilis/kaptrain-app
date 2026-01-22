@@ -42,6 +42,7 @@ export default function EditProfile() {
     setWeight,
     setSportLevel,
     setLocalAvatarUri,
+    setPhone,
     saveProfile,
     firstName,
     lastName,
@@ -51,6 +52,7 @@ export default function EditProfile() {
     inWheelchair,
     weight,
     sportLevel,
+    phone,
   } = useProfileStore();
 
   const displayImageUri = localAvatarUri || profile?.avatar_url;
@@ -171,6 +173,7 @@ export default function EditProfile() {
       sportLevel,
       height,
       inWheelchair,
+      phone,
     });
 
     if (!result.success) {
@@ -280,6 +283,14 @@ export default function EditProfile() {
               placeholder="DD/MM/YYYY"
               showIcon={false}
               error={errors.birthDate}
+            />
+
+            <Input
+              label="Numéro de téléphone"
+              placeholder="06 12 34 56 78"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
             />
 
             <Dropdown

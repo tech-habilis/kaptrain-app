@@ -122,6 +122,14 @@ export function Step1() {
         placeholder="completeProfile.step1.birthDatePlaceholder"
       />
 
+      <Input
+        label="Numéro de téléphone"
+        placeholder="06 12 34 56 78"
+        value={formData.phone}
+        onChangeText={(text) => updateStep1({ phone: text })}
+        keyboardType="phone-pad"
+      />
+
       <View className="mb-28">
         <Text className="text-accent font-medium text-sm">
           completeProfile.step1.gender

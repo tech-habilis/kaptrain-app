@@ -28,6 +28,7 @@ interface ProfileState {
   displayName: string;
   bio: string;
   email: string;
+  phone: string;
 
   // Form fields - Personal Details
   birthDate: string;
@@ -47,6 +48,7 @@ interface ProfileState {
   setDisplayName: (value: string) => void;
   setBio: (value: string) => void;
   setEmail: (value: string) => void;
+  setPhone: (value: string) => void;
   setBirthDate: (value: string) => void;
   setGender: (value: Gender) => void;
   setHeight: (value: string) => void;
@@ -70,6 +72,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   displayName: "",
   bio: "",
   email: "",
+  phone: "",
   birthDate: "",
   gender: "",
   height: "",
@@ -89,6 +92,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         displayName: profile.display_name || "",
         bio: profile.bio || "",
         email: profile.email || "",
+        phone: (profile as any).phone || "",
         birthDate: profile.date_of_birth || "",
         gender: (profile.gender as Gender) || "",
         height: profile.height?.toString() || "",
@@ -110,6 +114,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   setDisplayName: (value) => set({ displayName: value }),
   setBio: (value) => set({ bio: value }),
   setEmail: (value) => set({ email: value }),
+  setPhone: (value) => set({ phone: value }),
   setBirthDate: (value) => set({ birthDate: value }),
   setGender: (value) => set({ gender: value }),
   setHeight: (value) => set({ height: value }),
@@ -125,6 +130,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       displayName,
       bio,
       email,
+      phone,
       birthDate,
       gender,
       height,
@@ -159,11 +165,12 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       if (displayName) updates.display_name = displayName;
       if (bio !== undefined) updates.bio = bio || null;
       if (email) updates.email = email;
+      if (phone) updates.phone = phone;
 
       // Update personal details fields
       if (birthDate) updates.date_of_birth = birthDate;
       if (gender) updates.gender = gender;
-      if (height) updates.height = parseInt(height, 10);
+      if (height) updates.height = parseFloat(height.replace(",", "."));
       updates.in_wheelchair = inWheelchair;
       if (weight) updates.weight = parseFloat(weight.replace(",", "."));
       if (sportLevel) updates.sport_level = sportLevel;
@@ -207,6 +214,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     displayName: "",
     bio: "",
     email: "",
+    phone: "",
     birthDate: "",
     gender: "",
     height: "",

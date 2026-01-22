@@ -749,7 +749,7 @@ export type Database = {
           rest_seconds: number | null
           rounds: number | null
           session_id: string
-          timer_type: string
+          timer_type: Database["public"]["Enums"]["timer_type"]
           work_seconds: number | null
         }
         Insert: {
@@ -759,7 +759,7 @@ export type Database = {
           rest_seconds?: number | null
           rounds?: number | null
           session_id: string
-          timer_type: string
+          timer_type: Database["public"]["Enums"]["timer_type"]
           work_seconds?: number | null
         }
         Update: {
@@ -769,7 +769,7 @@ export type Database = {
           rest_seconds?: number | null
           rounds?: number | null
           session_id?: string
-          timer_type?: string
+          timer_type?: Database["public"]["Enums"]["timer_type"]
           work_seconds?: number | null
         }
         Relationships: [
@@ -1182,6 +1182,7 @@ export type Database = {
           last_name: string | null
           name: string | null
           onboarding_date: string | null
+          phone: string | null
           preferences: Json | null
           role: Database["public"]["Enums"]["user_role"]
           sport_level: string | null
@@ -1207,6 +1208,7 @@ export type Database = {
           last_name?: string | null
           name?: string | null
           onboarding_date?: string | null
+          phone?: string | null
           preferences?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           sport_level?: string | null
@@ -1232,6 +1234,7 @@ export type Database = {
           last_name?: string | null
           name?: string | null
           onboarding_date?: string | null
+          phone?: string | null
           preferences?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
           sport_level?: string | null

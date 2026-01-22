@@ -55,7 +55,8 @@
     "atLeastOneSportRequired": "Please select at least one sport",
     "maxFiveSports": "You can select up to 5 sports",
     "required": "This field is required",
-    "mustBeValidNumber": "Please enter a valid number"
+    "mustBeValidNumber": "Please enter a valid number",
+    "phoneRequired": "Phone number is required"
   },
   "signUp": {
     "noAccountSignUp": "No account?\nSign up",
