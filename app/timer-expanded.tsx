@@ -106,7 +106,7 @@ export default function TimerExpanded() {
         <Pressable onPress={router.back} className="p-2">
           <IcArrowLeft />
         </Pressable>
-        <Text className="text-secondary text-lg font-futura-bold">
+        <Text className="text-secondary text-lg font-ls-bold">
           {getTimerLabel()}
         </Text>
       </View>

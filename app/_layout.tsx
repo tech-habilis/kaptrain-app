@@ -41,11 +41,11 @@ initializeApp();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
-    // Futura fonts
-    "Futura-Book": require("../assets/fonts/FuturaBook.ttf"),
-    "Futura-Medium": require("../assets/fonts/FuturaMedium.ttf"),
-    "Futura-Demi": require("../assets/fonts/FuturaDemi.ttf"),
-    "Futura-Bold": require("../assets/fonts/FuturaBold.ttf"),
+    // LeagueSpartan fonts
+    "LeagueSpartan-Regular": require("../assets/fonts/LeagueSpartan-Regular.ttf"),
+    "LeagueSpartan-Medium": require("../assets/fonts/LeagueSpartan-Medium.ttf"),
+    "LeagueSpartan-SemiBold": require("../assets/fonts/LeagueSpartan-SemiBold.ttf"),
+    "LeagueSpartan-Bold": require("../assets/fonts/LeagueSpartan-Bold.ttf"),
     // Inter fonts
     "Inter_18pt-Regular": require("../assets/fonts/Inter_18pt-Regular.ttf"),
     "Inter_18pt-Medium": require("../assets/fonts/Inter_18pt-Medium.ttf"),

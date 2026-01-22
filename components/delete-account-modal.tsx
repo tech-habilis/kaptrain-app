@@ -49,7 +49,7 @@ const DeleteAccountModal = forwardRef<
       className="pb-safe"
     >
       {/* Header */}
-      <Text className="text-[20px] font-futura font-bold text-secondary">
+      <Text className="text-[20px] font-ls font-bold text-secondary">
         Supprimer mon compte ?
       </Text>
 

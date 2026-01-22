@@ -19,11 +19,11 @@
   --color-green: #3fa951;
   --color-error2: #e32828;
 
-  /* Font families - Futura */
-  --font-futura: "Futura-Book";
-  --font-futura-medium: "Futura-Medium";
-  --font-futura-semibold: "Futura-Demi";
-  --font-futura-bold: "Futura-Bold";
+  /* Font families - LeagueSpartan */
+  --font-ls: "LeagueSpartan-Regular";
+  --font-ls-medium: "LeagueSpartan-Medium";
+  --font-ls-semibold: "LeagueSpartan-SemiBold";
+  --font-ls-bold: "LeagueSpartan-Bold";
 
   /* Font families - Inter */
   --font-inter: "Inter_18pt-Regular";
