@@ -1,8 +1,14 @@
 import IcWeight from "@/components/icons/weight";
-import { Exercise, ExerciseItem, ProgramSectionProps } from "@/types";
+import { Exercise, ExerciseItem, ProgramSectionProps, SportOption, TChoice } from "@/types";
 import { ColorConst } from "./theme";
 import IcFire from "@/components/icons/fire";
 import IcClockRound from "@/components/icons/clock-round";
+import IcCycling from "@/components/icons/cycling";
+import IcRowing from "@/components/icons/rowing";
+import IcBasketball from "@/components/icons/basketball";
+import IcCrossfit from "@/components/icons/crossfit";
+import IcBodybuilding from "@/components/icons/bodybuilding";
+import IcYoga from "@/components/icons/yoga";
 
 const getExercises = ({
   isGridView,
@@ -245,4 +251,62 @@ export const mockExercises: Exercise[] = [
     title: "Abmat sit up",
     image: "https://via.placeholder.com/200",
   },
+];
+
+
+export const mockWeeklyTracking = [
+  {
+    text: "Lun",
+    doing: false,
+  },
+  {
+    text: "Mar",
+    doing: true,
+  },
+  {
+    text: "Mer",
+    doing: true,
+  },
+  {
+    text: "Jeu",
+    doing: true,
+  },
+  {
+    text: "Ven",
+    doing: true,
+  },
+  {
+    text: "Sam",
+    doing: false,
+  },
+  {
+    text: "Dim",
+    doing: false,
+  },
+];
+
+export const mockSports: TChoice[] = [
+  { text: "Cyclisme" },
+  { text: "Musculation" },
+  { text: "Aviron" },
+  { text: "Course }à pied" },
+  { text: "Crossfit" },
+];
+
+export const ALL_SPORTS: SportOption[] = [
+  {
+    id: "athletics",
+    name: "Athlétisme",
+    icon: <IcCycling size={24} />,
+  },
+  { id: "rowing", name: "Aviron", icon: <IcRowing size={24} /> },
+  { id: "basketball", name: "Basketball", icon: <IcBasketball size={24} /> },
+  { id: "crossfit", name: "Crossfit", icon: <IcCrossfit size={24} /> },
+  { id: "cycling", name: "Cyclisme", icon: <IcCycling size={24} /> },
+  {
+    id: "bodybuilding",
+    name: "Musculation",
+    icon: <IcBodybuilding size={24} />,
+  },
+  { id: "yoga", name: "Yoga", icon: <IcYoga size={24} /> },
 ];

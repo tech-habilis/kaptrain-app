@@ -17,14 +17,11 @@ import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
-import {
-  BottomSheetModal as BottomSheetModalType,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
+import { Pressable, View } from "react-native";
+import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import { Chip } from "@/components/chip";
-import cn from "@/utilities/cn";
 import { clsx } from "clsx";
+import { mockSports } from "@/constants/mock";
 
 const sportChoices: TChoice[] = [
   {
@@ -57,14 +54,6 @@ const sportChoices: TChoice[] = [
   },
 ];
 
-const sports: TChoice[] = [
-  { text: "Cyclisme" },
-  { text: "Musculation" },
-  { text: "Aviron" },
-  { text: "Course }à pied" },
-  { text: "Crossfit" },
-];
-
 export default function ExerciseFilterSports() {
   const [selectedSport, setSelectedSport] = useState<TChoice>();
   const [selectedChoices, setSelectedChoices] = useState<TChoice[]>([
@@ -86,7 +75,7 @@ export default function ExerciseFilterSports() {
       <View className="mt-6 gap-3">
         <Choices
           numColumns={2}
-          data={sports}
+          data={mockSports}
           selectedChoice={selectedSport}
           onChange={setSelectedSport}
         />

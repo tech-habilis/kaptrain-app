@@ -21,6 +21,7 @@ import {
   Pressable,
   ScrollView,
   View,
+  Text as RawText
 } from "react-native";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
@@ -158,9 +159,9 @@ export default function HomeScreen() {
           />
 
           <View className="gap-1.5 flex-1">
-            <Text className="text-white text-xl font-bold">
-              Bonjour Marie !
-            </Text>
+            <RawText className="text-white text-xl font-bold">
+              <Text>common.hello</Text> Marie !
+            </RawText>
             <Chip
               text="Forme excellente"
               leftIcon={<IcSmiley />}
@@ -170,13 +171,13 @@ export default function HomeScreen() {
 
           <View className="flex-row items-center">
             <Pressable className="p-2" onPress={() => {
-              router.push(ROUTE.UPGRADE_PLAN)
+              router.push(ROUTE.MESSAGING)
             }}>
               <IcMessage />
             </Pressable>
             <Pressable
               className="p-2"
-              onPress={() => setHaveUnread(!haveUnread)}
+              onPress={() => router.push(ROUTE.NOTIFICATIONS)}
             >
               <IcBell haveUnread={haveUnread} />
             </Pressable>

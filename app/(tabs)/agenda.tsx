@@ -9,11 +9,10 @@ import IcArrowRight from "@/components/icons/arrow-right";
 import IcHyrox from "@/components/icons/hyrox";
 import IcPlus from "@/components/icons/plus";
 import { ColorConst } from "@/constants/theme";
-import { ButtonIcon } from "@/components/button";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
-import IcCheck from "@/components/icons/check";
 import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
+import SingleFab from "@/components/fab";
 
 export default function Agenda() {
   // Mock data for the calendar - April 2025
@@ -274,17 +273,10 @@ export default function Agenda() {
         </View>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <View className="absolute bottom-20 right-4">
-        <ButtonIcon
-          size="large"
-          type="primary"
-          className="w-14 h-14 rounded-2xl shadow-lg"
-          onPress={() => router.push(ROUTE.CREATE_SESSION)}
-        >
-          <IcPlus size={32} color="white" />
-        </ButtonIcon>
-      </View>
+      <SingleFab
+        onPress={() => router.push(ROUTE.CREATE_SESSION)}
+        icon={<IcPlus size={32} color="white" />}
+      />
     </View>
   );
 }

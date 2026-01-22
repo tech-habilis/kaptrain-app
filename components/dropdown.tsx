@@ -7,6 +7,7 @@ import IcUnfoldMore from "./icons/unfold-more";
 import { Choices } from "./choices";
 import Text from "./text";
 import { TChoice } from "@/types";
+import Input from "./input";
 
 interface DropdownProps {
   label: string;
@@ -20,6 +21,9 @@ interface DropdownProps {
   rightIcon?: ReactNode;
   size?: ComponentProps<typeof Button>["size"];
   alwaysShowLabel?: boolean;
+  type?: "default" | "input";
+  modalHeight?: string | number;
+  itemType?: ComponentProps<typeof Choices>["type"];
 }
 
 export default function Dropdown({
@@ -33,13 +37,16 @@ export default function Dropdown({
   modalDescription,
   rightIcon,
   size,
+  type = "default",
   alwaysShowLabel = false,
+  modalHeight = "65%",
+  itemType = 'radio',
 }: DropdownProps) {
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
 
   const handleSelect = (option: TChoice) => {
     onSelect(option);
-    bottomSheetModalRef.current?.dismiss();
+    setTimeout(() => bottomSheetModalRef.current?.dismiss(), 300)
   };
 
   const renderShownText = () => {
@@ -67,21 +74,30 @@ export default function Dropdown({
 
   return (
     <>
-      <Button
-        type="secondaryV2"
-        className={className}
-        textClassName={textClassName}
-        rightIcon={rightIcon || <IcUnfoldMore />}
-        size={size}
-        onPress={() => bottomSheetModalRef.current?.present()}
-      >
-        {renderShownText()}
-      </Button>
+      {type === "default" ? (
+        <Button
+          type="secondaryV2"
+          className={className}
+          textClassName={textClassName}
+          rightIcon={rightIcon || <IcUnfoldMore />}
+          size={size}
+          onPress={() => bottomSheetModalRef.current?.present()}
+        >
+          {renderShownText()}
+        </Button>
+      ) : (
+        <Input
+          readOnly
+          label={label}
+          value={selectedOption.text || ""}
+          onPress={() => bottomSheetModalRef.current?.present()}
+        />
+      )}
 
       <BottomSheetModal
         ref={bottomSheetModalRef}
         name="dropdown-selection"
-        snapPoints={["65%"]}
+        snapPoints={[modalHeight]}
         className="pb-safe"
       >
         {modalTitle && (
@@ -99,7 +115,7 @@ export default function Dropdown({
             data={options}
             selectedChoice={selectedOption}
             onChange={handleSelect}
-            type="radio"
+            type={itemType}
           />
         </View>
       </BottomSheetModal>

@@ -101,7 +101,7 @@ export default function SessionView() {
                   </View>
 
                   <View
-                    className={clsx("h-1 w-4 bg-red-300", {
+                    className={clsx("h-1 w-4 bg-tertiary", {
                       hidden: i === totalWeek - 1,
                     })}
                   />
