@@ -28,6 +28,7 @@ interface DropdownProps {
   formatLabel?: (choice: TChoice) => string;
   placeholder?: string;
   inputWrapperClassName?: ComponentProps<typeof Input>["inputWrapperClassName"];
+  error?: string;
 }
 
 export default function Dropdown({
@@ -48,6 +49,7 @@ export default function Dropdown({
   formatLabel,
   inputWrapperClassName,
   placeholder,
+  error,
 }: DropdownProps) {
   const { t } = useTranslation();
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
@@ -117,6 +119,7 @@ export default function Dropdown({
           rightIcon={rightIcon}
           inputWrapperClassName={inputWrapperClassName}
           placeholder={placeholder}
+          error={error}
         />
       )}
 

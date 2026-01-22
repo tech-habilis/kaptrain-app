@@ -53,7 +53,9 @@
     "weightRequired": "Le poids est requis",
     "sportLevelRequired": "Le niveau de sport est requis",
     "atLeastOneSportRequired": "Veuillez sélectionner au moins un sport",
-    "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports"
+    "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports",
+    "required": "Ce champ est requis",
+    "mustBeValidNumber": "Veuillez entrer un nombre valide"
   },
   "landing": {
     "text1": "L'Expertise de haut niveau,",

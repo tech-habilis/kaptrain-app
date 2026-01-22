@@ -3,15 +3,8 @@ import Button from "@/components/button";
 import Input from "@/components/input";
 import Toggle from "@/components/toggle";
 import IcPencil from "@/components/icons/pencil";
-import { useEffect, useState, useRef } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Pressable,
-  ScrollView,
-  View,
-  Alert,
-} from "react-native";
+import { useState, useRef } from "react";
+import { Image, Pressable, ScrollView, View, Alert } from "react-native";
 import Text from "@/components/text";
 import DeleteAccountModal, {
   DeleteAccountModalRef,
@@ -26,19 +19,20 @@ import * as ImagePicker from "expo-image-picker";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { toast } from "@/components/toast";
+import { editProfileSchema } from "@/utilities/validation/edit-profile-schema";
 
 export default function EditProfile() {
   const { t } = useTranslation();
   const { session } = useSession();
   const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
   const [isPickerLoading, setIsPickerLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const {
     profile,
     isLoading,
     isSaving,
     localAvatarUri,
-    loadProfile,
     setFirstName,
     setLastName,
     setBirthDate,
@@ -62,9 +56,18 @@ export default function EditProfile() {
   const displayImageUri = localAvatarUri || profile?.avatar_url;
 
   const genders: TChoice[] = [
-    { text: "completeProfile.step1.genderFemale" },
-    { text: "completeProfile.step1.genderMale" },
-    { text: "completeProfile.step1.genderNonBinary" },
+    {
+      id: "completeProfile.step1.genderFemale",
+      text: "completeProfile.step1.genderFemale",
+    },
+    {
+      id: "completeProfile.step1.genderMale",
+      text: "completeProfile.step1.genderMale",
+    },
+    {
+      id: "completeProfile.step1.genderNonBinary",
+      text: "completeProfile.step1.genderNonBinary",
+    },
   ];
 
   const genderMap: Record<string, "female" | "male" | "nonbinary"> = {
@@ -77,22 +80,27 @@ export default function EditProfile() {
 
   const practiceLevels: TChoice[] = [
     {
+      id: "completeProfile.step3.levelBeginner",
       text: "completeProfile.step3.levelBeginner",
       secondaryText: "1 à 2h par semaine",
     },
     {
+      id: "completeProfile.step3.levelIntermediate",
       text: "completeProfile.step3.levelIntermediate",
       secondaryText: "3 à 4h par semaine",
     },
     {
+      id: "completeProfile.step3.levelAdvanced",
       text: "completeProfile.step3.levelAdvanced",
       secondaryText: "5 à 7h par semaine",
     },
     {
+      id: "completeProfile.step3.levelConfirmed",
       text: "completeProfile.step3.levelConfirmed",
       secondaryText: "8 à 11h par semaine",
     },
     {
+      id: "completeProfile.step3.levelExpert",
       text: "completeProfile.step3.levelExpert",
       secondaryText: "+ de 12h par semaine",
     },
@@ -153,6 +161,28 @@ export default function EditProfile() {
       return;
     }
 
+    // Validate using Zod schema
+    const result = editProfileSchema.safeParse({
+      firstName,
+      lastName,
+      birthDate,
+      gender,
+      weight,
+      sportLevel,
+      height,
+      inWheelchair,
+    });
+
+    if (!result.success) {
+      const newErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+        newErrors[field] = t(issue.message);
+      });
+      setErrors(newErrors);
+      return;
+    }
+
     await saveProfile(session.user.id);
   };
 
@@ -207,20 +237,49 @@ export default function EditProfile() {
             <Input
               label="Prénom"
               value={firstName}
-              onChangeText={setFirstName}
+              onChangeText={(text) => {
+                setFirstName(text);
+                if (errors.firstName) {
+                  setErrors((prev) => {
+                    const { firstName, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              error={errors.firstName}
             />
 
-            <Input label="Nom" value={lastName} onChangeText={setLastName} />
+            <Input
+              label="Nom"
+              value={lastName}
+              onChangeText={(text) => {
+                setLastName(text);
+                if (errors.lastName) {
+                  setErrors((prev) => {
+                    const { lastName, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
+              error={errors.lastName}
+            />
 
             <DatePicker
               label="Date de naissance"
               selectedDate={birthDate ? dayjs(birthDate).toDate() : undefined}
-              onSelect={(date) =>
-                setBirthDate(dayjs(date).format("YYYY-MM-DD"))
-              }
+              onSelect={(date) => {
+                setBirthDate(dayjs(date).format("YYYY-MM-DD"));
+                if (errors.birthDate) {
+                  setErrors((prev) => {
+                    const { birthDate, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               maxDate={dayjs().toDate()}
               placeholder="DD/MM/YYYY"
               showIcon={false}
+              error={errors.birthDate}
             />
 
             <Dropdown
@@ -231,9 +290,18 @@ export default function EditProfile() {
               selectedOption={selectedGender}
               onSelect={(choice) => {
                 const mappedGender = genderMap?.[choice.text];
-                if (mappedGender) setGender(mappedGender);
+                if (mappedGender) {
+                  setGender(mappedGender);
+                  if (errors.gender) {
+                    setErrors((prev) => {
+                      const { gender, ...rest } = prev;
+                      return rest;
+                    });
+                  }
+                }
               }}
               modalHeight="45%"
+              error={errors.gender}
             />
 
             <Input
@@ -241,7 +309,7 @@ export default function EditProfile() {
               value={height}
               onChangeText={setHeight}
               placeholder="170"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
             />
 
             {/* Wheelchair Toggle */}
@@ -255,9 +323,18 @@ export default function EditProfile() {
             <Input
               label="Poids (kg)"
               value={weight}
-              onChangeText={setWeight}
+              onChangeText={(text) => {
+                setWeight(text);
+                if (errors.weight) {
+                  setErrors((prev) => {
+                    const { weight, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               placeholder="63.5"
               keyboardType="decimal-pad"
+              error={errors.weight}
             />
 
             <Dropdown
@@ -274,11 +351,20 @@ export default function EditProfile() {
                   | "advanced"
                   | "confirmed"
                   | "expert";
-                if (mappedLevel) setSportLevel(mappedLevel);
+                if (mappedLevel) {
+                  setSportLevel(mappedLevel);
+                  if (errors.sportLevel) {
+                    setErrors((prev) => {
+                      const { sportLevel, ...rest } = prev;
+                      return rest;
+                    });
+                  }
+                }
               }}
               type="input"
               modalHeight="60%"
               itemType="secondary"
+              error={errors.sportLevel}
             />
 
             {/* Delete Account Button */}
