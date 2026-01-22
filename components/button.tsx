@@ -92,15 +92,21 @@ export default function Button({
   leftIcon,
   rightIcon,
   loading,
+  children,
   ...props
 }: Omit<PressableProps, "children"> &
   ComponentProps<typeof button> & {
-    text: string;
+    text?: string;
     textClassName?: string;
     leftIcon?: React.ReactNode;
     rightIcon?: React.ReactNode;
     loading?: boolean;
+    children?: React.ReactNode;
   }) {
+    if (text && children) {
+      throw new Error("Button cannot have both text prop and children");
+    }
+
   const loadingColorMap: Record<
     Exclude<ButtonVariants["type"], undefined>,
     string
@@ -129,9 +135,13 @@ export default function Button({
         />
       )}
 
-      <Text className={cn(buttonText({ size, type }), textClassName)}>
-        {text}
-      </Text>
+      {text ? (
+        <Text className={cn(buttonText({ size, type }), textClassName)}>
+          {text}
+        </Text>
+      ) : (
+        children
+      )}
 
       {rightIcon && (
         <View
@@ -175,7 +185,7 @@ export function ButtonIcon({
   className = "",
   textClassName = "",
   size,
-  type = 'secondaryV2',
+  type = "secondaryV2",
   disabled,
   children,
   ...props

@@ -18,7 +18,6 @@ import { useState } from "react";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
 import StatisticWidgetCard from "../statistic-widget-card";
-import { StatisticWidget } from "@/constants/mock";
 import CircularProgress, {
   CircularProgressProps,
 } from "@/components/charts/circular-progress";
@@ -29,6 +28,7 @@ import IcYoga from "../icons/yoga";
 import IcCycling from "../icons/cycling";
 import IcRowing from "../icons/rowing";
 import NoDataChart from "../no-data-chart";
+import { StatisticWidget } from "@/types";
 
 export const TrainingVolumeChart = ({
   withTotal = false,
