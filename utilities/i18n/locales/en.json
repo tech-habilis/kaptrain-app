@@ -57,7 +57,8 @@
     "required": "This field is required",
     "mustBeValidNumber": "Please enter a valid number",
     "phoneRequired": "Phone number is required",
-    "phoneNumbersOnly": "Phone number can only contain digits and +"
+    "phoneNumbersOnly": "Phone number can only contain digits and +",
+    "phoneMinLength": "Phone number must be at least 8 digits"
   },
   "signUp": {
     "noAccountSignUp": "No account?\nSign up",

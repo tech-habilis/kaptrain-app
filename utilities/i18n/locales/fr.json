@@ -57,7 +57,8 @@
     "required": "Ce champ est requis",
     "mustBeValidNumber": "Veuillez entrer un nombre valide",
     "phoneRequired": "Le numéro de téléphone est requis",
-    "phoneNumbersOnly": "Le numéro de téléphone ne peut contenir que des chiffres et +"
+    "phoneNumbersOnly": "Le numéro de téléphone ne peut contenir que des chiffres et +",
+    "phoneMinLength": "Le numéro de téléphone doit contenir au moins 8 chiffres"
   },
   "landing": {
     "text1": "L'Expertise de haut niveau,",
