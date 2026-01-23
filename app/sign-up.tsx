@@ -1,9 +1,10 @@
 import Button, { ButtonLink } from "@/components/button";
 import IcKaptrain from "@/components/icons/kaptrain";
+import IcCheck from "@/components/icons/check";
 import { appName } from "@/constants/misc";
 import { useSession } from "@/contexts/auth-context";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { View, ImageBackground, Text as RawText } from "react-native";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
@@ -14,6 +15,7 @@ import {
   signUpSchema,
   type SignUpFormData,
 } from "@/utilities/validation/schema";
+import { z } from "zod";
 
 export default function SignIn() {
   const { signUpWithEmail, isLoggedIn: isSigningUp } = useSession();
@@ -25,6 +27,10 @@ export default function SignIn() {
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignUpFormData, string>>
   >({});
+
+  const isEmailValid = useMemo(() => {
+    return z.string().email().safeParse(email).success;
+  }, [email]);
 
   const validateForm = () => {
     const result = signUpSchema.safeParse({ email, password, confirmPassword });
@@ -80,6 +86,9 @@ export default function SignIn() {
           autoCapitalize="none"
           keyboardType="email-address"
           error={errors.email}
+          rightIcon={
+            isEmailValid && !errors.email ? <IcCheck size={24} /> : undefined
+          }
         />
         <PasswordInput
           label="signUp.createPassword"
