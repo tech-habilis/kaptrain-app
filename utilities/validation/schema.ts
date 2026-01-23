@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+// Phone: Numbers only with optional "+" prefix (spaces allowed for formatting)
+export const phoneSchema = z
+  .string()
+  .min(1, "validation.phoneRequired")
+  .refine((val) => /^\+?[\d\s]*$/.test(val), "validation.phoneNumbersOnly");
+
 // Password: Minimum 8 characters, 1 uppercase letter, 1 number, 1 special character
 export const passwordSchema = z
   .string()
@@ -11,7 +17,10 @@ export const passwordSchema = z
 
 export const signUpSchema = z
   .object({
-    email: z.string().min(1, "validation.emailRequired").email("validation.emailInvalid"),
+    email: z
+      .string()
+      .min(1, "validation.emailRequired")
+      .email("validation.emailInvalid"),
     password: passwordSchema,
     confirmPassword: z.string().min(1, "validation.confirmPasswordRequired"),
   })

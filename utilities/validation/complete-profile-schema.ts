@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneSchema } from "./schema";
 
 // Step 1: Personal Information
 export const step1Schema = z.object({
@@ -7,7 +8,7 @@ export const step1Schema = z.object({
   lastName: z.string().min(1, "validation.lastNameRequired"),
   birthDate: z.string().min(1, "validation.birthDateRequired"),
   gender: z.string().min(1, "validation.genderRequired"),
-  phone: z.string().min(1, "validation.phoneRequired"),
+  phone: phoneSchema,
 });
 
 // Step 2: Weight

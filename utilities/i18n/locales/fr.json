@@ -56,7 +56,8 @@
     "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports",
     "required": "Ce champ est requis",
     "mustBeValidNumber": "Veuillez entrer un nombre valide",
-    "phoneRequired": "Le numéro de téléphone est requis"
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "phoneNumbersOnly": "Le numéro de téléphone ne peut contenir que des chiffres et +"
   },
   "landing": {
     "text1": "L'Expertise de haut niveau,",

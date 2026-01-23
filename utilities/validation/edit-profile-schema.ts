@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneSchema } from "./schema";
 
 // Helper function to validate number strings (supports both . and , as decimal separator)
 const numberString = () =>
@@ -23,7 +24,7 @@ export const editProfileSchema = z.object({
   sportLevel: z.string().min(1, "validation.sportLevelRequired"),
   height: z.string().optional(),
   inWheelchair: z.boolean().optional(),
-  phone: z.string().min(1, "validation.phoneRequired"),
+  phone: phoneSchema,
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;

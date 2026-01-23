@@ -2,25 +2,41 @@ import { Choices } from "@/components/choices";
 import { TChoice } from "@/types";
 import IcPlus from "@/components/icons/plus";
 import IcUser from "@/components/icons/user";
+import IcCheck from "@/components/icons/check";
 import Input from "@/components/input";
 import DatePicker from "@/components/date-picker";
 import Text from "@/components/text";
 import { useTranslation } from "react-i18next";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { View, Image, Pressable, Alert } from "react-native";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import dayjs from "dayjs";
 import * as ImagePicker from "expo-image-picker";
+import { phoneSchema } from "@/utilities/validation/schema";
 
 export function Step1() {
   const { t } = useTranslation();
-  const { formData, errors, updateStep1, localAvatarUri, setLocalAvatarUri } = useCompleteProfileStore();
+  const { formData, errors, updateStep1, localAvatarUri, setLocalAvatarUri } =
+    useCompleteProfileStore();
   const [isPickerLoading, setIsPickerLoading] = useState(false);
 
+  const isPhoneValid = useMemo(() => {
+    return phoneSchema.safeParse(formData.phone).success;
+  }, [formData.phone]);
+
   const genders: TChoice[] = [
-    { text: "completeProfile.step1.genderFemale" },
-    { text: "completeProfile.step1.genderMale" },
-    { text: "completeProfile.step1.genderNonBinary" },
+    {
+      id: "completeProfile.step1.genderFemale",
+      text: "completeProfile.step1.genderFemale",
+    },
+    {
+      id: "completeProfile.step1.genderMale",
+      text: "completeProfile.step1.genderMale",
+    },
+    {
+      id: "completeProfile.step1.genderNonBinary",
+      text: "completeProfile.step1.genderNonBinary",
+    },
   ];
 
   const selectedGender = genders.find((g) => g.text === formData.gender);
@@ -30,12 +46,13 @@ export function Step1() {
       setIsPickerLoading(true);
 
       // Request permission
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           t("completeProfile.step1.permissionDenied") || "Permission needed",
           t("completeProfile.step1.permissionMessage") ||
-            "Sorry, we need camera roll permissions to make this work."
+            "Sorry, we need camera roll permissions to make this work.",
         );
         return;
       }
@@ -58,7 +75,8 @@ export function Step1() {
       console.error("Error picking image:", error);
       Alert.alert(
         t("completeProfile.step1.errorTitle") || "Error",
-        t("completeProfile.step1.errorMessage") || "Failed to pick image. Please try again."
+        t("completeProfile.step1.errorMessage") ||
+          "Failed to pick image. Please try again.",
       );
     } finally {
       setIsPickerLoading(false);
@@ -114,8 +132,12 @@ export function Step1() {
 
       <DatePicker
         label="completeProfile.step1.birthDate"
-        selectedDate={formData.birthDate ? dayjs(formData.birthDate).toDate() : undefined}
-        onSelect={(date) => updateStep1({ birthDate: dayjs(date).format("YYYY-MM-DD") })}
+        selectedDate={
+          formData.birthDate ? dayjs(formData.birthDate).toDate() : undefined
+        }
+        onSelect={(date) =>
+          updateStep1({ birthDate: dayjs(date).format("YYYY-MM-DD") })
+        }
         error={errors.birthDate ? t(errors.birthDate) : undefined}
         maxDate={dayjs().toDate()}
         showIcon={false}
@@ -126,8 +148,14 @@ export function Step1() {
         label="Numéro de téléphone"
         placeholder="06 12 34 56 78"
         value={formData.phone}
-        onChangeText={(text) => updateStep1({ phone: text })}
+        onChangeText={(text) => {
+          updateStep1({ phone: text });
+        }}
         keyboardType="phone-pad"
+        error={errors.phone ? t(errors.phone) : undefined}
+        rightIcon={
+          isPhoneValid && !errors.phone ? <IcCheck size={24} /> : undefined
+        }
       />
 
       <View className="mb-28">

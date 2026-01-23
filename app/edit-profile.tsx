@@ -3,7 +3,8 @@ import Button from "@/components/button";
 import Input from "@/components/input";
 import Toggle from "@/components/toggle";
 import IcPencil from "@/components/icons/pencil";
-import { useState, useRef } from "react";
+import IcCheck from "@/components/icons/check";
+import { useState, useRef, useMemo } from "react";
 import { Image, Pressable, ScrollView, View, Alert } from "react-native";
 import Text from "@/components/text";
 import DeleteAccountModal, {
@@ -20,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { toast } from "@/components/toast";
 import { editProfileSchema } from "@/utilities/validation/edit-profile-schema";
+import { phoneSchema } from "@/utilities/validation/schema";
 
 export default function EditProfile() {
   const { t } = useTranslation();
@@ -56,6 +58,10 @@ export default function EditProfile() {
   } = useProfileStore();
 
   const displayImageUri = localAvatarUri || profile?.avatar_url;
+
+  const isPhoneValid = useMemo(() => {
+    return phoneSchema.safeParse(phone).success;
+  }, [phone]);
 
   const genders: TChoice[] = [
     {
@@ -289,8 +295,22 @@ export default function EditProfile() {
               label="Numéro de téléphone"
               placeholder="06 12 34 56 78"
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={(text) => {
+                setPhone(text);
+                if (errors.phone) {
+                  setErrors((prev) => {
+                    const { phone: _, ...rest } = prev;
+                    return rest;
+                  });
+                }
+              }}
               keyboardType="phone-pad"
+              error={errors.phone}
+              rightIcon={
+                isPhoneValid && !errors.phone ? (
+                  <IcCheck size={24} />
+                ) : undefined
+              }
             />
 
             <Dropdown

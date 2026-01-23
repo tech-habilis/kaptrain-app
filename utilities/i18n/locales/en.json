@@ -56,7 +56,8 @@
     "maxFiveSports": "You can select up to 5 sports",
     "required": "This field is required",
     "mustBeValidNumber": "Please enter a valid number",
-    "phoneRequired": "Phone number is required"
+    "phoneRequired": "Phone number is required",
+    "phoneNumbersOnly": "Phone number can only contain digits and +"
   },
   "signUp": {
     "noAccountSignUp": "No account?\nSign up",
