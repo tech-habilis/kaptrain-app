@@ -66,9 +66,9 @@ export function Step4() {
   const filteredChoices = useMemo(
     () =>
       choices.filter((x) =>
-        x.text.toLowerCase().includes(search.toLowerCase()),
+        t(x.text).toLowerCase().includes(search.toLowerCase()),
       ),
-    [choices, search],
+    [choices, search, t],
   );
 
   const selectedChoices = choices.filter((c) =>
