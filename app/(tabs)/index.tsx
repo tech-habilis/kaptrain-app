@@ -198,7 +198,7 @@ export default function HomeScreen() {
 
             <View className="gap-1.5 flex-1">
               <RawText
-                className="text-white text-xl font-bold"
+                className="text-white text-xl font-ls-bold"
                 numberOfLines={1}
               >
                 <Text>common.hello</Text>{" "}

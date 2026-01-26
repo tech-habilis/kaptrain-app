@@ -19,11 +19,18 @@
   --color-green: #3fa951;
   --color-error2: #e32828;
 
+  /* Default font family - Inter */
+  --font-sans: "Inter_18pt-Regular";
+  --font-sans-medium: "Inter_18pt-Medium";
+  --font-sans-semibold: "Inter_18pt-SemiBold";
+  --font-sans-bold: "Inter_18pt-Bold";
+
   /* Font families - LeagueSpartan */
   --font-ls: "LeagueSpartan-Regular";
   --font-ls-medium: "LeagueSpartan-Medium";
   --font-ls-semibold: "LeagueSpartan-SemiBold";
   --font-ls-bold: "LeagueSpartan-Bold";
+  --font-ls-extrabold: "LeagueSpartan-ExtraBold";
 
   /* Font families - Inter */
   --font-inter: "Inter_18pt-Regular";

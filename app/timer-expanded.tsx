@@ -237,15 +237,15 @@ export default function TimerExpanded() {
 
         <View className="flex-row justify-center items-center ml-3">
           <View className="w-28 items-center justify-center">
-          <Text className="text-secondary font-inter-semibold text-[80px]">
+          <Text className="text-secondary font-semibold text-[80px]">
             {formattedMinutes}
           </Text>
           </View>
-          <RawText className="text-secondary font-inter-semibold text-[80px]">
+          <RawText className="text-secondary font-semibold text-[80px]">
             :
           </RawText>
           <View className="w-28 items-center justify-center">
-          <Text className="text-secondary font-inter-semibold text-[80px]">
+          <Text className="text-secondary font-semibold text-[80px]">
             {formattedSeconds}
               </Text>
           </View>

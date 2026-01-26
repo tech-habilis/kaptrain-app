@@ -46,6 +46,8 @@ export default function RootLayout() {
     "LeagueSpartan-Medium": require("../assets/fonts/LeagueSpartan-Medium.ttf"),
     "LeagueSpartan-SemiBold": require("../assets/fonts/LeagueSpartan-SemiBold.ttf"),
     "LeagueSpartan-Bold": require("../assets/fonts/LeagueSpartan-Bold.ttf"),
+    "LeagueSpartan-ExtraBold": require("../assets/fonts/LeagueSpartan-ExtraBold.ttf"),
+
     // Inter fonts
     "Inter_18pt-Regular": require("../assets/fonts/Inter_18pt-Regular.ttf"),
     "Inter_18pt-Medium": require("../assets/fonts/Inter_18pt-Medium.ttf"),

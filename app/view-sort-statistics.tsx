@@ -14,7 +14,7 @@ export default function ViewSortStatistics() {
         <Pressable onPress={router.back}>
           <IcArrowLeft />
         </Pressable>
-        <Text className="font-bold text-lg">Toutes mes statistiques</Text>
+        <Text className="font-ls-bold text-lg">Toutes mes statistiques</Text>
       </View>
 
       <FlatList

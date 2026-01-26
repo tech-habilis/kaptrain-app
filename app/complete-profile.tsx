@@ -172,7 +172,7 @@ export default function CompleteProfile() {
             )}
             <Text
               className={cn(
-                "text-secondary font-bold",
+                "text-secondary font-ls-bold",
                 currentStep === 1 ? "text-2xl" : "text-2xl mt-2",
               )}
             >

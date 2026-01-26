@@ -62,7 +62,7 @@ export default function WeightTracking() {
             <Pressable onPress={router.back}>
               <IcArrowLeft />
             </Pressable>
-            <Text className="font-bold text-lg">Suivi de poids</Text>
+            <Text className="font-ls-bold text-lg">Suivi de poids</Text>
           </View>
         </View>
 
@@ -141,7 +141,7 @@ export default function WeightTracking() {
         key="statistic"
         className="pb-safe"
       >
-        <Text className="font-bold text-lg text-secondary">
+        <Text className="font-ls-bold text-lg text-secondary">
           Ajoute une nouvelle mesure de poids
         </Text>
 

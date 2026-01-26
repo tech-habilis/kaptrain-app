@@ -96,7 +96,7 @@ export default function SessionViewPersonal() {
               <Pressable onPress={router.back} className="p-2">
                 <IcArrowLeft />
               </Pressable>
-              <Text className="text-lg font-bold text-secondary flex-1">
+              <Text className="text-lg font-ls-bold text-secondary flex-1">
                 Hyrox Paris Grand palais
               </Text>
               <IcPencil size={24} />

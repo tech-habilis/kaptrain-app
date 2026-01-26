@@ -150,7 +150,7 @@ export default function ExerciseDetail() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg flex-1">
+          <Text className="font-ls-bold text-lg flex-1">
             {exercise?.title || "Exercise detail"}
           </Text>
           {exercise?.isFavorite ? (

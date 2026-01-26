@@ -34,7 +34,7 @@ const input = tv({
   variants: {
     type: {
       default: "",
-      unit: "text-2xl font-bold",
+      unit: "text-2xl font-ls-bold",
     },
   },
   defaultVariants: {

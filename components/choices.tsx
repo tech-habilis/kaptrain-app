@@ -36,7 +36,7 @@ const choiceText = tv({
   variants: {
     type: {
       default: "",
-      secondary: "text-base font-bold",
+      secondary: "text-base font-ls-bold",
       multipleChoice: "",
       multipleChoiceWithoutIcon: "text-center",
       radio: "text-base font-medium",

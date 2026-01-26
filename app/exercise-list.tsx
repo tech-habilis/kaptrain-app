@@ -109,7 +109,7 @@ export default function ExerciseList() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg">Tous les exercices</Text>
+          <Text className="font-ls-bold text-lg">Tous les exercices</Text>
         </View>
 
         <Input leftIcon={<IcSearch />} />

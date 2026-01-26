@@ -50,7 +50,7 @@ export default function EditInjury() {
             <IcArrowLeft />
           </Pressable>
           <View className="flex-1">
-            <Text className="text-lg font-bold text-secondary">
+            <Text className="text-lg font-ls-bold text-secondary">
               Modifier ma blessure
             </Text>
           </View>

@@ -61,7 +61,7 @@ export default function SignIn() {
               {appName}
             </Text>
           </View>
-          <Text className="text-white text-2xl font-bold mt-3">
+          <Text className="text-white text-2xl font-ls-bold mt-3">
             signUp.noAccountSignUp
           </Text>
           <View className="flex flex-row items-center gap-1.5 mt-4">
