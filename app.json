@@ -19,13 +19,11 @@
               "com.googleusercontent.apps.470536532763-kf2rekjkhpmt7ij9bcu70udr8ghrrhnj"
             ]
           }
-        ]
+        ],
+        "GIDClientID": "470536532763-kf2rekjkhpmt7ij9bcu70udr8ghrrhnj.apps.googleusercontent.com"
       },
       "usesAppleSignIn": true,
-      "appleTeamId": "CTWKNVBLA8",
-      "scheme": [
-        "com.googleusercontent.apps.470536532763-kf2rekjkhpmt7ij9bcu70udr8ghrrhnj"
-      ]
+      "appleTeamId": "CTWKNVBLA8"
     },
     "android": {
       "adaptiveIcon": {
@@ -70,7 +68,8 @@
         {
           "photosPermission": "The app accesses your photos to let you use them as profile picture."
         }
-      ]
+      ],
+      "@rnrepo/expo-config-plugin"
     ],
     "experiments": {
       "typedRoutes": true,

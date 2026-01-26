@@ -14,8 +14,8 @@ import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useEffect } from "react";
-import { BlurView } from "expo-blur";
 import { toast } from "@/components/toast";
+import FadedBottomBar from "@/components/faded-bottom-bar";
 
 const STEP_CONFIG = {
   1: {
@@ -94,7 +94,6 @@ export default function CompleteProfile() {
       nextStep();
     } else {
       // All steps completed, navigate to profile completed
-      router.dismissAll();
       router.replace(ROUTE.PROFILE_COMPLETED);
     }
   };
@@ -171,7 +170,7 @@ export default function CompleteProfile() {
             )}
             <Text
               className={cn(
-                "text-secondary font-bold",
+                "text-secondary font-ls-bold",
                 currentStep === 1 ? "text-2xl" : "text-2xl mt-2",
               )}
             >
@@ -190,37 +189,31 @@ export default function CompleteProfile() {
         )}
       </View>
       {!isLoading && (
-        <View className="absolute bottom-0 left-0 right-0 pb-safe px-4 pt-8">
-          <BlurView
-            intensity={2}
-            className="absolute inset-0 bg-linear-to-t from-white from-66% to-transparent"
-          />
-          <View className="flex-row android:mb-6 gap-6 items-center justify-between">
-            <View className="gap-2 grow">
-              <Text className="text-subtleText">{config.progress}</Text>
-              <View className="flex-row gap-1">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <View
-                    key={index}
-                    className={cn(
-                      "flex-1 h-2 rounded-full",
-                      index < currentStep ? "bg-secondary" : "bg-stroke",
-                    )}
-                  />
-                ))}
-              </View>
+        <FadedBottomBar className="pt-8">
+          <View className="gap-2 grow">
+            <Text className="text-subtleText">{config.progress}</Text>
+            <View className="flex-row gap-1">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <View
+                  key={index}
+                  className={cn(
+                    "flex-1 h-2 rounded-full",
+                    index < currentStep ? "bg-secondary" : "bg-stroke",
+                  )}
+                />
+              ))}
             </View>
-            {currentStep < Object.keys(STEP_CONFIG).length && (
-              <Button
-                text="common.continue"
-                className="grow"
-                onPress={handleContinue}
-                disabled={!isStepComplete() || isSaving}
-                loading={isSaving}
-              />
-            )}
           </View>
-        </View>
+          {currentStep < Object.keys(STEP_CONFIG).length && (
+            <Button
+              text="common.continue"
+              className="grow"
+              onPress={handleContinue}
+              disabled={!isStepComplete() || isSaving}
+              loading={isSaving}
+            />
+          )}
+        </FadedBottomBar>
       )}
     </>
   );

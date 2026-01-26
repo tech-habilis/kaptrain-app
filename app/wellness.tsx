@@ -26,7 +26,7 @@ export default function Wellness() {
     <View className="py-safe px-4 flex-1 bg-white">
       <StatusBar style="dark" />
       <View className="flex-row items-center justify-between">
-        <Text className="text-lg text-secondary font-bold">wellness.title</Text>
+        <Text className="text-lg text-secondary font-ls-bold">wellness.title</Text>
 
         <Pressable onPress={router.back}>
           <IcClose />
@@ -125,7 +125,7 @@ export default function Wellness() {
         key="native"
         className="pb-safe"
       >
-        <Text className="text-lg font-bold text-secondary">
+        <Text className="text-lg font-ls-bold text-secondary">
           Désactiver l’affichage quotidien du suivi de ta forme ?
         </Text>
         <Text className="text-subtleText text-base">

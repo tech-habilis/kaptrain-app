@@ -45,7 +45,7 @@ export default function ConfirmActionModal({
       className="pb-safe"
       onDismiss={onCancel}
     >
-      <Text className="font-bold text-secondary text-lg">{title}</Text>
+      <Text className="font-ls-bold text-secondary text-lg">{title}</Text>
       <Text className="text-subtleText text-base mt-1 grow">{message}</Text>
 
       <Button

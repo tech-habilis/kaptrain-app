@@ -20,7 +20,7 @@ export default function PasswordChanged() {
         <View className="grow" />
 
         <IcCheckVerified />
-        <Text className="text-white text-2xl font-bold text-center">
+        <Text className="text-white text-2xl font-ls-bold text-center">
           passwordChanged.title
         </Text>
         <Text className="text-white text-base text-center">

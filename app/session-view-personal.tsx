@@ -7,18 +7,19 @@ import IcPencil from "@/components/icons/pencil";
 import { SessionCard } from "@/components/session";
 import { Slider } from "@/components/slider";
 import Text from "@/components/text";
-import { mockExercises } from "@/constants/mock";
-import { Exercise } from "@/types";
-import clsx from "clsx";
+import getExercises from "@/constants/mock";
+import { ExerciseItem } from "@/types";
+import { clsx } from "clsx";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
+const exercises = getExercises({ isGridView: false });
 const sessionData: {
   title: string;
   description: string;
-  exercises: Exercise[];
+  exercises: ExerciseItem[];
   haveNote: boolean;
 }[] = [
   {
@@ -32,14 +33,14 @@ const sessionData: {
     title: "Hyrox Grand Palais",
     description:
       "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-    exercises: mockExercises,
+    exercises: exercises,
     haveNote: false,
   },
   {
     title: "Récupération",
     description:
       "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-    exercises: mockExercises,
+    exercises: exercises,
     haveNote: false,
   },
 ];
@@ -95,7 +96,7 @@ export default function SessionViewPersonal() {
               <Pressable onPress={router.back} className="p-2">
                 <IcArrowLeft />
               </Pressable>
-              <Text className="text-lg font-bold text-secondary flex-1">
+              <Text className="text-lg font-ls-bold text-secondary flex-1">
                 Hyrox Paris Grand palais
               </Text>
               <IcPencil size={24} />

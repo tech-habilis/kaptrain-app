@@ -1,4 +1,4 @@
-import { Exercise } from "@/types";
+import { ExerciseItem } from "@/types";
 import { Pressable, ScrollView, View } from "react-native";
 import Text from "./text";
 import IcClose from "./icons/close";
@@ -7,9 +7,9 @@ export default function ExerciseCards({
   exercises,
   onRemoveExercise,
 }: {
-  exercises: Exercise[];
+  exercises: ExerciseItem[];
   onRemoveExercise: (id: string) => void;
-  }) {
+}) {
   if (exercises.length === 0) {
     return null;
   }
@@ -55,7 +55,10 @@ export default function ExerciseCards({
               {/* Exercise Title */}
               <View className="absolute bottom-0 left-0 right-0 p-3">
                 <View className="flex-row items-center gap-1">
-                  <Text className="text-xs font-semibold text-white">
+                  <Text
+                    className="text-xs font-semibold text-white"
+                    numberOfLines={1}
+                  >
                     {exercise.title}
                   </Text>
                 </View>

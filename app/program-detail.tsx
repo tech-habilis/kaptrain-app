@@ -58,7 +58,7 @@ export default function ProgramDetail() {
         <Pressable onPress={router.back}>
           <IcArrowLeft />
         </Pressable>
-        <Text className="font-bold text-lg flex-1">Programmation</Text>
+        <Text className="font-ls-bold text-lg flex-1">Programmation</Text>
       </View>
 
       <Text className="text-subtleText text-base mt-1">

@@ -1,4 +1,4 @@
-import { ComponentProps, useRef, useState } from "react";
+import { ComponentProps, useRef, useState, ReactNode } from "react";
 import { Dimensions, View } from "react-native";
 import Button from "./button";
 import BottomSheetModal from "./bottom-sheet-modal";
@@ -20,6 +20,10 @@ type DatePickerProps = ComponentProps<typeof Input> & {
   locale?: string;
   error?: string;
   showIcon?: boolean;
+  renderTrigger?: (props: {
+    onPress: () => void;
+    formattedDate: string | undefined;
+  }) => ReactNode;
 }
 
 export default function DatePicker({
@@ -34,6 +38,7 @@ export default function DatePicker({
   locale = "fr",
   error,
   showIcon = true,
+  renderTrigger,
   ...inputProps
 }: DatePickerProps) {
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
@@ -62,28 +67,22 @@ export default function DatePicker({
   return (
     <>
       <View className={cn("flex flex-col gap-2", className)}>
-        {/*<Button
-          text={selectedDate ? formatDisplayDate(selectedDate) : label}
-          type="secondaryV2"
-          className={clsx("justify-between", {
-            "border-error2": !!error
-          })}
-          textClassName="font-normal text-base"
-          rightIcon={<IcCalendar />}
-          onPress={() => {
-            setTempDate(selectedDate);
-            bottomSheetModalRef.current?.present();
-          }}
-        />*/}
-        <Input
-          label={label}
-          rightIcon={showIcon ? <IcCalendar /> : null}
-          value={formatDisplayDate(selectedDate)}
-          error={error}
-          asPressable
-          onPress={showDatepicker}
-          {...inputProps}
-        />
+        {renderTrigger ? (
+          renderTrigger({
+            onPress: showDatepicker,
+            formattedDate: formatDisplayDate(selectedDate),
+          })
+        ) : (
+          <Input
+            label={label}
+            rightIcon={showIcon ? <IcCalendar /> : null}
+            value={formatDisplayDate(selectedDate)}
+            error={error}
+            asPressable
+            onPress={showDatepicker}
+            {...inputProps}
+          />
+        )}
       </View>
 
       <BottomSheetModal
