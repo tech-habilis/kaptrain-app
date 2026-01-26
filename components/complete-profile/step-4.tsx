@@ -123,7 +123,7 @@ export function Step4() {
         </Pressable>
       </View>
 
-      <ScrollView className="mt-4">
+      <ScrollView className="mt-4 mb-safe pb-28 android:pb-34">
         <Choices
           data={filteredChoices}
           type="multipleChoice"

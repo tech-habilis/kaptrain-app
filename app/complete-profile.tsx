@@ -10,7 +10,7 @@ import { ROUTE } from "@/constants/route";
 import cn from "@/utilities/cn";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { useSession } from "@/contexts/auth-context";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useEffect } from "react";
@@ -47,10 +47,12 @@ const STEP_CONFIG = {
 
 export default function CompleteProfile() {
   const { session } = useSession();
+  const { step: stepParam } = useLocalSearchParams();
   const {
     currentStep,
     nextStep,
     previousStep,
+    setCurrentStep,
     validateStep,
     formData,
     saveStep,
@@ -71,6 +73,17 @@ export default function CompleteProfile() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
+
+  // FOR DEV ONLY; handle step parameter from URL (?step=N)
+  useEffect(() => {
+    if (__DEV__ && stepParam) {
+      const step = parseInt(stepParam.toString(), 10);
+      if (!isNaN(step) && step >= 1 && step <= 5) {
+        setCurrentStep(step);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepParam]);
 
   const handleContinue = async () => {
     if (!validateStep(currentStep)) {
