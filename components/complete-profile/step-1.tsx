@@ -158,7 +158,7 @@ export function Step1() {
         }
       />
 
-      <View className="mb-28">
+      <View className="mb-28 android:mb-34">
         <Text className="text-accent font-medium text-sm">
           completeProfile.step1.gender
         </Text>
