@@ -16,12 +16,13 @@ import DatePicker from "@/components/date-picker";
 import { useProfileStore } from "@/stores/profile-store";
 import { useSession } from "@/contexts/auth-context";
 import { StatusBar } from "expo-status-bar";
-import * as ImagePicker from "expo-image-picker";
+import ImagePicker from "react-native-image-crop-picker";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import { toast } from "@/components/toast";
 import { editProfileSchema } from "@/utilities/validation/edit-profile-schema";
 import { phoneSchema } from "@/utilities/validation/schema";
+import { IMAGE_PICKER_OPTIONS } from "@/constants/misc";
 
 export default function EditProfile() {
   const { t } = useTranslation();
@@ -130,28 +131,14 @@ export default function EditProfile() {
     try {
       setIsPickerLoading(true);
 
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          t("completeProfile.step1.permissionDenied") || "Permission needed",
-          t("completeProfile.step1.permissionMessage") ||
-            "Sorry, we need camera roll permissions to make this work.",
-        );
+      const result = await ImagePicker.openPicker(IMAGE_PICKER_OPTIONS);
+
+      setLocalAvatarUri(result.path);
+    } catch (error: any) {
+      // User cancelled the picker
+      if (error.code === "E_PICKER_CANCELLED") {
         return;
       }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setLocalAvatarUri(result.assets[0].uri);
-      }
-    } catch (error) {
       console.error("Error picking image:", error);
       Alert.alert(
         t("completeProfile.step1.errorTitle") || "Error",

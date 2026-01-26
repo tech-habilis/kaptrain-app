@@ -11,8 +11,9 @@ import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { View, Image, Pressable, Alert } from "react-native";
 import { useState, useMemo } from "react";
 import dayjs from "dayjs";
-import * as ImagePicker from "expo-image-picker";
+import ImagePicker from "react-native-image-crop-picker";
 import { phoneSchema } from "@/utilities/validation/schema";
+import { IMAGE_PICKER_OPTIONS } from "@/constants/misc";
 
 export function Step1() {
   const { t } = useTranslation();
@@ -45,33 +46,16 @@ export function Step1() {
     try {
       setIsPickerLoading(true);
 
-      // Request permission
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          t("completeProfile.step1.permissionDenied") || "Permission needed",
-          t("completeProfile.step1.permissionMessage") ||
-            "Sorry, we need camera roll permissions to make this work.",
-        );
+      const result = await ImagePicker.openPicker(IMAGE_PICKER_OPTIONS);
+
+      // Store local URI for preview and upload
+      updateStep1({ avatarUrl: result.path });
+      setLocalAvatarUri(result.path);
+    } catch (error: any) {
+      // User cancelled the picker
+      if (error.code === "E_PICKER_CANCELLED") {
         return;
       }
-
-      // Pick image
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri;
-        // Store local URI for preview and upload
-        updateStep1({ avatarUrl: uri });
-        setLocalAvatarUri(uri);
-      }
-    } catch (error) {
       console.error("Error picking image:", error);
       Alert.alert(
         t("completeProfile.step1.errorTitle") || "Error",

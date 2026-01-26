@@ -64,9 +64,10 @@
       "expo-web-browser",
       "@react-native-google-signin/google-signin",
       [
-        "expo-image-picker",
+        "expo-plugin-image-crop-picker",
         {
-          "photosPermission": "The app accesses your photos to let you use them as profile picture."
+          "photosPermission": "The app accesses your photos to let you use them as profile picture.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ],
       "@rnrepo/expo-config-plugin"
