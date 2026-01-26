@@ -23,30 +23,37 @@ export function Step4() {
   const choices: TChoice[] = useMemo(
     () => [
       {
+        id: "id-sports.athletics",
         text: "sports.athletics",
         leftIcon: <IcCycling />,
       },
       {
+        id: "id-sports.rowing",
         text: "sports.rowing",
         leftIcon: <IcRowing />,
       },
       {
+        id: "id-sports.basketball",
         text: "sports.basketball",
         leftIcon: <IcBasketball />,
       },
       {
+        id: "id-sports.crossfit",
         text: "sports.crossfit",
         leftIcon: <IcCrossfit />,
       },
       {
+        id: "id-sports.cycling",
         text: "sports.cycling",
         leftIcon: <IcCycling />,
       },
       {
+        id: "id-sports.bodybuilding",
         text: "sports.bodybuilding",
         leftIcon: <IcBodybuilding />,
       },
       {
+        id: "id-sports.yoga",
         text: "sports.yoga",
         leftIcon: <IcYoga />,
       },
