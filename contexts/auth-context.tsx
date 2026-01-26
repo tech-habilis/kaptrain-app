@@ -428,8 +428,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       toast.error(result.error.message);
     } else {
       setSession(supabaseUtils.toLocalSession(result.data.session));
-      router.dismissAll();
-      router.push(ROUTE.EMAIL_VERIFIED);
+      router.replace(ROUTE.EMAIL_VERIFIED);
     }
   };
 

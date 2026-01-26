@@ -14,7 +14,6 @@ import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useEffect } from "react";
-import { BlurView } from "expo-blur";
 import { toast } from "@/components/toast";
 import FadedBottomBar from "@/components/faded-bottom-bar";
 
@@ -95,7 +94,6 @@ export default function CompleteProfile() {
       nextStep();
     } else {
       // All steps completed, navigate to profile completed
-      router.dismissAll();
       router.replace(ROUTE.PROFILE_COMPLETED);
     }
   };

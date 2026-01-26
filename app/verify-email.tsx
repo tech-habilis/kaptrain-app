@@ -34,7 +34,7 @@ function Box({
       )}
       style={{ width: 300 / Config.OTP_LENGTH }}
     >
-      <Text className={cn("text-[24px] text-secondary font-bold")}>
+      <Text className={cn("text-lg text-secondary font-ls-bold")}>
         {char ?? ""}
       </Text>
     </View>
