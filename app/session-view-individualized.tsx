@@ -88,6 +88,17 @@ export default function SessionViewIndividualized() {
   );
   const [error, setError] = useState<string | null>(null);
 
+  // Calculate duration in minutes
+  const durationMinutes = session?.duration_seconds
+    ? Math.round(session.duration_seconds / 60)
+    : null;
+
+  const sessionSportName = useMemo(() => {
+    const sportName = session?.sport?.name_fr ?? "Séance";
+    const duration = durationMinutes ? ` - Environ ${durationMinutes} minutes` : "";
+    return `${sportName} ${duration}`;
+  }, [session?.sport?.name_fr, durationMinutes]);
+
   const sessionExerciseToExerciseItem = useMemo(() => {
     return (sessionExercise: SessionExercise) => {
       return {
@@ -274,11 +285,6 @@ export default function SessionViewIndividualized() {
     );
   }
 
-  // Calculate duration in minutes
-  const durationMinutes = session.duration_seconds
-    ? Math.round(session.duration_seconds / 60)
-    : null;
-
   // Format scheduled date
   const formattedDate = session.scheduled_date
     ? new Date(session.scheduled_date).toLocaleDateString("fr-FR", {
@@ -335,8 +341,7 @@ export default function SessionViewIndividualized() {
             </View>
             <Text className="text-sm text-text mt-1">
               {/* TODO: check why sport is empty */}
-              {(session.sport?.name_fr ?? "Séance") || "Séance"}{" "}
-              {durationMinutes && `- Environ ${durationMinutes} minutes`}
+              {sessionSportName}
             </Text>
             {session.description && (
               <Text className="text-sm text-subtleText mt-2">
