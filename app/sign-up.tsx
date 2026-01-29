@@ -57,14 +57,14 @@ export default function SignIn() {
         <View className="px-4 pb-6 pt-2">
           <View className="flex flex-row gap-[4.5px] items-center pt-safe">
             <IcKaptrain size={18} />
-            <Text className="text-white text-lg font-bold uppercase">
+            <Text className="text-white text-lg font-ls-extrabold uppercase">
               {appName}
             </Text>
           </View>
           <Text className="text-white text-2xl font-ls-bold mt-3">
             signUp.noAccountSignUp
           </Text>
-          <View className="flex flex-row items-center gap-1.5 mt-4">
+          <View className="flex flex-row items-center gap-1.5">
             <Text className="text-white text-sm">
               signUp.alreadyHaveAccount
             </Text>

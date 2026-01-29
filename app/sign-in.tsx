@@ -41,7 +41,7 @@ export default function SignIn() {
               {appName}
             </Text>
           </View>
-          <Text className="text-white text-2xl font-ls-bold">
+          <Text className="text-white text-2xl font-ls-bold mt-3">
             signIn.loginToYourAccount
           </Text>
           <View className="flex flex-row items-center gap-1.5">

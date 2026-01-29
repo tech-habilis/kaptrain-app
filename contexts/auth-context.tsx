@@ -378,7 +378,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
     });
 
     if (error) {
-      toast.error(error.message);
+      let errorMessage = error.message;
+
+      if (error.message.includes("User already registered") ||
+          error.message.includes("user_already_exists")) {
+        errorMessage = t("error.userAlreadyExists");
+      } else if (error.message.includes("email_exists")) {
+        errorMessage = t("error.emailExists");
+      }
+
+      toast.error(errorMessage);
       setLoggingInWith(null);
       return;
     }
