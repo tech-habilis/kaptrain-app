@@ -9,6 +9,7 @@ interface DayProps {
   day: string;
   isCurrentMonth?: boolean;
   isToday?: boolean;
+  isSelected?: boolean;
   activities?: ActivityStatus[];
   onPress?: () => void;
 }
@@ -24,6 +25,7 @@ export function Day({
   day,
   isCurrentMonth = true,
   isToday = false,
+  isSelected = false,
   activities = [],
   onPress,
 }: DayProps) {
@@ -32,24 +34,16 @@ export function Day({
       onPress={onPress}
       disabled={!onPress}
       className={cn(
-        "w-8 h-8 items-center justify-center rounded-full relative",
+        "size-8 items-center justify-center rounded-full relative",
         clsx({
-          "bg-secondary": isToday,
+          "bg-secondary": isSelected,
           "opacity-60": !isCurrentMonth,
-        })
+        }),
       )}
     >
       {/* Activity indicators */}
       {activities.length > 0 && (
-        <View
-          className={cn(
-            "absolute flex-row gap-0.75",
-            clsx({
-              "top-0": activities.length <= 2,
-              "-top-0.5": activities.length === 3,
-            })
-          )}
-        >
+        <View className="absolute flex-row gap-0.75 top-0">
           {activities.slice(0, 3).map((status, index) => (
             <View
               key={index}
@@ -65,10 +59,11 @@ export function Day({
         className={cn(
           "text-sm font-medium",
           clsx({
-            "text-white": isToday,
-            "text-text": !isToday && isCurrentMonth,
+            "text-white": isSelected,
+            "text-primary font-bold": isToday && !isSelected,
+            "text-text": !isSelected && !isToday && isCurrentMonth,
             "text-subtleText": !isCurrentMonth,
-          })
+          }),
         )}
       >
         {day}

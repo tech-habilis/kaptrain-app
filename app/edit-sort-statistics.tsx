@@ -124,7 +124,7 @@ export default function EditSortStatistics() {
             <Pressable onPress={router.back}>
               <IcArrowLeft />
             </Pressable>
-            <Text className="font-bold text-lg">Modifier mes statistiques</Text>
+            <Text className="font-ls-bold text-lg">Modifier mes statistiques</Text>
           </View>
 
           <Text className="text-subtleText mb-6">
@@ -168,7 +168,7 @@ export default function EditSortStatistics() {
       >
         {selectedStatistic ? (
           <View>
-            <Text className="text-lg font-bold text-secondary">
+            <Text className="text-lg font-ls-bold text-secondary">
               {selectedStatistic.title}
             </Text>
             <Text className="text-subtleText text-base">

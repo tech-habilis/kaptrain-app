@@ -8,11 +8,12 @@ import { Choices } from "./choices";
 import Text from "./text";
 import { TChoice } from "@/types";
 import Input from "./input";
+import { useTranslation } from "react-i18next";
 
 interface DropdownProps {
-  label: string;
+  label?: string;
   options: TChoice[];
-  selectedOption: TChoice;
+  selectedOption?: TChoice;
   onSelect: (option: TChoice) => void;
   className?: string;
   textClassName?: string;
@@ -24,6 +25,10 @@ interface DropdownProps {
   type?: "default" | "input";
   modalHeight?: string | number;
   itemType?: ComponentProps<typeof Choices>["type"];
+  formatLabel?: (choice: TChoice) => string;
+  placeholder?: string;
+  inputWrapperClassName?: ComponentProps<typeof Input>["inputWrapperClassName"];
+  error?: string;
 }
 
 export default function Dropdown({
@@ -40,36 +45,49 @@ export default function Dropdown({
   type = "default",
   alwaysShowLabel = false,
   modalHeight = "65%",
-  itemType = 'radio',
+  itemType = "radio",
+  formatLabel,
+  inputWrapperClassName,
+  placeholder,
+  error,
 }: DropdownProps) {
+  const { t } = useTranslation();
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
 
   const handleSelect = (option: TChoice) => {
     onSelect(option);
-    setTimeout(() => bottomSheetModalRef.current?.dismiss(), 300)
+    setTimeout(() => bottomSheetModalRef.current?.dismiss(), 300);
   };
 
   const renderShownText = () => {
-    if (alwaysShowLabel && selectedOption.text !== undefined) {
+    if (
+      label !== undefined &&
+      alwaysShowLabel &&
+      selectedOption?.text !== undefined
+    ) {
       return (
         <View className="gap-1">
           <Text className="text-subtleText text-xs">{label}</Text>
           <Text className="text-sm font-semibold text-text">
-            {selectedOption.text}
+            {formatLabel ? formatLabel(selectedOption) : selectedOption.text}
           </Text>
         </View>
       );
     }
 
-    if (selectedOption.text !== undefined) {
+    if (selectedOption?.text !== undefined) {
       return (
         <Text className="text-sm font-semibold text-text">
-          {selectedOption.text}
+          {formatLabel ? formatLabel(selectedOption) : selectedOption.text}
         </Text>
       );
     }
 
-    return <Text className="text-sm text-subtleText">{label}</Text>;
+    if (label) {
+      return <Text className="text-sm text-subtleText">{label}</Text>;
+    }
+
+    return null;
   };
 
   return (
@@ -87,10 +105,21 @@ export default function Dropdown({
         </Button>
       ) : (
         <Input
-          readOnly
           label={label}
-          value={selectedOption.text || ""}
+          value={
+            selectedOption
+              ? formatLabel
+                ? formatLabel(selectedOption)
+                : t(selectedOption?.text || "")
+              : undefined
+          }
+          asPressable
           onPress={() => bottomSheetModalRef.current?.present()}
+          inputClassName={textClassName}
+          rightIcon={rightIcon}
+          inputWrapperClassName={inputWrapperClassName}
+          placeholder={placeholder}
+          error={error}
         />
       )}
 
@@ -109,7 +138,7 @@ export default function Dropdown({
           </Text>
         )}
 
-        <View className="mt-4 pb-safe">
+        <View className="mt-4 pb-safe flex-1">
           <Choices
             numColumns={1}
             data={options}

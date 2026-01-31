@@ -1,10 +1,9 @@
 import Button from "@/components/button";
-import IcArrowLeft from "@/components/icons/arrow-left";
 import IcPlus from "@/components/icons/plus";
 import Text from "@/components/text";
 import { ColorConst } from "@/constants/theme";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -15,183 +14,289 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Dropdown from "@/components/dropdown";
-import { Exercise, TChoice } from "@/types";
+import { TChoice } from "@/types";
 import BottomSheetModal from "@/components/bottom-sheet-modal";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import Input from "@/components/input";
-import IcSearch from "@/components/icons/search";
-import IcFilter from "@/components/icons/filter";
-import getExercises, { mockExercises } from "@/constants/mock";
-import { Choices } from "@/components/choices";
+import getExercises, {
+  zoneReference,
+  zoneReferenceWithHeader,
+} from "@/constants/mock";
 import Tabs from "@/components/tabs";
 import IcInfoCircle from "@/components/icons/info-circle";
 import { clsx } from "clsx";
 import ExerciseCards from "@/components/exercise-cards";
+import BasicScreen from "@/components/basic-screen";
+import { TimerPickerModal } from "react-native-timer-picker";
+import IcChevronDown from "@/components/icons/chevron-down";
+import FilterAndSelectModal from "@/components/filter-and-select-modal";
+import ConfirmActionModal from "@/components/confirm-action-modal";
+import { useCreateSessionStore } from "@/stores/create-session-store";
+import type { SessionBlockData } from "@/stores/create-session-store";
+import { supabase } from "@/utilities/supabase";
 
 export default function AddBlock() {
-  const { mode } = useLocalSearchParams();
+  const { mode, blockId } = useLocalSearchParams();
   const isEditing = mode === "edit";
+  const createSessionStore = useCreateSessionStore();
 
-  const [blockTitle, setBlockTitle] = useState<string>(
-    "Travail de l'endurance aérobie haute, zone Z4 (~95 % de la VMA)",
+  // Validation errors
+  const [errors, setErrors] = useState<{
+    title?: string;
+    description?: string;
+    intensity?: string;
+    exercises?: string;
+  }>({});
+
+  // Delete confirmation state
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  const [blockTitle, setBlockTitle] = useState<string>("");
+  const [blockDescription, setBlockDescription] = useState<string>("");
+
+  const [intensityOptions, setIntensityOptions] = useState<TChoice[]>([]);
+  const [selectedIntensity, setSelectedIntensity] = useState<TChoice>();
+
+  // Fetch intensity options from Supabase
+  useEffect(() => {
+    const fetchIntensityOptions = async () => {
+      const { data, error } = await supabase
+        .from("intensity_references")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching intensity options:", error);
+        return;
+      }
+
+      const options: TChoice[] = (data || []).map((item: any) => ({
+        id: item.id,
+        text: item.name_fr,
+      }));
+
+      setIntensityOptions(options);
+
+      // Set default intensity to "Aucun" (first option) if not already set
+      if (!selectedIntensity && options.length > 0) {
+        setSelectedIntensity(options[0]);
+      }
+    };
+
+    fetchIntensityOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const durationOrDistanceTabs = ["Temps", "Distance"];
+  const [tabDurationOrDistance, setTabDurationOrDistance] = useState(
+    durationOrDistanceTabs[0],
   );
-  const [blockDescription, setBlockDescription] = useState<string>(
-    "Travail ciblé sur l'endurance aérobie haute.\n\nL Répétitions à 95 % de la VMA :\nL'objectif est de maintenir une allure soutenue sur 400 m avec un temps de passage autour de 1'30. \nVeillez à conserver une bonne technique de course tout au long des répétitions. \n\n→ Récupération passive ou active selon le niveau de fatigue. Adapté aux objectifs de développement du seuil aérobie.",
-  );
 
-  const intensityOptions: TChoice[] = [
-    { text: "Aucun" },
-    { text: "FORCE (%RM)" },
-    { text: "Cardiaque (%FC Max)" },
-    { text: "Puissance (%PMA)" },
-    { text: "Puissance (%FTP)" },
-    { text: "Vitesse (%VMA)" },
-    { text: "Vitesse (Vitesse brute)" },
-    { text: "Ressenti (RPE physique)" },
-    { text: "Ressenti (RPE cognitif)" },
-  ];
+  const [series, setSeries] = useState<string>();
+  const [recovery, setRecovery] = useState<string>();
 
-  const [selectedIntensity, setSelectedIntensity] = useState<TChoice>(
-    intensityOptions[0],
-  );
-  const [vmaValue, setVmaValue] = useState<string>("");
-  const [exercises, setExercises] = useState<Exercise[]>(mockExercises);
+  const defaultVmaDuration = {
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  };
+  const [showInputTime, setShowInputTime] = useState(false);
+  const [vmaDuration, setVmaDuration] = useState<typeof defaultVmaDuration>();
+  const [vmaDistance, setVmaDistance] = useState("");
 
-  const reference = [
-    {
-      zone: "Zones",
-      percentage: "Pourcentage VMA",
-      targetPace: "Allure cible (km/h)",
-      color: ColorConst.secondary,
-    },
-    {
-      zone: "Z1",
-      percentage: "30-50%",
-      targetPace: "9:00 – 6:00",
-      color: ColorConst.success,
-    },
-    {
-      zone: "Z2",
-      percentage: "51-70%",
-      targetPace: "5:53 – 4:17",
-      color: "#CEA700",
-    },
-    {
-      zone: "Z3",
-      percentage: "71-91%",
-      targetPace: "4:13 – 3:45",
-      color: "#DB8000",
-    },
-    {
-      zone: "Z4",
-      percentage: "85-105%",
-      targetPace: "3:42 – 3:18",
-      color: "#E65B08",
-    },
-    {
-      zone: "Z5",
-      percentage: "91-105%",
-      targetPace: "3:18 – 3:00",
-      color: "#E35D56",
-    },
-    { zone: "Z6", percentage: "150%", targetPace: "2:30", color: "#E04D60" },
-    { zone: "Z7", percentage: "250%", targetPace: "1:30", color: "#BA0003" },
-  ];
+  const zones: TChoice[] = zoneReference.slice(1).map((x) => ({
+    id: x.id,
+    text: x.zone,
+    secondaryText: x.percentage,
+  }));
+  const [selectedZone, setSelectedZone] = useState<TChoice>();
 
   const referenceModalRef = useRef<BottomSheetModalType>(null);
-  const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<TChoice[]>([]);
+  const [showAddExerciseModal, setShowAddExerciseModal] = useState(false);
 
   const availableExercises = getExercises({ isGridView: true });
   const exerciseChoices: TChoice[] = availableExercises.map((ex) => ({
+    id: ex.id,
     text: ex.title,
     leftIcon: ex.icon,
   }));
 
   const removeExercise = (id: string) => {
-    setExercises(exercises.filter((ex) => ex.id !== id));
+    setSelectedExercises((x) => x.filter((y) => y.id !== id));
   };
 
-  const addSelectedExercises = () => {
-    const newExercises = selectedExercises.map((choice) => {
-      const exercise = availableExercises.find(
-        (ex) => ex.title === choice.text,
+  // Load block data when editing
+  useEffect(() => {
+    if (isEditing && blockId) {
+      const block = createSessionStore.sessionData?.blocks.find(
+        (b) => b.id === blockId,
       );
-      return {
-        id: exercise?.id || String(Date.now()),
-        title: choice.text,
-        image: exercise?.image || "",
-      };
-    });
-    setExercises([...exercises, ...newExercises]);
-    setSelectedExercises([]);
-    bottomSheetModalRef.current?.dismiss();
+      if (block) {
+        setBlockTitle(block.title);
+        setBlockDescription(block.description);
+        setSelectedIntensity(block.intensity);
+        setSelectedExercises(block.exercises);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, blockId]);
+
+  const renderDurationOrDistanceTabs = () => {
+    if (tabDurationOrDistance === "Distance") {
+      return (
+        <Input
+          value={vmaDistance}
+          onChangeText={setVmaDistance}
+          placeholder="0 km"
+          inputClassName="text-center"
+          translate={false}
+          keyboardType="decimal-pad"
+          returnKeyType="done"
+        />
+      );
+    }
+
+    return (
+      <>
+        <Input
+          value={
+            vmaDuration
+              ? Object.values(vmaDuration)
+                  .map((x) => x.toString().padStart(2, "0"))
+                  .join(":")
+              : undefined
+          }
+          asPressable
+          onPress={() => setShowInputTime(true)}
+          placeholder="00:00:00"
+          inputClassName="text-center"
+          translate={false}
+        />
+
+        <TimerPickerModal
+          closeOnOverlayPress
+          modalProps={{
+            overlayOpacity: 0.2,
+          }}
+          onCancel={() => setShowInputTime(false)}
+          onConfirm={({ hours, minutes, seconds }) => {
+            setVmaDuration({ hours, minutes, seconds });
+            setShowInputTime(false);
+          }}
+          styles={{
+            theme: "light",
+          }}
+          visible={showInputTime}
+          setIsVisible={() => setShowInputTime(false)}
+          initialValue={defaultVmaDuration}
+          hideDays
+        />
+      </>
+    );
+  };
+
+  const validateAndSave = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    // Validate title
+    if (!blockTitle || blockTitle.trim().length === 0) {
+      newErrors.title = "Le titre du bloc est requis";
+    }
+
+    // Validate description
+    if (!blockDescription || blockDescription.trim().length === 0) {
+      newErrors.description = "La description du bloc est requise";
+    }
+
+    // Validate intensity
+    if (!selectedIntensity?.text) {
+      newErrors.intensity = "La référence d'intensité est requise";
+    }
+
+    // Validate exercises
+    if (selectedExercises.length === 0) {
+      newErrors.exercises = "Au moins un exercice est requis";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="auto" />
-      {/* Header */}
-      <View className="px-4 pt-safe">
-        <View className="flex-row items-center py-2">
-          <Pressable onPress={router.back} className="p-2">
-            <IcArrowLeft color={ColorConst.secondary} />
-          </Pressable>
-          <Text className="text-lg font-bold text-secondary flex-1 ml-1">
-            {isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
-          </Text>
-        </View>
-      </View>
+    <BasicScreen
+      title={isEditing ? "Modifier le bloc" : "Ajouter un bloc"}
+      headerClassName="bg-white"
+    >
+      <StatusBar style="dark" />
 
       {/* Main Content */}
       <ScrollView
         className="flex-1"
-        contentContainerClassName="px-4 pb-32 pt-6"
+        contentContainerClassName="px-4 pb-38"
         showsVerticalScrollIndicator={false}
       >
         {/* Block Title Input */}
         <View className="gap-3 mb-6">
-          <View className="flex-row items-start" style={{ minHeight: 48 }}>
+          <View className="flex-row items-start">
             <TextInput
               value={blockTitle}
-              onChangeText={setBlockTitle}
+              onChangeText={(text) => {
+                setBlockTitle(text);
+                setErrors((prev) => ({ ...prev, title: undefined }));
+              }}
               placeholder="Titre du bloc"
               placeholderTextColor={ColorConst.subtleText}
               multiline
               className="flex-1 text-base font-semibold text-secondary leading-6"
-              style={{ minHeight: 48 }}
             />
           </View>
+          {errors.title && (
+            <Text className="text-error text-sm">{errors.title}</Text>
+          )}
 
           {/* Block Description */}
           <TextInput
             value={blockDescription}
-            onChangeText={setBlockDescription}
+            onChangeText={(text) => {
+              setBlockDescription(text);
+              setErrors((prev) => ({ ...prev, description: undefined }));
+            }}
             placeholder="Description du bloc"
             placeholderTextColor={ColorConst.subtleText}
             multiline
             className="text-base text-subtleText leading-6"
             style={{ minHeight: 120 }}
           />
+          {errors.description && (
+            <Text className="text-error text-sm">{errors.description}</Text>
+          )}
         </View>
 
         {/* Intensity Reference Dropdown */}
         <View className="mb-6">
           <Dropdown
+            modalHeight="90%"
             label="Référence d'intensité"
             options={intensityOptions}
             selectedOption={selectedIntensity}
-            onSelect={setSelectedIntensity}
+            onSelect={(choice) => {
+              setSelectedIntensity(choice);
+              setErrors((prev) => ({ ...prev, intensity: undefined }));
+            }}
             modalTitle="Choisis une référence d'intensité"
             size="large"
             className="justify-between"
             alwaysShowLabel
           />
+          {errors.intensity && (
+            <Text className="text-error text-sm mt-2">{errors.intensity}</Text>
+          )}
         </View>
 
         {/* VMA Form - Show when Vitesse (%VMA) is selected */}
-        {selectedIntensity.text === "Vitesse (%VMA)" && (
+        {selectedIntensity?.text === "Vitesse (%VMA)" && (
           <View className="mb-6 gap-2">
             <View className="flex-row items-center gap-2">
               <Text>Vitesse maximale aérobie (VMA)</Text>
@@ -204,36 +309,52 @@ export default function AddBlock() {
                 placeholder="0"
                 type="unit"
                 unit="series"
-                value={vmaValue}
-                onChangeText={setVmaValue}
+                value={series}
+                onChangeText={setSeries}
                 className="grow"
                 inputClassName="text-base font-normal"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
               />
 
               <Input
                 placeholder="0s"
                 type="unit"
                 unit="Récup"
-                value={vmaValue}
-                onChangeText={setVmaValue}
+                value={recovery}
+                onChangeText={setRecovery}
                 className="grow"
                 inputClassName="text-base font-normal"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
               />
             </View>
 
             <Tabs
-              tabs={["Temps", "Distance"]}
-              selected="Temps"
-              onSelected={() => null}
+              tabs={durationOrDistanceTabs}
+              selected={tabDurationOrDistance}
+              onSelected={setTabDurationOrDistance}
             />
-            <Input placeholder="00:00:00:00" inputClassName="text-center" />
+
+            {renderDurationOrDistanceTabs()}
 
             <Tabs
               tabs={["Zone", "%"]}
               selected="Zone"
               onSelected={() => null}
             />
-            <Input placeholder="Z1 30-50%" inputClassName="text-center" />
+            <Dropdown
+              type="input"
+              placeholder="Z1 30-50%"
+              options={zones}
+              selectedOption={selectedZone}
+              onSelect={setSelectedZone}
+              modalHeight="90%"
+              rightIcon={<IcChevronDown />}
+              formatLabel={(choice) => `${choice.text} ${choice.secondaryText}`}
+              inputWrapperClassName="justify-center"
+              textClassName="flex-none"
+            />
 
             <BottomSheetModal
               ref={referenceModalRef}
@@ -256,28 +377,37 @@ export default function AddBlock() {
               </View>
               <FlatList
                 contentContainerClassName="mt-6"
-                data={reference}
+                data={zoneReferenceWithHeader}
                 renderItem={({ item, index }) => (
                   <View className="flex-row items-center overflow-hidden">
                     <Text
-                      className={clsx("border border-stroke py-1 px-4 w-1/5", {
-                        "font-medium text-secondary": index === 0,
-                      })}
+                      className={clsx(
+                        "border border-stroke py-1 px-4 w-[22%] h-full",
+                        {
+                          "font-medium text-secondary": index === 0,
+                        },
+                      )}
                       style={{ color: item.color }}
                     >
                       {item.zone}
                     </Text>
                     <Text
-                      className={clsx("border border-stroke py-1 px-4 w-2/5", {
-                        "font-medium text-secondary": index === 0,
-                      })}
+                      className={clsx(
+                        "border border-stroke py-1 px-4 w-[35%] h-full",
+                        {
+                          "font-medium text-secondary": index === 0,
+                        },
+                      )}
                     >
                       {item.percentage}
                     </Text>
                     <Text
-                      className={clsx("border border-stroke py-1 px-4 w-2/5", {
-                        "font-medium text-secondary": index === 0,
-                      })}
+                      className={clsx(
+                        "border border-stroke py-1 px-4 w-[42%] h-full",
+                        {
+                          "font-medium text-secondary": index === 0,
+                        },
+                      )}
                     >
                       {item.targetPace}
                     </Text>
@@ -290,11 +420,22 @@ export default function AddBlock() {
 
         {/* Exercises Section */}
         <View className="gap-3">
-          {/* Exercise Cards - Horizontal Scroll */}
           <ExerciseCards
-            exercises={exercises}
-            onRemoveExercise={(id) => removeExercise(id)}
+            exercises={selectedExercises.map((choice) => ({
+              id: choice.id,
+              title: choice.text,
+              image: require("../assets/images/exercise-example-1.png"),
+              isFavorite: false,
+            }))}
+            onRemoveExercise={(id) => {
+              removeExercise(id);
+              setErrors((prev) => ({ ...prev, exercises: undefined }));
+            }}
           />
+
+          {errors.exercises && (
+            <Text className="text-error text-sm">{errors.exercises}</Text>
+          )}
 
           {/* Add Exercise Button */}
           <Button
@@ -302,9 +443,7 @@ export default function AddBlock() {
             size="small"
             text="Ajouter des exercices"
             leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-            onPress={() => {
-              bottomSheetModalRef.current?.present();
-            }}
+            onPress={() => setShowAddExerciseModal(true)}
           />
         </View>
       </ScrollView>
@@ -314,7 +453,7 @@ export default function AddBlock() {
         <Button
           type="secondary"
           text="Supprimer le bloc"
-          onPress={() => {}}
+          onPress={() => setShowDeleteConfirmation(true)}
           className={clsx({
             hidden: !isEditing,
           })}
@@ -325,66 +464,57 @@ export default function AddBlock() {
           type="primary"
           size="large"
           onPress={() => {
-            // Save block and go back
-            router.back();
+            if (validateAndSave()) {
+              // Save block to store
+              const blockData: SessionBlockData = {
+                id: isEditing && blockId ? (blockId as string) : String(Date.now()),
+                title: blockTitle,
+                description: blockDescription,
+                intensity: selectedIntensity!,
+                exercises: selectedExercises,
+              };
+
+              if (isEditing && blockId) {
+                createSessionStore.updateBlock(blockId as string, blockData);
+              } else {
+                createSessionStore.addBlock(blockData);
+              }
+
+              // Go back to create-session
+              router.back();
+            }
           }}
+          className="mb-6"
         />
       </View>
 
-      {/* Exercise Selection Bottom Sheet */}
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        name="exercise-selection"
-        snapPoints={["90%"]}
-        className="pb-0"
-      >
-        <View className="flex-1">
-          {/* Search and Filter */}
-          <View className="gap-3 mb-4">
-            <Input
-              placeholder="Rechercher un exercice"
-              leftIcon={<IcSearch />}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            <Button
-              type="secondaryV2"
-              size="small"
-              text="Filtres"
-              leftIcon={<IcFilter />}
-              onPress={() => {
-                // Open filter modal
-              }}
-            />
-          </View>
+      <FilterAndSelectModal
+        choices={exerciseChoices}
+        selectedChoices={selectedExercises}
+        onSelected={(selected) => setSelectedExercises(selected as TChoice[])}
+        name="add-exercise-to-block-modal"
+        show={showAddExerciseModal}
+        onDismiss={() => setShowAddExerciseModal(false)}
+        height="90%"
+      />
 
-          {/* Exercise List */}
-          <ScrollView
-            className="flex-1"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          >
-            <Choices
-              data={exerciseChoices}
-              selectedChoices={selectedExercises}
-              onChangeMultiple={setSelectedExercises}
-              type="multipleChoice"
-            />
-          </ScrollView>
-
-          {/* Bottom CTA */}
-          {selectedExercises.length > 0 && (
-            <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-4 pb-6">
-              <Button
-                text={`Ajouter ${selectedExercises.length} exercice${selectedExercises.length > 1 ? "s" : ""}`}
-                type="primary"
-                size="large"
-                onPress={addSelectedExercises}
-              />
-            </View>
-          )}
-        </View>
-      </BottomSheetModal>
-    </View>
+      <ConfirmActionModal
+        name="confirm-delete-block-modal"
+        title="Supprimer ce bloc ?"
+        message="Cette action est définitive. Le bloc sera retiré de ta séance."
+        confirm={{
+          text: "Supprimer le bloc",
+          isDestructive: true,
+          onPress: () => {
+            if (blockId) {
+              createSessionStore.removeBlock(blockId as string);
+            }
+            setShowDeleteConfirmation(false);
+            router.back();
+          },
+        }}
+        show={showDeleteConfirmation}
+      />
+    </BasicScreen>
   );
 }

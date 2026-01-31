@@ -17,7 +17,7 @@ export default function PaymentConfirmed() {
         <View className="grow" />
 
         <IcCheckVerified />
-        <Text className="text-white text-2xl font-bold">Paiement confirmé</Text>
+        <Text className="text-white text-2xl font-ls-bold">Paiement confirmé</Text>
         <Text className="text-white text-base text-center">
           Ton programme est maintenant débloqué et prêt à être suivi.
         </Text>

@@ -33,6 +33,7 @@ const BottomSheetModal = forwardRef<
       }
       {...props}
       name={name}
+      handleIndicatorStyle={{marginTop: 48}}
     >
       <BottomSheetView className={cn("h-full px-4", className)}>
         {children}

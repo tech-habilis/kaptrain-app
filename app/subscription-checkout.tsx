@@ -32,7 +32,7 @@ export default function SubscriptionCheckout() {
           <Pressable onPress={router.back} className="p-2">
             <IcArrowLeft color="white" />
           </Pressable>
-          <Text className="text-lg font-bold text-white flex-1">
+          <Text className="text-lg font-ls-bold text-white flex-1">
             Abonnement premium
           </Text>
         </View>
@@ -121,7 +121,7 @@ export default function SubscriptionCheckout() {
       {/* Bottom Summary Section */}
       <View className="bg-light px-4 pt-6 pb-safe border-t border-stroke">
         {/* Trial Period Badge */}
-        <Text className="text-secondary font-bold text-xl">
+        <Text className="text-secondary font-ls-bold text-xl">
           14 jours d&apos;essai gratuit
         </Text>
 

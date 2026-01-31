@@ -54,8 +54,13 @@ Make sure the following files are present in the root directory:
 
 ## Deploy
 
+### Android
 Creating a local .apk file:
 
 ```
 eas build --local --platform android --profile preview
 ```
+
+### iOS
+
+Create an archive in xcode and upload it to Testflight.

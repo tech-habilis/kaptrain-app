@@ -21,7 +21,7 @@ const FitnessTracking = () => {
   return (
     <View className="bg-white py-4 gap-4">
       <View className="flex-row justify-between items-center mx-4">
-        <Text className="font-bold text-base text-secondary">
+        <Text className="font-ls-bold text-base text-secondary">
           Mon suivi de forme
         </Text>
         <Button text="Aujourd’hui" type="secondaryV2" size="small" />

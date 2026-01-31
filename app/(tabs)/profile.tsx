@@ -14,6 +14,7 @@ import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
 import { useSession } from "@/contexts/auth-context";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
+import { useTimerStore } from "@/stores/timer-store";
 import { clsx } from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -50,15 +51,19 @@ const profileMenu = [
 export default function ProfileScreen() {
   const { session } = useSession();
   const { setCurrentStep } = useCompleteProfileStore();
+  const showWidget = useTimerStore((state) => state.showWidget);
   return (
     <View className="flex-1">
       <StatusBar style="light" />
       <ImageBackground source={require("../../assets/images/profile-hero.png")}>
-        <View className="px-4 pt-safe pb-6 flex-row gap-3 items-center">
+        <View className={clsx("px-4 pb-6 flex-row gap-3 items-center", {
+          "pt-4": showWidget,
+          "pt-safe": !showWidget,
+        })}>
           <Avatar url={session?.user?.avatarUrl} name={session?.user?.name} />
 
           <View className="gap-1.5 flex-1">
-            <Text className="text-white text-xl font-bold" numberOfLines={1}>
+            <Text className="text-white text-xl font-ls-bold" numberOfLines={1}>
               {session?.user?.name || session?.user?.email || "User"}
             </Text>
             <Pressable onPress={() => router.push(ROUTE.SUBSCRIPTION)}>
@@ -82,7 +87,7 @@ export default function ProfileScreen() {
       </ImageBackground>
 
       <View className="bg-white p-4 rounded-2xl">
-        <Text className="font-bold text-base text-text py-2">
+        <Text className="font-ls-bold text-base text-text py-2">
           Suivi de forme
         </Text>
 
@@ -134,7 +139,7 @@ export default function ProfileScreen() {
             onPress={x.onPress}
           >
             {x.icon}
-            <Text className="text-text text-base font-bold flex-1">
+            <Text className="text-text text-base font-ls-bold flex-1">
               {x.text}
             </Text>
             <IcArrowRight />
@@ -143,10 +148,7 @@ export default function ProfileScreen() {
       </View>
 
       <SingleFab
-        onPress={() => {
-          setCurrentStep(1);
-          router.push(ROUTE.COMPLETE_PROFILE);
-        }}
+        onPress={() => router.push(ROUTE.MESSAGING)}
         icon={<IcChat size={32} />}
       />
     </View>

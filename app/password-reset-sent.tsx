@@ -88,7 +88,7 @@ export default function PasswordResetSent() {
       <Pressable className="py-4" onPress={router.back}>
         <IcArrowLeft />
       </Pressable>
-      <Text className="text-2xl text-secondary font-bold mt-2">
+      <Text className="text-2xl text-secondary font-ls-bold mt-2">
         passwordResetSent.title
       </Text>
       <Text className="text-subtleText mt-1">
