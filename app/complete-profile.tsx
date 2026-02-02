@@ -12,7 +12,7 @@ import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { useSession } from "@/contexts/auth-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, View } from "react-native";
 import { useEffect } from "react";
 import { toast } from "@/components/toast";
 import FadedBottomBar from "@/components/faded-bottom-bar";
@@ -84,6 +84,24 @@ export default function CompleteProfile() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepParam]);
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (currentStep > 1) {
+          // Navigate to previous step instead of going back to OTP screen
+          previousStep();
+          return true; // Prevent default back behavior
+        }
+        // On step 1, allow default back behavior (go to OTP screen)
+        return false;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [currentStep, previousStep]);
 
   const handleContinue = async () => {
     if (!validateStep(currentStep)) {
