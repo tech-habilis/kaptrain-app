@@ -186,130 +186,13 @@ export default function CreateSession() {
   }, [isEditing]);
 
   // Load existing session data when in edit mode (only once)
+  // TODO: Reimplement edit mode after schema changes are fully understood
   useEffect(() => {
     if (isEditing && sessionId && typeof sessionId === "string" && !hasLoadedSessionData) {
-      const loadSessionData = async () => {
-        setIsFetching(true);
-        try {
-          const { data: sessionData, error } = await supabase
-            .from("sessions")
-            .select("*")
-            .eq("id", sessionId)
-            .single();
-
-          if (error) throw error;
-          if (sessionData) {
-            // Set session name
-            setSessionName(sessionData.title);
-
-            // Set date - ensure it's a Date object
-            const scheduledDate = new Date(sessionData.scheduled_date);
-            setSelectedDate(scheduledDate);
-
-            // Set time range if exists
-            if (sessionData.scheduled_time) {
-              // Parse time and only keep hours and minutes (remove seconds)
-              const timeParts = sessionData.scheduled_time.split(":");
-              const formattedTime = `${timeParts[0]}:${timeParts[1]}`;
-              setTimeRange({
-                start: formattedTime,
-                end: formattedTime, // In a real app, you'd have separate end time
-              });
-            } else {
-              setTimeRange(undefined);
-            }
-
-            // Fetch and set sport
-            if (sessionData.sport_id) {
-              const { data: sportData } = await supabase
-                .from("sports")
-                .select("*")
-                .eq("id", sessionData.sport_id)
-                .single();
-
-              if (sportData) {
-                setSelectedSports([
-                  { id: sportData.id, text: sportData.name_fr },
-                ]);
-              }
-            }
-
-            // Load theme from store if available, otherwise set default
-            const storeData = createSessionStore.sessionData;
-            if (storeData?.theme) {
-              setSelectedTheme(storeData.theme);
-            } else if (themes.length > 0) {
-              setSelectedTheme(themes[0]);
-            }
-          }
-
-          // Fetch session blocks with exercises
-          const { data: blocksData } = await supabase
-            .from("session_blocks")
-            .select(
-              `
-              *,
-              session_exercises (
-                id,
-                name,
-                sequence_order
-              )
-            `,
-            )
-            .eq("session_id", sessionId)
-            .order("sequence_order", { ascending: true });
-
-          if (blocksData && blocksData.length > 0) {
-            // Convert to SessionBlockData format
-            const blockDataArray: SessionBlockData[] = [];
-            for (const block of blocksData) {
-              // Fetch intensity reference if intensity_id exists
-              let intensity = { id: "id-Aucun", text: "Aucun" };
-              if (block.intensity_id) {
-                const { data: intensityData } = await supabase
-                  .from("intensity_references")
-                  .select("id, name_fr")
-                  .eq("id", block.intensity_id)
-                  .single();
-
-                if (intensityData) {
-                  intensity = {
-                    id: intensityData.id,
-                    text: intensityData.name_fr,
-                  };
-                }
-              }
-
-              // Convert exercises to TChoice format
-              const exercises: TChoice[] =
-                block.session_exercises?.map((exercise: any) => ({
-                  id: exercise.id,
-                  text: exercise.name,
-                })) || [];
-
-              blockDataArray.push({
-                id: block.id,
-                title: block.title || "",
-                description: block.description || "",
-                intensity,
-                exercises,
-              });
-            }
-
-            // Set all blocks at once to preserve order
-            createSessionStore.setBlocks(blockDataArray);
-            setHasLoadedSessionData(true);
-          }
-        } catch (error) {
-          console.error("Error loading session:", error);
-        } finally {
-          setIsFetching(false);
-        }
-      };
-
-      loadSessionData();
+      console.warn("Edit mode temporarily disabled due to schema changes");
+      setHasLoadedSessionData(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isEditing, sessionId, hasLoadedSessionData]);
 
   // Sync store data to local state (for when returning from add-block)
@@ -350,35 +233,46 @@ export default function CreateSession() {
   };
 
   const handleSubmit = async () => {
+    console.log("=== handleSubmit started ===");
     setSubmitError(undefined);
 
     const userId = session?.user?.id;
+    console.log("userId:", userId);
     if (!userId) {
+      console.log("No userId found, setting session to null");
       setSession(null);
       return;
     }
 
     // Assert userId is non-null after the check
     const coachId: string = userId;
+    console.log("coachId:", coachId);
 
     setIsSubmitting(true);
 
     try {
       // Validate form data
-      const validationResult = createSessionSchema.safeParse({
+      console.log("=== Starting form validation ===");
+      const formData = {
         sessionName,
         theme: selectedTheme?.text,
         sports: selectedSports.map((s) => s.text),
         date: selectedDate ? new Date(selectedDate as string) : undefined,
         blocks: createSessionStore.sessionData?.blocks || [],
         timeRange,
-      });
+      };
+      console.log("Form data:", formData);
+
+      const validationResult = createSessionSchema.safeParse(formData);
+      console.log("Validation result:", validationResult);
 
       if (!validationResult.success) {
+        console.log("Validation failed:", validationResult.error.issues);
         // Set field-specific errors
         const newErrors: typeof errors = {};
         validationResult.error.issues.forEach((issue) => {
           const field = issue.path[0] as keyof typeof errors;
+          console.log("Field error:", field, issue.message);
           // Check if field is a valid error field (theme, sports, date, sessionName, blocks)
           if (
             ["theme", "sports", "date", "sessionName", "blocks"].includes(field)
@@ -391,19 +285,49 @@ export default function CreateSession() {
         return;
       }
 
+      console.log("=== Form validation passed ===");
       const data = validationResult.data;
+      console.log("Validated data:", data);
 
       // Get sport IDs from database
+      console.log("=== Fetching sport IDs ===");
+      console.log("Sports to fetch:", data.sports);
       const { data: sportsData, error: sportsError } = await supabase
         .from("sports")
         .select("id")
         .in("name_fr", data.sports);
 
+      console.log("Sports query result:", { sportsData, sportsError });
+
       if (sportsError || !sportsData || sportsData.length === 0) {
+        console.log("Error fetching sports:", sportsError);
         setSubmitError("Erreur lors de la récupération des sports");
         return;
       }
 
+      // Get theme ID from database
+      console.log("=== Fetching theme ID ===");
+      console.log("Theme to fetch:", data.theme);
+      const { data: themeData, error: themeError } = await supabase
+        .from("themes")
+        .select("id")
+        .eq("name_fr", data.theme);
+
+      console.log("Theme query result:", { themeData, themeError });
+
+      if (themeError || !themeData || themeData.length === 0) {
+        console.log("Error fetching theme:", themeError);
+        setSubmitError("Erreur lors de la récupération de la thématique");
+        return;
+      }
+
+      // Prepare arrays for new schema
+      const sportIds = sportsData.map((sport) => sport.id);
+      const themeIds = [themeData[0].id];
+      console.log("Sport IDs:", sportIds);
+      console.log("Theme IDs:", themeIds);
+
+      console.log("=== Calculating duration ===");
       // Calculate duration from time range
       let durationSeconds: number | null = null;
       if (timeRange) {
@@ -413,88 +337,40 @@ export default function CreateSession() {
         const endMinutes = endH * 60 + endM;
         durationSeconds = Math.max(0, endMinutes - startMinutes) * 60;
       }
+      console.log("Duration seconds:", durationSeconds);
 
       // Format date for database
       const scheduledDate = dayjs(data.date).format("YYYY-MM-DD");
       const scheduledTime = timeRange ? timeRange.start : null;
+      console.log("Formatted date:", scheduledDate);
+      console.log("Scheduled time:", scheduledTime);
 
       // Check if editing or creating
       if (isEditing && sessionId && typeof sessionId === "string") {
-        // UPDATE EXISTING SESSION
-        const { error: updateError } = await supabase
-          .from("sessions")
-          .update({
-            title: sessionName,
-            scheduled_date: scheduledDate,
-            scheduled_time: scheduledTime,
-            duration_seconds: durationSeconds,
-            sport_id: sportsData[0].id,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", sessionId);
-
-        if (updateError) {
-          setSubmitError("Erreur lors de la mise à jour de la séance");
-          return;
-        }
-
-        // Update existing blocks instead of deleting and recreating
-        const storeBlocks = createSessionStore.sessionData?.blocks || [];
-        if (storeBlocks.length > 0) {
-          // Update blocks with description, intensity, and sequence_order
-          for (let index = 0; index < storeBlocks.length; index++) {
-            const block = storeBlocks[index];
-
-            const { error: updateError } = await supabase
-              .from("session_blocks")
-              .update({
-                title: block.title,
-                description: block.description,
-                intensity_id: block.intensity?.id,
-                sequence_order: index,
-              })
-              .eq("id", block.id);
-
-            if (updateError) {
-              console.error("Error updating block:", updateError);
-              setSubmitError("Erreur lors de la mise à jour des blocs");
-              return;
-            }
-          }
-
-          // Update exercises for each block
-          for (let i = 0; i < storeBlocks.length; i++) {
-            const block = storeBlocks[i];
-
-            // Delete existing exercises for this block
-            await supabase
-              .from("session_exercises")
-              .delete()
-              .eq("session_block_id", block.id);
-
-            // Insert new exercises
-            if (block.exercises.length > 0) {
-              const exercises = block.exercises.map((exercise, index) => ({
-                session_block_id: block.id,
-                name: exercise.text,
-                sequence_order: index,
-              }));
-
-              const { error: exercisesError } = await supabase
-                .from("session_exercises")
-                .insert(exercises);
-
-              if (exercisesError) {
-                console.error("Error inserting exercises:", exercisesError);
-              }
-            }
-          }
-        }
+        console.log("=== EDIT MODE TEMPORARILY DISABLED ===");
+        console.log("Edit mode disabled due to schema changes");
+        setSubmitError("Mode édition temporairement indisponible");
+        return;
       } else {
+        console.log("=== CREATING NEW SESSION ===");
         // CREATE NEW SESSION
         if (!sessionName) {
+          console.log("No session name provided");
+          setSubmitError("Le nom de la séance est requis");
           return;
         }
+
+        console.log("Creating session with data:", {
+          coach_id: coachId,
+          title: sessionName,
+          session_type: "individual",
+          session_status: "upcoming",
+          scheduled_date: scheduledDate,
+          scheduled_time: scheduledTime,
+          duration_seconds: durationSeconds,
+          sport_ids: sportIds,
+          theme_ids: themeIds,
+        });
 
         const { data: sessionData, error: sessionError } = await supabase
           .from("sessions")
@@ -506,69 +382,98 @@ export default function CreateSession() {
             scheduled_date: scheduledDate,
             scheduled_time: scheduledTime,
             duration_seconds: durationSeconds,
-            sport_id: sportsData[0].id,
+            sport_ids: sportIds,
+            theme_ids: themeIds,
           })
           .select()
           .single();
 
+        console.log("Session creation result:", { sessionData, sessionError });
+
         if (sessionError) {
+          console.log("Error creating session:", sessionError);
           setSubmitError("Erreur lors de la création de la séance");
           return;
         }
 
-        // Insert session blocks if any
+        // Create training blocks and link them to the session
         const storeBlocks = createSessionStore.sessionData?.blocks || [];
+        console.log("Store blocks for creation:", storeBlocks);
+        
         if (storeBlocks.length > 0) {
-          // Insert blocks with description and intensity
-          const blocks = storeBlocks.map((block, index) => ({
-            session_id: sessionData.id,
-            title: block.title,
-            description: block.description,
-            intensity_id: block.intensity?.id,
-            sequence_order: index,
-          }));
+          // Create training blocks first
+          for (let index = 0; index < storeBlocks.length; index++) {
+            const block = storeBlocks[index];
+            console.log(`Creating training block ${index}:`, block);
 
-          const { data: insertedBlocks, error: blocksError } = await supabase
-            .from("session_blocks")
-            .insert(blocks)
-            .select();
+            // Create training block
+            const { data: trainingBlockData, error: trainingBlockError } = await supabase
+              .from("training_blocks")
+              .insert({
+                created_by: coachId,
+                title: block.title,
+                description: block.description,
+                is_public: false,
+              })
+              .select()
+              .single();
 
-          if (blocksError) {
-            setSubmitError("Séance créée, mais erreur lors de l'ajout des blocs");
-            return;
-          }
+            console.log(`Training block ${index} creation result:`, { trainingBlockData, trainingBlockError });
 
-          // Insert exercises for each block
-          for (let i = 0; i < storeBlocks.length; i++) {
-            const block = storeBlocks[i];
-            const insertedBlockId = insertedBlocks?.[i]?.id;
+            if (trainingBlockError) {
+              console.log("Error creating training block:", trainingBlockError);
+              setSubmitError("Erreur lors de la création des blocs d'entraînement");
+              return;
+            }
 
-            if (insertedBlockId && block.exercises.length > 0) {
-              const exercises = block.exercises.map((exercise, index) => ({
-                session_block_id: insertedBlockId,
-                name: exercise.text,
-                sequence_order: index,
-                // exercise_library_id: exercise.id, // Uncomment if exercises are linked to library
-              }));
+            // Create exercises for this training block
+            if (block.exercises.length > 0) {
+              console.log(`Creating exercises for training block ${trainingBlockData.id}:`, block.exercises);
 
-              const { error: exercisesError } = await supabase
-                .from("session_exercises")
-                .insert(exercises);
+              for (let exerciseIndex = 0; exerciseIndex < block.exercises.length; exerciseIndex++) {
+                const exercise = block.exercises[exerciseIndex];
 
-              if (exercisesError) {
-                console.error("Error inserting exercises:", exercisesError);
-                // Don't fail the entire operation if exercises fail
+                const { error: exerciseError } = await supabase
+                  .from("training_block_exercises")
+                  .insert({
+                    training_block_id: trainingBlockData.id,
+                    name: exercise.text,
+                  });
+
+                if (exerciseError) {
+                  console.error("Error inserting training block exercise:", exerciseError);
+                  // Don't fail the entire operation if exercises fail
+                }
               }
+            }
+
+            // Link training block to session
+            const { error: sessionBlockError } = await supabase
+              .from("session_blocks")
+              .insert({
+                session_id: sessionData.id,
+                training_block_id: trainingBlockData.id,
+                intensity_id: block.intensity?.id || null,
+                sequence_order: index,
+              });
+
+            if (sessionBlockError) {
+              console.log("Error linking training block to session:", sessionBlockError);
+              setSubmitError("Erreur lors de l'association des blocs à la séance");
+              return;
             }
           }
         }
       }
 
+      console.log("=== Session submission successful ===");
       // Navigate back on success
       router.back();
-    } catch {
+    } catch (error) {
+      console.error("Unexpected error in handleSubmit:", error);
       setSubmitError("Une erreur inattendue s'est produite");
     } finally {
+      console.log("=== handleSubmit finished ===");
       setIsSubmitting(false);
     }
   };
@@ -607,170 +512,174 @@ export default function CreateSession() {
       </View>
 
       {/* Main Content */}
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-4 pb-48 pt-2"
-        showsVerticalScrollIndicator={false}
-      >
-        {currentStep === 1 ? (
-          <>
-            {/* Thématique Section */}
-            <View>
-              <Choices
-                label="Thématique"
-                data={themes}
-                selectedChoice={selectedTheme}
-                onChange={(choice) => {
-                  setSelectedTheme(choice);
-                  setErrors((prev) => ({ ...prev, theme: undefined }));
-                }}
-                numColumns={2}
-                className="mb-6"
-                itemTextClassName="text-center"
-              />
-              {isFetching && <ActivityIndicator />}
-              {errors.theme && (
-                <Text className="text-error2 text-sm -mt-4 mb-2 ml-1">
-                  {errors.theme}
-                </Text>
-              )}
-            </View>
-
-            {/* Sports Section */}
-            <View>
-              <Choices
-                label="Sports"
-                data={shownSports}
-                selectedChoices={selectedSports}
-                type="multipleChoiceWithoutIcon"
-                onChangeMultiple={(choices) => {
-                  console.log("selectedChoices changed", choices);
-                  setSelectedSports(choices);
-                  setErrors((prev) => ({ ...prev, sports: undefined }));
-                }}
-                numColumns={2}
-                className="mb-6"
-                extraComponent={
-                  <Button
-                    type="tertiary"
-                    size="small"
-                    text="Ajouter un sport"
-                    className="flex-1"
-                    leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-                    onPress={() => setShowMoreSport(true)}
-                  />
-                }
-              />
-              {isFetching && <ActivityIndicator />}
-              {errors.sports && (
-                <Text className="text-error text-sm -mt-4 mb-2 ml-1">
-                  {errors.sports}
-                </Text>
-              )}
-            </View>
-
-            {/* Date & Time Section */}
-            <View className="gap-3">
-              <Text className="text-sm font-medium text-accent">
-                Date & Heure
+      {currentStep === 1 ? (
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-4 pb-48 pt-2"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Thématique Section */}
+          <View>
+            <Choices
+              label="Thématique"
+              data={themes}
+              selectedChoice={selectedTheme}
+              onChange={(choice) => {
+                setSelectedTheme(choice);
+                setErrors((prev) => ({ ...prev, theme: undefined }));
+              }}
+              numColumns={2}
+              className="mb-6"
+              itemTextClassName="text-center"
+            />
+            {isFetching && <ActivityIndicator />}
+            {errors.theme && (
+              <Text className="text-error2 text-sm -mt-4 mb-2 ml-1">
+                {errors.theme}
               </Text>
+            )}
+          </View>
 
-              {/* Date Input */}
-              <View>
+          {/* Sports Section */}
+          <View>
+            <Choices
+              label="Sports"
+              data={shownSports}
+              selectedChoices={selectedSports}
+              type="multipleChoiceWithoutIcon"
+              onChangeMultiple={(choices) => {
+                console.log("selectedChoices changed", choices);
+                setSelectedSports(choices);
+                setErrors((prev) => ({ ...prev, sports: undefined }));
+              }}
+              numColumns={2}
+              className="mb-6"
+              extraComponent={
+                <Button
+                  type="tertiary"
+                  size="small"
+                  text="Ajouter un sport"
+                  className="flex-1"
+                  leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+                  onPress={() => setShowMoreSport(true)}
+                />
+              }
+            />
+            {isFetching && <ActivityIndicator />}
+            {errors.sports && (
+              <Text className="text-error text-sm -mt-4 mb-2 ml-1">
+                {errors.sports}
+              </Text>
+            )}
+          </View>
+
+          {/* Date & Time Section */}
+          <View className="gap-3">
+            <Text className="text-sm font-medium text-accent">
+              Date & Heure
+            </Text>
+
+            {/* Date Input */}
+            <View>
+              <View className="flex-row items-center gap-2">
+                <Text className="text-sm font-medium text-accent w-6">
+                  Le
+                </Text>
+                <View className="flex-1">
+                  <DatePicker
+                    selectedDate={selectedDate}
+                    onSelect={(date) => {
+                      setSelectedDate(date);
+                      setErrors((prev) => ({ ...prev, date: undefined }));
+                    }}
+                    className="w-full"
+                  />
+                </View>
+              </View>
+              {errors.date && (
+                <Text className="text-error text-sm mt-1 ml-1">
+                  {errors.date}
+                </Text>
+              )}
+            </View>
+
+            {/* Time Range Input */}
+            <View>
+              {timeRange === undefined ? (
+                <Button
+                  leftIcon={<IcPlus size={24} color={ColorConst.accent} />}
+                  type="tertiary"
+                  text="Renseigner une heure"
+                  onPress={() => {
+                    setTimeRange({ start: "10:00", end: "11:00" });
+                  }}
+                />
+              ) : (
                 <View className="flex-row items-center gap-2">
-                  <Text className="text-sm font-medium text-accent w-6">
-                    Le
+                  <Text
+                    className="text-sm font-medium text-accent"
+                    style={{ width: 24 }}
+                  >
+                    De
                   </Text>
                   <View className="flex-1">
-                    <DatePicker
-                      selectedDate={selectedDate}
-                      onSelect={(date) => {
-                        setSelectedDate(date);
-                        setErrors((prev) => ({ ...prev, date: undefined }));
+                    <Input
+                      value={timeRange.start}
+                      placeholder="10:00"
+                      inputClassName="text-center text-base"
+                      asPressable
+                      onPress={() => {
+                        setSelectedTime({
+                          id: "time",
+                          type: "start",
+                          value: timeRange.start,
+                        });
                       }}
-                      className="w-full"
                     />
                   </View>
-                </View>
-                {errors.date && (
-                  <Text className="text-error text-sm mt-1 ml-1">
-                    {errors.date}
+                  <Text
+                    className="text-sm font-medium text-accent text-center"
+                    style={{ width: 16 }}
+                  >
+                    à
                   </Text>
-                )}
-              </View>
-
-              {/* Time Range Input */}
-              <View>
-                {timeRange === undefined ? (
-                  <Button
-                    leftIcon={<IcPlus size={24} color={ColorConst.accent} />}
-                    type="tertiary"
-                    text="Renseigner une heure"
-                    onPress={() => {
-                      setTimeRange({ start: "10:00", end: "11:00" });
-                    }}
-                  />
-                ) : (
-                  <View className="flex-row items-center gap-2">
-                    <Text
-                      className="text-sm font-medium text-accent"
-                      style={{ width: 24 }}
-                    >
-                      De
-                    </Text>
-                    <View className="flex-1">
-                      <Input
-                        value={timeRange.start}
-                        placeholder="10:00"
-                        inputClassName="text-center text-base"
-                        asPressable
-                        onPress={() => {
-                          setSelectedTime({
-                            id: "time",
-                            type: "start",
-                            value: timeRange.start,
-                          });
-                        }}
-                      />
-                    </View>
-                    <Text
-                      className="text-sm font-medium text-accent text-center"
-                      style={{ width: 16 }}
-                    >
-                      à
-                    </Text>
-                    <View className="flex-1">
-                      <Input
-                        value={timeRange.end}
-                        asPressable
-                        onPress={() =>
-                          setSelectedTime({
-                            id: "time",
-                            type: "end",
-                            value: timeRange.end,
-                          })
-                        }
-                        placeholder="11:00"
-                        inputClassName="text-center text-base"
-                      />
-                    </View>
-
-                    <Pressable
-                      onPress={() => {
-                        setTimeRange(undefined);
-                      }}
-                      className="p-1"
-                    >
-                      <IcClose size={20} color={ColorConst.subtleText} />
-                    </Pressable>
+                  <View className="flex-1">
+                    <Input
+                      value={timeRange.end}
+                      asPressable
+                      onPress={() =>
+                        setSelectedTime({
+                          id: "time",
+                          type: "end",
+                          value: timeRange.end,
+                        })
+                      }
+                      placeholder="11:00"
+                      inputClassName="text-center text-base"
+                    />
                   </View>
-                )}
-              </View>
+
+                  <Pressable
+                    onPress={() => {
+                      setTimeRange(undefined);
+                    }}
+                    className="p-1"
+                  >
+                    <IcClose size={20} color={ColorConst.subtleText} />
+                  </Pressable>
+                </View>
+              )}
             </View>
-          </>
-        ) : (
-          <>
-            {/* Step 2: Session Details */}
+          </View>
+        </ScrollView>
+      ) : (
+        <>
+          {/* Step 2: Session Details */}
+          <ScrollView
+            className="flex-1"
+            contentContainerClassName="px-4 pb-48 pt-2"
+            showsVerticalScrollIndicator={false}
+          >
             {/* Session Name Section */}
             <Input
               label="Nom de la séance"
@@ -789,192 +698,150 @@ export default function CreateSession() {
                 Déroulé de la séance
               </Text>
 
+              {errors.blocks && (
+                <Text className="text-error text-sm">{errors.blocks}</Text>
+              )}
+
+              {/* Blocks List */}
               <View>
-                <DraggableFlatList
-                  data={createSessionStore.sessionData?.blocks || []}
-                  renderItem={({
-                    item,
-                    drag,
-                    isActive,
-                  }: RenderItemParams<SessionBlockData>) => (
-                    <View className="mb-2">
-                      <SessionBlock
-                        block={item}
-                        drag={drag}
-                        isActive={isActive}
-                        onClickDelete={() => {
-                          setSelectedBlockForDelete(item);
-                        }}
-                      />
-                    </View>
-                  )}
-                  keyExtractor={(item, index) => `${item.id}-${index}`}
-                  onDragEnd={(event: any) => {
-                    // Method 1: Use from/to if available
-                    if (event?.data?.from !== undefined && event?.data?.to !== undefined) {
-                      createSessionStore.reorderBlocks(event.data.from, event.data.to);
-                    }
-                    // Method 2: Fallback - directly use reordered data array
-                    else if (Array.isArray(event?.data)) {
-                      createSessionStore.setBlocks(event.data);
-                    }
-                    // Method 3: Check if event itself has from/to
-                    else if (event?.from !== undefined && event?.to !== undefined) {
-                      createSessionStore.reorderBlocks(event.from, event.to);
-                    }
-                  }}
-                />
-
-                {errors.blocks && (
-                  <Text className="text-error text-sm">{errors.blocks}</Text>
-                )}
-
-                {/* Add Block Button */}
-                <Button
-                  type={isEditing ? "tertiary" : "secondary"}
-                  size="small"
-                  text="Ajouter un bloc"
-                  leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
-                  onPress={() => {
-                    router.push(ROUTE.ADD_BLOCK);
-                  }}
-                />
-
-                {isEditing && (
-                  <>
-                    <Pressable
-                      onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
-                      className="flex-row justify-between items-center mt-8"
-                    >
-                      <Text className="text-accent">
-                        Informations complémentaires
-                      </Text>
-                      <View
-                        className={clsx({
-                          "-rotate-90": showAdditionalInfo,
-                          "rotate-90": !showAdditionalInfo,
-                        })}
-                      >
-                        <IcArrowLeft />
-                      </View>
-                    </Pressable>
-
-                    {showAdditionalInfo && (
-                      <View className="gap-2 mt-2">
-                        <Pressable
-                          onPress={() => setShowMoreSport(true)}
-                          className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
-                        >
-                          {/* Block Content */}
-                          <View className="flex-1 gap-1">
-                            <Text
-                              numberOfLines={1}
-                              className="text-sm text-subtleText"
-                            >
-                              Sport
-                            </Text>
-
-                            <View className="flex-row gap-1.5 items-center">
-                              <IcCycling />
-                              <Text className="text-base font-semibold text-secondary flex-1">
-                                {selectedSports[0]?.text || "--"}
-                              </Text>
-                              <IcPencil size={24} />
-                            </View>
-                          </View>
-                        </Pressable>
-
-                        <DatePicker
-                          selectedDate={selectedDate}
-                          onSelect={setSelectedDate}
-                          renderTrigger={({ onPress, formattedDate }) => (
-                            <Pressable
-                              onPress={onPress}
-                              className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
-                            >
-                              {/* Block Content */}
-                              <View className="flex-1 gap-1">
-                                <Text
-                                  numberOfLines={1}
-                                  className="text-sm text-subtleText"
-                                >
-                                  Date
-                                </Text>
-
-                                <View className="flex-row gap-1.5 items-center">
-                                  <Text className="text-accent text-base font-medium">
-                                    Le
-                                  </Text>
-                                  <Text className="text-base font-semibold text-secondary flex-1">
-                                    {formattedDate || "--/--/----"}
-                                  </Text>
-                                  <IcPencil size={24} />
-                                </View>
-                              </View>
-                            </Pressable>
-                          )}
+                {(createSessionStore.sessionData?.blocks || []).length > 0 ? (
+                  <DraggableFlatList
+                    data={createSessionStore.sessionData?.blocks || []}
+                    renderItem={({
+                      item,
+                      drag,
+                      isActive,
+                    }: RenderItemParams<SessionBlockData>) => (
+                      <View className="mb-2">
+                        <SessionBlock
+                          block={item}
+                          drag={drag}
+                          isActive={isActive}
+                          onClickDelete={() => {
+                            setSelectedBlockForDelete(item);
+                          }}
                         />
                       </View>
                     )}
-
-                    {/* Time Section - Commented out for now */}
-                    {/* <View className="border border-stroke rounded-xl p-3 gap-1">
-                      <Text numberOfLines={1} className="text-sm text-subtleText">
-                        Heure
-                      </Text>
-
-                      <View className="flex-row items-center gap-2">
-                        <Text
-                          className="text-sm font-medium text-accent"
-                          style={{ width: 24 }}
-                        >
-                          De
-                        </Text>
-                        <View className="flex-1">
-                          <Input
-                            value={timeRange?.start}
-                            placeholder="10:00"
-                            inputClassName="text-center text-base"
-                            asPressable
-                            onPress={() => {
-                              setSelectedTime({
-                                id: "time",
-                                type: "start",
-                                value: timeRange?.start || "10:00",
-                              });
-                            }}
-                          />
-                        </View>
-                        <Text
-                          className="text-sm font-medium text-accent text-center"
-                          style={{ width: 16 }}
-                        >
-                          à
-                        </Text>
-                        <View className="flex-1">
-                          <Input
-                            value={timeRange?.end}
-                            asPressable
-                            onPress={() =>
-                              setSelectedTime({
-                                id: "time",
-                                type: "end",
-                                value: timeRange?.end || "11:00",
-                              })
-                            }
-                            placeholder="11:00"
-                            inputClassName="text-center text-base"
-                          />
-                        </View>
-                      </View>
-                    </View> */}
-                  </>
+                    keyExtractor={(item, index) => `${item.id}-${index}`}
+                    onDragEnd={(event: any) => {
+                      // Method 1: Use from/to if available
+                      if (event?.data?.from !== undefined && event?.data?.to !== undefined) {
+                        createSessionStore.reorderBlocks(event.data.from, event.data.to);
+                      }
+                      // Method 2: Fallback - directly use reordered data array
+                      else if (Array.isArray(event?.data)) {
+                        createSessionStore.setBlocks(event.data);
+                      }
+                      // Method 3: Check if event itself has from/to
+                      else if (event?.from !== undefined && event?.to !== undefined) {
+                        createSessionStore.reorderBlocks(event.from, event.to);
+                      }
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    scrollEnabled={false}
+                    style={{ flexGrow: 0 }}
+                  />
+                ) : (
+                  <Text className="text-subtleText text-sm text-center py-4">
+                    Aucun bloc ajouté pour le moment
+                  </Text>
                 )}
               </View>
+
+              {/* Add Block Button */}
+              <Button
+                type={isEditing ? "tertiary" : "secondary"}
+                size="small"
+                text="Ajouter un bloc"
+                leftIcon={<IcPlus size={24} color={ColorConst.secondary} />}
+                onPress={() => {
+                  router.push(ROUTE.ADD_BLOCK);
+                }}
+              />
+
+              {isEditing && (
+                <>
+                  <Pressable
+                    onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
+                    className="flex-row justify-between items-center mt-8"
+                  >
+                    <Text className="text-accent">
+                      Informations complémentaires
+                    </Text>
+                    <View
+                      className={clsx({
+                        "-rotate-90": showAdditionalInfo,
+                        "rotate-90": !showAdditionalInfo,
+                      })}
+                    >
+                      <IcArrowLeft />
+                    </View>
+                  </Pressable>
+
+                  {showAdditionalInfo && (
+                    <View className="gap-2 mt-2">
+                      <Pressable
+                        onPress={() => setShowMoreSport(true)}
+                        className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
+                      >
+                        {/* Block Content */}
+                        <View className="flex-1 gap-1">
+                          <Text
+                            numberOfLines={1}
+                            className="text-sm text-subtleText"
+                          >
+                            Sport
+                          </Text>
+
+                          <View className="flex-row gap-1.5 items-center">
+                            <IcCycling />
+                            <Text className="text-base font-semibold text-secondary flex-1">
+                              {selectedSports[0]?.text || "--"}
+                            </Text>
+                            <IcPencil size={24} />
+                          </View>
+                        </View>
+                      </Pressable>
+
+                      <DatePicker
+                        selectedDate={selectedDate}
+                        onSelect={setSelectedDate}
+                        renderTrigger={({ onPress, formattedDate }) => (
+                          <Pressable
+                            onPress={onPress}
+                            className="border border-stroke rounded-xl p-3 flex-row items-center gap-2"
+                          >
+                            {/* Block Content */}
+                            <View className="flex-1 gap-1">
+                              <Text
+                                numberOfLines={1}
+                                className="text-sm text-subtleText"
+                              >
+                                Date
+                              </Text>
+
+                              <View className="flex-row gap-1.5 items-center">
+                                <Text className="text-accent text-base font-medium">
+                                  Le
+                                </Text>
+                                <Text className="text-base font-semibold text-secondary flex-1">
+                                  {formattedDate || "--/--/----"}
+                                </Text>
+                                <IcPencil size={24} />
+                              </View>
+                            </View>
+                          </Pressable>
+                        )}
+                      />
+                    </View>
+                  )}
+                </>
+              )}
             </View>
-          </>
-        )}
-      </ScrollView>
+          </ScrollView>
+        </>
+      )}
 
       {/* Bottom CTA */}
       <View className="absolute bottom-0 left-0 right-0 bg-white px-4 pt-6 pb-safe gap-2">

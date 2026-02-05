@@ -25,25 +25,25 @@ import { TimerType } from "@/hooks/use-workout-timer";
 import { TrainingBlockCard } from "@/components/session";
 import { useTimerStore } from "@/stores/timer-store";
 
-type SessionExercise = Database["public"]["Tables"]["session_exercises"]["Row"];
-type SessionTimerConfig =
-  Database["public"]["Tables"]["session_timer_configs"]["Row"];
 type Session = Database["public"]["Tables"]["sessions"]["Row"];
 type Sport = Database["public"]["Tables"]["sports"]["Row"];
+type TrainingBlock = Database["public"]["Tables"]["training_blocks"]["Row"];
+type TrainingBlockExercise = Database["public"]["Tables"]["training_block_exercises"]["Row"];
+type SessionTimerConfig = Database["public"]["Tables"]["session_timer_configs"]["Row"];
 
 interface SessionWithRelations extends Session {
-  sport: Sport | null;
+  sports: Sport[];
 }
 
 interface BlockWithExercises {
   id: string;
   session_id: string;
-  title: string;
-  description: string | null;
-  color: string | null;
+  training_block_id: string;
   intensity_id: string | null;
   sequence_order: number;
-  exercises: SessionExercise[];
+  training_block: TrainingBlock & {
+    exercises: TrainingBlockExercise[];
+  };
 }
 
 // Timer type mapping from display name to database value
@@ -94,16 +94,18 @@ export default function SessionViewIndividualized() {
     : null;
 
   const sessionSportName = useMemo(() => {
-    const sportName = session?.sport?.name_fr ?? "Séance";
+    const firstSportName = session?.sports?.[0]?.name_fr ?? "Séance";
+    const sportsCount = session?.sports?.length ?? 0;
+    const sportText = sportsCount > 1 ? `${firstSportName} +${sportsCount - 1}` : firstSportName;
     const duration = durationMinutes ? ` - Environ ${durationMinutes} minutes` : "";
-    return `${sportName} ${duration}`;
-  }, [session?.sport?.name_fr, durationMinutes]);
+    return `${sportText}${duration}`;
+  }, [session?.sports, durationMinutes]);
 
-  const sessionExerciseToExerciseItem = useMemo(() => {
-    return (sessionExercise: SessionExercise) => {
+  const trainingBlockExerciseToExerciseItem = useMemo(() => {
+    return (exercise: TrainingBlockExercise) => {
       return {
-        id: sessionExercise.id,
-        title: sessionExercise.name,
+        id: exercise.id,
+        title: exercise.name,
         image: "",
         icon: undefined,
         isFavorite: false,
@@ -156,30 +158,40 @@ export default function SessionViewIndividualized() {
       setError(null);
 
       try {
-        // Fetch session with sport
+        // Fetch session first
         const { data: sessionData, error: sessionError } = await supabase
           .from("sessions")
-          .select(
-            `
-            *,
-            sport:sports(*)
-          `,
-          )
+          .select("*")
           .eq("id", sessionId)
           .single();
 
         if (sessionError) throw sessionError;
         if (!sessionData) throw new Error("Session not found");
 
-        setSession(sessionData as SessionWithRelations);
+        // Fetch sports separately using sport_ids array
+        let sports: Sport[] = [];
+        if (sessionData.sport_ids && sessionData.sport_ids.length > 0) {
+          const { data: sportsData, error: sportsError } = await supabase
+            .from("sports")
+            .select("*")
+            .in("id", sessionData.sport_ids);
 
-        // Fetch session blocks with exercises
+          if (sportsError) throw sportsError;
+          sports = sportsData || [];
+        }
+
+        setSession({ ...sessionData, sports } as SessionWithRelations);
+
+        // Fetch session blocks with training blocks and exercises
         const { data: blocksData, error: blocksError } = await supabase
           .from("session_blocks")
           .select(
             `
             *,
-            session_exercises(*)
+            training_block:training_blocks(
+              *,
+              exercises:training_block_exercises(*)
+            )
           `,
           )
           .eq("session_id", sessionId)
@@ -187,19 +199,7 @@ export default function SessionViewIndividualized() {
 
         if (blocksError) throw blocksError;
 
-        // Transform the data to match BlockWithExercises interface
-        const transformedBlocks = (blocksData || []).map((block: any) => ({
-          id: block.id,
-          session_id: block.session_id,
-          title: block.title,
-          description: block.description,
-          color: block.color,
-          intensity_id: block.intensity_id,
-          sequence_order: block.sequence_order,
-          exercises: block.session_exercises || [],
-        }));
-
-        setBlocks(transformedBlocks);
+        setBlocks(blocksData as BlockWithExercises[] || []);
 
         // Fetch timer config
         const { data: timerData, error: timerError } = await supabase
@@ -378,14 +378,14 @@ export default function SessionViewIndividualized() {
             {blocks.map((block, index) => (
               <TrainingBlockCard
                 key={block.id}
-                title={block.title}
-                description={block.description || ""}
+                title={block.training_block.title}
+                description={block.training_block.description || ""}
                 isCompleted={completedSections[index] || false}
                 onToggleComplete={() => toggleCompleted(index)}
                 isExpanded={expandedSections[index] || false}
                 onToggleExpand={() => toggleExpanded(index)}
                 exercises={
-                  block.exercises.map(sessionExerciseToExerciseItem) || []
+                  block.training_block.exercises.map(trainingBlockExerciseToExerciseItem) || []
                 }
               />
             ))}
