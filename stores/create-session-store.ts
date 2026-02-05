@@ -8,6 +8,7 @@ export interface SessionBlockData {
   description: string;
   intensity: TChoice;
   exercises: TChoice[];
+  training_block_id?: string; // Optional for edit mode
 }
 
 export interface CreateSessionData {

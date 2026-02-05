@@ -186,13 +186,177 @@ export default function CreateSession() {
   }, [isEditing]);
 
   // Load existing session data when in edit mode (only once)
-  // TODO: Reimplement edit mode after schema changes are fully understood
   useEffect(() => {
-    if (isEditing && sessionId && typeof sessionId === "string" && !hasLoadedSessionData) {
-      console.warn("Edit mode temporarily disabled due to schema changes");
-      setHasLoadedSessionData(true);
+    if (
+      isEditing &&
+      sessionId &&
+      typeof sessionId === "string" &&
+      !hasLoadedSessionData
+    ) {
+      const loadSessionData = async () => {
+        setIsFetching(true);
+        try {
+          console.log("=== Loading session data for editing ===");
+          console.log("Session ID:", sessionId);
+
+          // Fetch session data
+          const { data: sessionData, error: sessionError } = await supabase
+            .from("sessions")
+            .select("*")
+            .eq("id", sessionId)
+            .single();
+
+          console.log("Session data:", sessionData);
+          console.log("Session error:", sessionError);
+
+          if (sessionError) throw sessionError;
+          if (sessionData) {
+            // Set session name
+            setSessionName(sessionData.title);
+
+            // Set date - ensure it's a Date object
+            const scheduledDate = new Date(sessionData.scheduled_date);
+            setSelectedDate(scheduledDate);
+
+            // Set time range if exists
+            if (sessionData.scheduled_time) {
+              // Parse time and only keep hours and minutes (remove seconds)
+              const timeParts = sessionData.scheduled_time.split(":");
+              const formattedTime = `${timeParts[0]}:${timeParts[1]}`;
+              setTimeRange({
+                start: formattedTime,
+                end: formattedTime, // For now, use same time as start
+              });
+            } else {
+              setTimeRange(undefined);
+            }
+
+            // Fetch and set sports using sport_ids array
+            if (sessionData.sport_ids && sessionData.sport_ids.length > 0) {
+              const { data: sportsData, error: sportsError } = await supabase
+                .from("sports")
+                .select("id, name_fr")
+                .in("id", sessionData.sport_ids);
+
+              console.log("Sports data:", sportsData);
+
+              if (sportsData && !sportsError) {
+                setSelectedSports(
+                  sportsData.map((sport) => ({
+                    id: sport.id,
+                    text: sport.name_fr,
+                  })),
+                );
+              }
+            }
+
+            // Fetch and set theme using theme_ids array
+            if (sessionData.theme_ids && sessionData.theme_ids.length > 0) {
+              const { data: themeDataArray, error: themeError } = await supabase
+                .from("themes")
+                .select("id, name_fr")
+                .eq("id", sessionData.theme_ids[0]); // Use first theme
+
+              console.log("Theme data:", themeDataArray);
+
+              if (themeDataArray && themeDataArray.length > 0 && !themeError) {
+                const themeData = themeDataArray[0];
+                setSelectedTheme({
+                  id: themeData.id,
+                  text: themeData.name_fr,
+                });
+              }
+            } else if (themes.length > 0) {
+              // Fallback to first available theme
+              setSelectedTheme(themes[0]);
+            }
+          }
+
+          // Fetch session blocks with training blocks and exercises
+          const { data: blocksData, error: blocksError } = await supabase
+            .from("session_blocks")
+            .select(
+              `
+              *,
+              training_block:training_blocks(
+                *,
+                exercises:training_block_exercises(*)
+              )
+            `,
+            )
+            .eq("session_id", sessionId)
+            .order("sequence_order", { ascending: true });
+
+          console.log("Blocks data:", blocksData);
+          console.log("Blocks error:", blocksError);
+
+          if (blocksData && blocksData.length > 0) {
+            // Convert to SessionBlockData format for the store
+            const blockDataArray: SessionBlockData[] = [];
+
+            for (const block of blocksData) {
+              // Fetch intensity reference if intensity_id exists
+              let intensity = { id: "id-Aucun", text: "Aucun" };
+              if (block.intensity_id) {
+                const { data: intensityData } = await supabase
+                  .from("intensity_references")
+                  .select("id, name_fr")
+                  .eq("id", block.intensity_id)
+                  .single();
+
+                if (intensityData) {
+                  intensity = {
+                    id: intensityData.id,
+                    text: intensityData.name_fr,
+                  };
+                }
+              }
+
+              // Convert training block exercises to TChoice format
+              const exercises: TChoice[] =
+                block.training_block?.exercises?.map((exercise: any) => ({
+                  id: exercise.id,
+                  text: exercise.name,
+                })) || [];
+
+              blockDataArray.push({
+                id: block.id, // Use session_block id
+                title: block.training_block?.title || "",
+                description: block.training_block?.description || "",
+                intensity,
+                exercises,
+                // Store training_block_id for updates
+                training_block_id: block.training_block_id,
+              });
+            }
+
+            console.log("Converted block data:", blockDataArray);
+
+            // Set all blocks at once to preserve order
+            createSessionStore.setBlocks(blockDataArray);
+
+            // Also save step 1 data to store for edit mode
+            createSessionStore.setStep1Data({
+              theme: selectedTheme!,
+              sports: selectedSports,
+              date: selectedDate,
+              timeRange: timeRange || null,
+            });
+
+            createSessionStore.setSessionName(sessionName || "");
+            setHasLoadedSessionData(true);
+          }
+        } catch (error) {
+          console.error("Error loading session:", error);
+          setSubmitError("Erreur lors du chargement de la séance");
+        } finally {
+          setIsFetching(false);
+        }
+      };
+
+      loadSessionData();
     }
-     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditing, sessionId, hasLoadedSessionData]);
 
   // Sync store data to local state (for when returning from add-block)
@@ -202,13 +366,39 @@ export default function CreateSession() {
       if (storeData.sessionName) {
         setSessionName(storeData.sessionName);
       }
+      // For edit mode, also sync step 1 data if available
+      if (isEditing) {
+        if (storeData.theme && !selectedTheme) {
+          setSelectedTheme(storeData.theme);
+        }
+        if (
+          storeData.sports &&
+          storeData.sports.length > 0 &&
+          selectedSports.length === 0
+        ) {
+          setSelectedSports(storeData.sports);
+        }
+        if (storeData.date && !selectedDate) {
+          setSelectedDate(storeData.date);
+        }
+        if (storeData.timeRange && !timeRange) {
+          setTimeRange(storeData.timeRange);
+        }
+      }
       // Clear blocks error if blocks are added
       if (storeData.blocks && storeData.blocks.length > 0) {
         setErrors((prev) => ({ ...prev, blocks: undefined }));
       }
       // Could sync other fields here if needed
     }
-  }, [createSessionStore.sessionData]);
+  }, [
+    createSessionStore.sessionData,
+    isEditing,
+    selectedTheme,
+    selectedSports.length,
+    selectedDate,
+    timeRange,
+  ]);
 
   const validateStep1 = (): boolean => {
     const newErrors: typeof errors = {};
@@ -347,10 +537,110 @@ export default function CreateSession() {
 
       // Check if editing or creating
       if (isEditing && sessionId && typeof sessionId === "string") {
-        console.log("=== EDIT MODE TEMPORARILY DISABLED ===");
-        console.log("Edit mode disabled due to schema changes");
-        setSubmitError("Mode édition temporairement indisponible");
-        return;
+        console.log("=== UPDATING EXISTING SESSION ===");
+        console.log("sessionId:", sessionId);
+
+        // UPDATE EXISTING SESSION
+        const { error: updateError } = await supabase
+          .from("sessions")
+          .update({
+            title: sessionName,
+            scheduled_date: scheduledDate,
+            scheduled_time: scheduledTime,
+            duration_seconds: durationSeconds,
+            sport_ids: sportIds,
+            theme_ids: themeIds,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", sessionId);
+
+        console.log("Update session result:", { updateError });
+
+        if (updateError) {
+          console.log("Error updating session:", updateError);
+          setSubmitError("Erreur lors de la mise à jour de la séance");
+          return;
+        }
+
+        // Update existing blocks - need to handle training blocks
+        const storeBlocks = createSessionStore.sessionData?.blocks || [];
+        console.log("Store blocks for update:", storeBlocks);
+
+        if (storeBlocks.length > 0) {
+          // For each block, we need to:
+          // 1. Update the training block content
+          // 2. Update the session block (intensity, sequence)
+          for (let index = 0; index < storeBlocks.length; index++) {
+            const block = storeBlocks[index];
+
+            // Update the training block
+            if (block.training_block_id) {
+              const { error: updateTrainingBlockError } = await supabase
+                .from("training_blocks")
+                .update({
+                  title: block.title,
+                  description: block.description,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", block.training_block_id);
+
+              if (updateTrainingBlockError) {
+                console.error(
+                  "Error updating training block:",
+                  updateTrainingBlockError,
+                );
+                setSubmitError(
+                  "Erreur lors de la mise à jour des blocs d'entraînement",
+                );
+                return;
+              }
+
+              // Update exercises for this training block
+              // First delete existing exercises
+              await supabase
+                .from("training_block_exercises")
+                .delete()
+                .eq("training_block_id", block.training_block_id);
+
+              // Insert new exercises
+              if (block.exercises.length > 0 && block.training_block_id) {
+                const exercises = block.exercises.map((exercise) => ({
+                  training_block_id: block.training_block_id!,
+                  name: exercise.text,
+                }));
+
+                const { error: exercisesError } = await supabase
+                  .from("training_block_exercises")
+                  .insert(exercises);
+
+                if (exercisesError) {
+                  console.error("Error updating exercises:", exercisesError);
+                  // Don't fail the entire operation if exercises fail
+                }
+              }
+            }
+
+            // Update the session block (intensity, sequence_order)
+            const { error: updateSessionBlockError } = await supabase
+              .from("session_blocks")
+              .update({
+                intensity_id: block.intensity?.id || null,
+                sequence_order: index,
+              })
+              .eq("id", block.id);
+
+            if (updateSessionBlockError) {
+              console.error(
+                "Error updating session block:",
+                updateSessionBlockError,
+              );
+              setSubmitError(
+                "Erreur lors de la mise à jour des blocs de séance",
+              );
+              return;
+            }
+          }
+        }
       } else {
         console.log("=== CREATING NEW SESSION ===");
         // CREATE NEW SESSION
@@ -399,7 +689,7 @@ export default function CreateSession() {
         // Create training blocks and link them to the session
         const storeBlocks = createSessionStore.sessionData?.blocks || [];
         console.log("Store blocks for creation:", storeBlocks);
-        
+
         if (storeBlocks.length > 0) {
           // Create training blocks first
           for (let index = 0; index < storeBlocks.length; index++) {
@@ -407,30 +697,43 @@ export default function CreateSession() {
             console.log(`Creating training block ${index}:`, block);
 
             // Create training block
-            const { data: trainingBlockData, error: trainingBlockError } = await supabase
-              .from("training_blocks")
-              .insert({
-                created_by: coachId,
-                title: block.title,
-                description: block.description,
-                is_public: false,
-              })
-              .select()
-              .single();
+            const { data: trainingBlockData, error: trainingBlockError } =
+              await supabase
+                .from("training_blocks")
+                .insert({
+                  created_by: coachId,
+                  title: block.title,
+                  description: block.description,
+                  is_public: false,
+                })
+                .select()
+                .single();
 
-            console.log(`Training block ${index} creation result:`, { trainingBlockData, trainingBlockError });
+            console.log(`Training block ${index} creation result:`, {
+              trainingBlockData,
+              trainingBlockError,
+            });
 
             if (trainingBlockError) {
               console.log("Error creating training block:", trainingBlockError);
-              setSubmitError("Erreur lors de la création des blocs d'entraînement");
+              setSubmitError(
+                "Erreur lors de la création des blocs d'entraînement",
+              );
               return;
             }
 
             // Create exercises for this training block
             if (block.exercises.length > 0) {
-              console.log(`Creating exercises for training block ${trainingBlockData.id}:`, block.exercises);
+              console.log(
+                `Creating exercises for training block ${trainingBlockData.id}:`,
+                block.exercises,
+              );
 
-              for (let exerciseIndex = 0; exerciseIndex < block.exercises.length; exerciseIndex++) {
+              for (
+                let exerciseIndex = 0;
+                exerciseIndex < block.exercises.length;
+                exerciseIndex++
+              ) {
                 const exercise = block.exercises[exerciseIndex];
 
                 const { error: exerciseError } = await supabase
@@ -441,7 +744,10 @@ export default function CreateSession() {
                   });
 
                 if (exerciseError) {
-                  console.error("Error inserting training block exercise:", exerciseError);
+                  console.error(
+                    "Error inserting training block exercise:",
+                    exerciseError,
+                  );
                   // Don't fail the entire operation if exercises fail
                 }
               }
@@ -458,8 +764,13 @@ export default function CreateSession() {
               });
 
             if (sessionBlockError) {
-              console.log("Error linking training block to session:", sessionBlockError);
-              setSubmitError("Erreur lors de l'association des blocs à la séance");
+              console.log(
+                "Error linking training block to session:",
+                sessionBlockError,
+              );
+              setSubmitError(
+                "Erreur lors de l'association des blocs à la séance",
+              );
               return;
             }
           }
@@ -582,9 +893,7 @@ export default function CreateSession() {
             {/* Date Input */}
             <View>
               <View className="flex-row items-center gap-2">
-                <Text className="text-sm font-medium text-accent w-6">
-                  Le
-                </Text>
+                <Text className="text-sm font-medium text-accent w-6">Le</Text>
                 <View className="flex-1">
                   <DatePicker
                     selectedDate={selectedDate}
@@ -726,15 +1035,24 @@ export default function CreateSession() {
                     keyExtractor={(item, index) => `${item.id}-${index}`}
                     onDragEnd={(event: any) => {
                       // Method 1: Use from/to if available
-                      if (event?.data?.from !== undefined && event?.data?.to !== undefined) {
-                        createSessionStore.reorderBlocks(event.data.from, event.data.to);
+                      if (
+                        event?.data?.from !== undefined &&
+                        event?.data?.to !== undefined
+                      ) {
+                        createSessionStore.reorderBlocks(
+                          event.data.from,
+                          event.data.to,
+                        );
                       }
                       // Method 2: Fallback - directly use reordered data array
                       else if (Array.isArray(event?.data)) {
                         createSessionStore.setBlocks(event.data);
                       }
                       // Method 3: Check if event itself has from/to
-                      else if (event?.from !== undefined && event?.to !== undefined) {
+                      else if (
+                        event?.from !== undefined &&
+                        event?.to !== undefined
+                      ) {
                         createSessionStore.reorderBlocks(event.from, event.to);
                       }
                     }}

@@ -15,8 +15,8 @@ import TimerCard from "@/components/timer-card";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { supabase } from "@/utilities/supabase";
@@ -28,8 +28,10 @@ import { useTimerStore } from "@/stores/timer-store";
 type Session = Database["public"]["Tables"]["sessions"]["Row"];
 type Sport = Database["public"]["Tables"]["sports"]["Row"];
 type TrainingBlock = Database["public"]["Tables"]["training_blocks"]["Row"];
-type TrainingBlockExercise = Database["public"]["Tables"]["training_block_exercises"]["Row"];
-type SessionTimerConfig = Database["public"]["Tables"]["session_timer_configs"]["Row"];
+type TrainingBlockExercise =
+  Database["public"]["Tables"]["training_block_exercises"]["Row"];
+type SessionTimerConfig =
+  Database["public"]["Tables"]["session_timer_configs"]["Row"];
 
 interface SessionWithRelations extends Session {
   sports: Sport[];
@@ -68,6 +70,9 @@ export default function SessionViewIndividualized() {
     setShowWidget,
   } = useTimerStore();
 
+  // Track if this is the initial mount
+  const isInitialMount = useRef(true);
+
   const [expandedSections, setExpandedSections] = useState<{
     [key: number]: boolean;
   }>({});
@@ -96,8 +101,13 @@ export default function SessionViewIndividualized() {
   const sessionSportName = useMemo(() => {
     const firstSportName = session?.sports?.[0]?.name_fr ?? "Séance";
     const sportsCount = session?.sports?.length ?? 0;
-    const sportText = sportsCount > 1 ? `${firstSportName} +${sportsCount - 1}` : firstSportName;
-    const duration = durationMinutes ? ` - Environ ${durationMinutes} minutes` : "";
+    const sportText =
+      sportsCount > 1
+        ? `${firstSportName} +${sportsCount - 1}`
+        : firstSportName;
+    const duration = durationMinutes
+      ? ` - Environ ${durationMinutes} minutes`
+      : "";
     return `${sportText}${duration}`;
   }, [session?.sports, durationMinutes]);
 
@@ -146,94 +156,108 @@ export default function SessionViewIndividualized() {
   };
 
   // Fetch session data
+  const fetchSessionData = useCallback(async () => {
+    if (!sessionId) {
+      setError("No session ID provided");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Fetch session first
+      const { data: sessionData, error: sessionError } = await supabase
+        .from("sessions")
+        .select("*")
+        .eq("id", sessionId)
+        .single();
+
+      if (sessionError) throw sessionError;
+      if (!sessionData) throw new Error("Session not found");
+
+      // Fetch sports separately using sport_ids array
+      let sports: Sport[] = [];
+      if (sessionData.sport_ids && sessionData.sport_ids.length > 0) {
+        const { data: sportsData, error: sportsError } = await supabase
+          .from("sports")
+          .select("*")
+          .in("id", sessionData.sport_ids);
+
+        if (sportsError) throw sportsError;
+        sports = sportsData || [];
+      }
+
+      setSession({ ...sessionData, sports } as SessionWithRelations);
+
+      // Fetch session blocks with training blocks and exercises
+      const { data: blocksData, error: blocksError } = await supabase
+        .from("session_blocks")
+        .select(
+          `
+          *,
+          training_block:training_blocks(
+            *,
+            exercises:training_block_exercises(*)
+          )
+        `,
+        )
+        .eq("session_id", sessionId)
+        .order("sequence_order", { ascending: true });
+
+      if (blocksError) throw blocksError;
+
+      setBlocks((blocksData as BlockWithExercises[]) || []);
+
+      // Fetch timer config
+      const { data: timerData, error: timerError } = await supabase
+        .from("session_timer_configs")
+        .select("*")
+        .eq("session_id", sessionId)
+        .maybeSingle();
+
+      if (timerError && timerError.code !== "PGRST116") {
+        // PGRST116 = "not found" which is acceptable
+        throw timerError;
+      }
+
+      setTimerConfig(timerData);
+      if (timerData) {
+        // Initialize the store with timer config from database
+        initializeTimer({
+          timerType: timerData.timer_type as TimerType,
+          effortSeconds: timerData.work_seconds ?? 20,
+          restSeconds: timerData.rest_seconds ?? 10,
+          durationSeconds: timerData.duration_seconds ?? 60,
+          rounds: timerData.rounds ?? 8,
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching session:", err);
+      setError(err instanceof Error ? err.message : "Failed to load session");
+    } finally {
+      setLoading(false);
+    }
+  }, [sessionId, initializeTimer]);
+
+  // Fetch data on mount
   useEffect(() => {
-    const fetchSessionData = async () => {
-      if (!sessionId) {
-        setError("No session ID provided");
-        setLoading(false);
+    fetchSessionData();
+  }, [fetchSessionData]);
+
+  // Refetch data when screen comes into focus (e.g., returning from edit screen)
+  useFocusEffect(
+    useCallback(() => {
+      // Skip refetch on initial mount, only refetch when returning to screen
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
         return;
       }
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Fetch session first
-        const { data: sessionData, error: sessionError } = await supabase
-          .from("sessions")
-          .select("*")
-          .eq("id", sessionId)
-          .single();
-
-        if (sessionError) throw sessionError;
-        if (!sessionData) throw new Error("Session not found");
-
-        // Fetch sports separately using sport_ids array
-        let sports: Sport[] = [];
-        if (sessionData.sport_ids && sessionData.sport_ids.length > 0) {
-          const { data: sportsData, error: sportsError } = await supabase
-            .from("sports")
-            .select("*")
-            .in("id", sessionData.sport_ids);
-
-          if (sportsError) throw sportsError;
-          sports = sportsData || [];
-        }
-
-        setSession({ ...sessionData, sports } as SessionWithRelations);
-
-        // Fetch session blocks with training blocks and exercises
-        const { data: blocksData, error: blocksError } = await supabase
-          .from("session_blocks")
-          .select(
-            `
-            *,
-            training_block:training_blocks(
-              *,
-              exercises:training_block_exercises(*)
-            )
-          `,
-          )
-          .eq("session_id", sessionId)
-          .order("sequence_order", { ascending: true });
-
-        if (blocksError) throw blocksError;
-
-        setBlocks(blocksData as BlockWithExercises[] || []);
-
-        // Fetch timer config
-        const { data: timerData, error: timerError } = await supabase
-          .from("session_timer_configs")
-          .select("*")
-          .eq("session_id", sessionId)
-          .maybeSingle();
-
-        if (timerError && timerError.code !== "PGRST116") {
-          // PGRST116 = "not found" which is acceptable
-          throw timerError;
-        }
-
-        setTimerConfig(timerData);
-        if (timerData) {
-          // Initialize the store with timer config from database
-          initializeTimer({
-            timerType: timerData.timer_type as TimerType,
-            effortSeconds: timerData.work_seconds ?? 20,
-            restSeconds: timerData.rest_seconds ?? 10,
-            durationSeconds: timerData.duration_seconds ?? 60,
-            rounds: timerData.rounds ?? 8,
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching session:", err);
-        setError(err instanceof Error ? err.message : "Failed to load session");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessionData();
-  }, [sessionId, initializeTimer]);
+      fetchSessionData();
+    }, [fetchSessionData]),
+  );
 
   const toggleExpanded = (index: number) => {
     setExpandedSections((prev) => ({
@@ -385,7 +409,9 @@ export default function SessionViewIndividualized() {
                 isExpanded={expandedSections[index] || false}
                 onToggleExpand={() => toggleExpanded(index)}
                 exercises={
-                  block.training_block.exercises.map(trainingBlockExerciseToExerciseItem) || []
+                  block.training_block.exercises.map(
+                    trainingBlockExerciseToExerciseItem,
+                  ) || []
                 }
               />
             ))}
