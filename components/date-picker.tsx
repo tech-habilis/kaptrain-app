@@ -4,7 +4,10 @@ import Button from "./button";
 import BottomSheetModal from "./bottom-sheet-modal";
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
 import IcCalendar from "./icons/calendar";
+import IcArrowLeft from "./icons/arrow-left";
+import IcArrowRight from "./icons/arrow-right";
 import Text from "./text";
+import { ColorConst } from "@/constants/theme";
 import DateTimePicker, { DateType } from "react-native-ui-datepicker";
 import dayjs from "dayjs";
 import cn from "@/utilities/cn";
@@ -128,6 +131,11 @@ export default function DatePicker({
               year_label: "text-base text-text",
               month_selector_label: "font-bold text-lg",
               year_selector_label: "font-bold text-lg",
+            }}
+            // Custom components to fix invisible arrow issue on real devices
+            components={{
+              IconPrev: <IcArrowLeft size={20} color={ColorConst.secondary} />,
+              IconNext: <IcArrowRight size={20} color={ColorConst.secondary} />,
             }}
           />
         </View>
