@@ -33,7 +33,9 @@
   },
   "error": {
     "googleSignInFailed": "Failed to sign in with Google. Please try again later or contact support.",
-    "emailAndPasswordRequired": "Email and password are required."
+    "emailAndPasswordRequired": "Email and password are required.",
+    "userAlreadyExists": "A user with this email already exists. Please sign in instead.",
+    "emailExists": "This email address is already registered. Please sign in instead."
   },
   "validation": {
     "passwordRequired": "Password is required",
@@ -53,7 +55,12 @@
     "weightRequired": "Weight is required",
     "sportLevelRequired": "Sport level is required",
     "atLeastOneSportRequired": "Please select at least one sport",
-    "maxFiveSports": "You can select up to 5 sports"
+    "maxFiveSports": "You can select up to 5 sports",
+    "required": "This field is required",
+    "mustBeValidNumber": "Please enter a valid number",
+    "phoneRequired": "Phone number is required",
+    "phoneNumbersOnly": "Phone number can only contain digits and +",
+    "phoneMinLength": "Phone number must be at least 8 digits"
   },
   "signUp": {
     "noAccountSignUp": "No account?\nSign up",

@@ -33,7 +33,10 @@
   },
   "error": {
     "googleSignInFailed": "Échec de la connexion avec Google. Veuillez réessayer plus tard ou contacter le support.",
-    "emailAndPasswordRequired": "Email et mot de passe sont requis."
+    "emailAndPasswordRequired": "Email et mot de passe sont requis.",
+    "emailAlreadyRegistered": "Cet email est déjà enregistré. Veuillez vous connecter à la place.",
+    "userAlreadyExists": "Un utilisateur avec cet email existe déjà. Veuillez vous connecter à la place.",
+    "emailExists": "Cette adresse email est déjà enregistrée. Veuillez vous connecter à la place."
   },
   "validation": {
     "passwordRequired": "Le mot de passe est requis",
@@ -53,14 +56,19 @@
     "weightRequired": "Le poids est requis",
     "sportLevelRequired": "Le niveau de sport est requis",
     "atLeastOneSportRequired": "Veuillez sélectionner au moins un sport",
-    "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports"
+    "maxFiveSports": "Vous pouvez sélectionner jusqu'à 5 sports",
+    "required": "Ce champ est requis",
+    "mustBeValidNumber": "Veuillez entrer un nombre valide",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "phoneNumbersOnly": "Le numéro de téléphone ne peut contenir que des chiffres et +",
+    "phoneMinLength": "Le numéro de téléphone doit contenir au moins 8 chiffres"
   },
   "landing": {
     "text1": "L'Expertise de haut niveau,",
     "text2": "accessible à tous"
   },
   "signUp": {
-    "noAccountSignUp": "Pas de compte ?\nInscris toi",
+    "noAccountSignUp": "Pas de compte ? Inscris toi",
     "alreadyHaveAccount": "Tu as déjà un compte ?",
     "login": "Connecte toi",
     "createPassword": "Crée un mot de passe",
@@ -78,7 +86,7 @@
   },
   "emailVerified": {
     "emailVerified": "Mail vérifié",
-    "emailVerifiedDescription": "Ton adresse mail a été vérifiée avec\nsuccès",
+    "emailVerifiedDescription": "Ton adresse email a été vérifiée avec\nsuccès",
     "completeProfile": "Compléter mon profil"
   },
   "completeProfile": {
@@ -171,7 +179,7 @@
   "onboarding": {
     "step1Text": "Visualise, comprends,\naméliore.",
     "step2Text": "L'expertise sportive,\naccessible à tous.",
-    "step3Text": "Ta progression\ncommence ici."
+    "step3Text": "Ta progression commence\nici."
   },
   "wellness": {
     "title": "Comment te sens-tu\naujourd'hui ?",

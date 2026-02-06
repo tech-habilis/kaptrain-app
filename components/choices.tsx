@@ -1,4 +1,4 @@
-import { FlatList, Pressable, View, ViewStyle } from "react-native";
+import { Pressable, View, ViewStyle } from "react-native";
 import Text from "./text";
 import { tv, VariantProps } from "tailwind-variants";
 import cn from "@/utilities/cn";
@@ -8,7 +8,7 @@ import IcRadio from "./icons/radio";
 import IcRadioSelected from "./icons/radio-selected";
 import { TChoice } from "@/types";
 import { clsx } from "clsx";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 const choiceWrapper = tv({
   base: "rounded-lg px-2 py-4 justify-center items-center",
@@ -36,7 +36,7 @@ const choiceText = tv({
   variants: {
     type: {
       default: "",
-      secondary: "text-base font-bold",
+      secondary: "text-base font-ls-bold",
       multipleChoice: "",
       multipleChoiceWithoutIcon: "text-center",
       radio: "text-base font-medium",
@@ -131,7 +131,7 @@ export const Choice = ({
 
   return (
     <Pressable
-      className={cn(choiceWrapper({ selected, type }), "flex-1", className)}
+      className={cn(choiceWrapper({ selected, type }), className)}
       onPress={onPress}
       style={style}
     >
@@ -140,7 +140,7 @@ export const Choice = ({
         <Text className={cn(choiceText({ type, selected }), textClassName)}>
           {choice.text}
         </Text>
-        {type === "radio" && choice.secondaryText && (
+        {type === "radio" && choice.secondaryText !== undefined && (
           <Text className="text-sm text-subtleText">
             {choice.secondaryText}
           </Text>
@@ -166,6 +166,7 @@ export const Choices = ({
   activeItemClassName = "",
   inactiveItemClassName = "",
   itemTextClassName = "",
+  extraComponent,
 }: {
   label?: string;
   data: TChoice[];
@@ -180,6 +181,7 @@ export const Choices = ({
   activeItemClassName?: string;
   inactiveItemClassName?: string;
   itemTextClassName?: string;
+  extraComponent?: ReactNode;
 } & Omit<ChoiceVariants, "selected">) => {
   const [width, setWidth] = useState(0);
   const gap = numColumns > 1 ? 8 : 0;
@@ -196,10 +198,14 @@ export const Choices = ({
         <Text className="text-accent font-medium text-sm">{label}</Text>
       )}
 
-      <View className="gap-2 mt-2">
-        {data.map((item, index) => (
+      <View
+        className={clsx("gap-2 mt-2", {
+          "flex-row flex-wrap": numColumns > 1,
+        })}
+      >
+        {data.map((item) => (
           <Choice
-            key={index}
+            key={item.id}
             type={type}
             className={clsx(itemClassName, {
               [activeItemClassName]: selectedChoice?.text === item.text,
@@ -219,7 +225,7 @@ export const Choices = ({
                 type === "multipleChoiceWithoutIcon"
               ) {
                 const nonNullSelectedChoices = selectedChoices || [];
-                const isSelecting = !selectedChoices?.includes(item);
+                const isSelecting = !selectedChoices?.some((c) => c.id === item.id);
 
                 if (
                   maxChoice !== undefined &&
@@ -232,7 +238,7 @@ export const Choices = ({
                 onChangeMultiple?.(
                   isSelecting
                     ? [...nonNullSelectedChoices, item]
-                    : nonNullSelectedChoices.filter((c) => c !== item),
+                    : nonNullSelectedChoices.filter((c) => c.id !== item.id),
                 );
 
                 return;
@@ -242,6 +248,7 @@ export const Choices = ({
             }}
           />
         ))}
+        {extraComponent}
       </View>
     </View>
   );

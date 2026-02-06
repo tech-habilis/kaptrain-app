@@ -222,7 +222,7 @@ export default function NumberOfSteps() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg">Répartition d’activité</Text>
+          <Text className="font-ls-bold text-lg">Nombre de pas</Text>
         </View>
 
         <Tabs
@@ -279,7 +279,7 @@ export default function NumberOfSteps() {
         key="statistic"
         className="pb-safe"
       >
-        <Text className="font-bold text-lg text-secondary">
+        <Text className="font-ls-bold text-lg text-secondary">
           {"Indiquer mon objectif de pas\nquotidien"}
         </Text>
 
@@ -307,7 +307,7 @@ export default function NumberOfSteps() {
         className="pb-safe"
       >
         <IcSync />
-        <Text className="font-bold text-lg text-secondary mt-3">
+        <Text className="font-ls-bold text-lg text-secondary mt-3">
           {"Synchroniser avec Health\nConnect"}
         </Text>
 

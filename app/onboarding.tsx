@@ -99,7 +99,7 @@ export default function Onboarding() {
         <PaginationImage key={"image" + index} index={index} currentIndex={currentStepIndex} />
       ))}
       <AnimatedText
-        className="text-white text-2xl font-bold"
+        className="text-white text-2xl font-ls-bold"
         key={"text" + currentStepIndex}
         entering={currentStepIndex === 0 ? undefined : SlideInLeft}
         exiting={SlideOutRight}

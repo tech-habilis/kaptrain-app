@@ -37,7 +37,7 @@ export default function ProgramDetailAction() {
         <Pressable onPress={router.back}>
           <IcArrowLeft />
         </Pressable>
-        <Text className="font-bold text-lg flex-1">Abdos à la maison</Text>
+        <Text className="font-ls-bold text-lg flex-1">Abdos à la maison</Text>
       </View>
 
       <Chip text="Programme acheté" className="self-start bg-warmLight mt-2" />

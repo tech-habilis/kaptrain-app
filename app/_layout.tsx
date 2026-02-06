@@ -20,6 +20,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { Platform } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { useFonts } from "expo-font";
 
 /**
  * Place all initialization logic here for easier management
@@ -39,6 +40,24 @@ initializeApp();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    // LeagueSpartan fonts
+    "LeagueSpartan-Regular": require("../assets/fonts/LeagueSpartan-Regular.ttf"),
+    "LeagueSpartan-Medium": require("../assets/fonts/LeagueSpartan-Medium.ttf"),
+    "LeagueSpartan-SemiBold": require("../assets/fonts/LeagueSpartan-SemiBold.ttf"),
+    "LeagueSpartan-Bold": require("../assets/fonts/LeagueSpartan-Bold.ttf"),
+    "LeagueSpartan-ExtraBold": require("../assets/fonts/LeagueSpartan-ExtraBold.ttf"),
+
+    // Inter fonts
+    "Inter_18pt-Regular": require("../assets/fonts/Inter_18pt-Regular.ttf"),
+    "Inter_18pt-Medium": require("../assets/fonts/Inter_18pt-Medium.ttf"),
+    "Inter_18pt-SemiBold": require("../assets/fonts/Inter_18pt-SemiBold.ttf"),
+    "Inter_18pt-Bold": require("../assets/fonts/Inter_18pt-Bold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <SessionProvider>
@@ -73,7 +92,7 @@ function RootNavigator() {
       {/* logged in stack */}
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Protected guard={showCompleteProfileForm}>
-        <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
+          <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
         </Stack.Protected>
 
         <Stack.Screen name={ROUTE_NAME.TABS} />

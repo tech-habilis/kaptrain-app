@@ -10,12 +10,12 @@ import { ROUTE } from "@/constants/route";
 import cn from "@/utilities/cn";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
 import { useSession } from "@/contexts/auth-context";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, View } from "react-native";
 import { useEffect } from "react";
-import { BlurView } from "expo-blur";
 import { toast } from "@/components/toast";
+import FadedBottomBar from "@/components/faded-bottom-bar";
 
 const STEP_CONFIG = {
   1: {
@@ -47,10 +47,12 @@ const STEP_CONFIG = {
 
 export default function CompleteProfile() {
   const { session } = useSession();
+  const { step: stepParam } = useLocalSearchParams();
   const {
     currentStep,
     nextStep,
     previousStep,
+    setCurrentStep,
     validateStep,
     formData,
     saveStep,
@@ -71,6 +73,35 @@ export default function CompleteProfile() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
+
+  // FOR DEV ONLY; handle step parameter from URL (?step=N)
+  useEffect(() => {
+    if (__DEV__ && stepParam) {
+      const step = parseInt(stepParam.toString(), 10);
+      if (!isNaN(step) && step >= 1 && step <= 5) {
+        setCurrentStep(step);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepParam]);
+
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (currentStep > 1) {
+          // Navigate to previous step instead of going back to OTP screen
+          previousStep();
+          return true; // Prevent default back behavior
+        }
+        // On step 1, allow default back behavior (go to OTP screen)
+        return false;
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [currentStep, previousStep]);
 
   const handleContinue = async () => {
     if (!validateStep(currentStep)) {
@@ -94,7 +125,6 @@ export default function CompleteProfile() {
       nextStep();
     } else {
       // All steps completed, navigate to profile completed
-      router.dismissAll();
       router.replace(ROUTE.PROFILE_COMPLETED);
     }
   };
@@ -171,7 +201,7 @@ export default function CompleteProfile() {
             )}
             <Text
               className={cn(
-                "text-secondary font-bold",
+                "text-secondary font-ls-bold",
                 currentStep === 1 ? "text-2xl" : "text-2xl mt-2",
               )}
             >
@@ -190,37 +220,31 @@ export default function CompleteProfile() {
         )}
       </View>
       {!isLoading && (
-        <View className="absolute bottom-0 left-0 right-0 pb-safe px-4 pt-8">
-          <BlurView
-            intensity={2}
-            className="absolute inset-0 bg-linear-to-t from-white from-66% to-transparent"
-          />
-          <View className="flex-row android:mb-6 gap-6 items-center justify-between">
-            <View className="gap-2 grow">
-              <Text className="text-subtleText">{config.progress}</Text>
-              <View className="flex-row gap-1">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <View
-                    key={index}
-                    className={cn(
-                      "flex-1 h-2 rounded-full",
-                      index < currentStep ? "bg-secondary" : "bg-stroke",
-                    )}
-                  />
-                ))}
-              </View>
+        <FadedBottomBar className="pt-8">
+          <View className="gap-2 grow">
+            <Text className="text-subtleText">{config.progress}</Text>
+            <View className="flex-row gap-1">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <View
+                  key={index}
+                  className={cn(
+                    "flex-1 h-2 rounded-full",
+                    index < currentStep ? "bg-secondary" : "bg-stroke",
+                  )}
+                />
+              ))}
             </View>
-            {currentStep < Object.keys(STEP_CONFIG).length && (
-              <Button
-                text="common.continue"
-                className="grow"
-                onPress={handleContinue}
-                disabled={!isStepComplete() || isSaving}
-                loading={isSaving}
-              />
-            )}
           </View>
-        </View>
+          {currentStep < Object.keys(STEP_CONFIG).length && (
+            <Button
+              text="common.continue"
+              className="grow"
+              onPress={handleContinue}
+              disabled={!isStepComplete() || isSaving}
+              loading={isSaving}
+            />
+          )}
+        </FadedBottomBar>
       )}
     </>
   );
