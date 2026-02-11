@@ -22,7 +22,7 @@ import IcGrid from "@/components/icons/grid";
 import IcLoveFilled from "@/components/icons/love-filled";
 import { clsx } from "clsx";
 import getExercises from "@/constants/mock";
-import { ExerciseItem } from "@/types";
+import { ExerciseItem, TChoice } from "@/types";
 import { ROUTE } from "@/constants/route";
 import CircleBadge from "@/components/circle-badge";
 
@@ -81,11 +81,13 @@ export default function ExerciseList() {
   const [isGridView, setIsGridView] = useState(false);
   const exercises = getExercises({ isGridView });
 
-  const sorts = [
+  const sorts: TChoice[] = [
     {
+      id: 'az',
       text: "Ordre alphabétique (A à Z)",
     },
     {
+      id: 'za',
       text: "Ordre alphabétique (Z à A)",
     },
   ];
@@ -107,7 +109,7 @@ export default function ExerciseList() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg">Tous les exercices</Text>
+          <Text className="font-ls-bold text-lg">Tous les exercices</Text>
         </View>
 
         <Input leftIcon={<IcSearch />} />

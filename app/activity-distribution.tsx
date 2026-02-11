@@ -114,26 +114,31 @@ export default function ActivityDistribution() {
   };
   const distributionOptions: DistributionOption[] = [
     {
+      id: "id-Heure",
       text: "Heure",
       withPalette: true,
       chart: <ActivityDistributionChartDetail withDate />,
     },
     {
+      id: "id-Répartition de",
       text: "Répartition de séance",
       withPalette: false,
       chart: <ActivityDistributionChartDetail />,
     },
     {
+      id: "id-Nombre de",
       text: "Nombre de séances",
       withPalette: false,
       chart: <NumberOfSessionChart />,
     },
     {
+      id: "id-RPE Cognitif",
       text: "RPE Cognitif",
       withPalette: false,
       chart: <CognitiveFeelingChart />,
     },
     {
+      id: "id-RPE Physique",
       text: "RPE Physique",
       withPalette: false,
       chart: <CognitiveFeelingChart />,
@@ -150,7 +155,7 @@ export default function ActivityDistribution() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg">Répartition d’activité</Text>
+          <Text className="font-ls-bold text-lg">Répartition d’activité</Text>
         </View>
 
         <Tabs
@@ -198,7 +203,7 @@ export default function ActivityDistribution() {
         key="statistic"
         className="pb-safe"
       >
-        <Text className="font-bold text-lg text-secondary">Code couleur</Text>
+        <Text className="font-ls-bold text-lg text-secondary">Code couleur</Text>
         <Text className="text-base text-subtleText mt-1">
           Associe une couleur à chaque sport pour mieux visualiser ta pratique
         </Text>

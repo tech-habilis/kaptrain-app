@@ -51,7 +51,7 @@ export default function Subscription() {
           <View className="px-4 items-center pt-6 pb-8">
             <View className="flex-row items-center mb-2">
               <IcKaptrain size={40} />
-              <Text className="text-white text-2xl font-bold ml-2">
+              <Text className="text-white text-2xl font-ls-bold ml-2">
                 KAPTRAIN
               </Text>
             </View>
@@ -63,9 +63,9 @@ export default function Subscription() {
           {/* Hero Content */}
           <View className="px-4 gap-6">
             <View className="gap-3">
-              <RawText className="text-white text-2xl font-bold">
+              <RawText className="text-white text-2xl font-ls-bold">
                 Débloque tout ton potentiel avec{" "}
-                <HighlightedText className="text-white text-2xl font-bold">
+                <HighlightedText className="text-white text-2xl font-ls-bold">
                   Kaptrain Premium
                 </HighlightedText>
               </RawText>
@@ -84,7 +84,7 @@ export default function Subscription() {
                   <IcFire size={28} color="white" />
                 </View>
                 <View>
-                  <Text className="text-white text-2xl font-bold">500+</Text>
+                  <Text className="text-white text-2xl font-ls-bold">500+</Text>
                   <Text className="text-white/80 text-sm">
                     Athlètes déjà inscrits
                   </Text>
@@ -98,7 +98,7 @@ export default function Subscription() {
                   <IcStar />
                 </View>
                 <View>
-                  <Text className="text-white text-2xl font-bold">4,8/5</Text>
+                  <Text className="text-white text-2xl font-ls-bold">4,8/5</Text>
                   <Text className="text-white/80 text-sm">
                     Note moyenne sur l&apos;App Store
                   </Text>
@@ -112,7 +112,7 @@ export default function Subscription() {
                   <IcVerified />
                 </View>
                 <View>
-                  <Text className="text-white text-2xl font-bold">30+</Text>
+                  <Text className="text-white text-2xl font-ls-bold">30+</Text>
                   <Text className="text-white/80 text-sm">
                     Coachs certifiés impliqués
                   </Text>
@@ -144,7 +144,7 @@ export default function Subscription() {
 
           {/* Ils soutiennent le projet */}
           <View className="mt-12">
-            <Text className="text-white text-base font-bold px-4">
+            <Text className="text-white text-base font-ls-bold px-4">
               Ils soutiennent le projet
             </Text>
             <ScrollView
@@ -158,7 +158,7 @@ export default function Subscription() {
                     source={require("../assets/images/subscription-testimony-1.png")}
                     className="rounded-2xl"
                   />
-                  <Text className="mt-2 text-white font-bold text-xs text-center">
+                  <Text className="mt-2 text-white font-ls-bold text-xs text-center">
                     Elodie Clouvel
                   </Text>
                   <Text className="mt-1 text-stroke text-center text-[8px] px-1">
@@ -217,7 +217,7 @@ export default function Subscription() {
       <BottomSheetModal name="plan-ref" ref={planRef} snapPoints={["60%"]}>
         {/* Modal Title */}
         <RawText className="text-secondary text-lg font-bold mb-3">
-          <RawText className="text-primary">
+          <RawText className="text-primary font-ls-bold">
             14 jours d&apos;essai gratuit,
           </RawText>{" "}
           puis

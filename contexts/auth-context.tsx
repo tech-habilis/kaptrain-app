@@ -27,6 +27,7 @@ import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
 import { appScheme } from "@/constants/misc";
 import { AuthError } from "@supabase/auth-js";
+import { useProfileStore } from "@/stores/profile-store";
 
 type TEmailSignIn = {
   email: string;
@@ -54,6 +55,7 @@ type TAuthContext = {
   resetPassword: (email: string) => void;
   verifyPasswordResetOtp: (email: string, otp: string) => void;
   updatePassword: (newPassword: string) => void;
+  loadProfile: () => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -82,6 +84,7 @@ const AuthContext = createContext<TAuthContext>({
   resetPassword: (email: string) => {},
   verifyPasswordResetOtp: (email: string, otp: string) => {},
   updatePassword: (newPassword: string) => {},
+  loadProfile: () => {},
 
   session: null,
   isLoadingSession: false,
@@ -96,6 +99,41 @@ const AuthContext = createContext<TAuthContext>({
   isCheckingProfileCompletion: false,
 });
 
+// Helper function to sync auth metadata from database profile
+// This ensures that if user has updated their profile in the database,
+// those values take precedence over social provider data on re-login
+const syncAuthMetadataFromProfile = async (userId: string) => {
+  try {
+    const profile = await getUserProfile(userId);
+
+    // Only update if user has completed onboarding and has profile data
+    if (profile.onboarding_date) {
+      const metadataUpdates: Record<string, string | null> = {};
+
+      // Use name from database if available, otherwise don't override
+      if (profile.first_name || profile.last_name) {
+        metadataUpdates.name =
+          `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
+      }
+
+      // Use avatar from database if available, otherwise don't override
+      if (profile.avatar_url) {
+        metadataUpdates.avatar_url = profile.avatar_url;
+      }
+
+      // Only update if we have something to update
+      if (Object.keys(metadataUpdates).length > 0) {
+        await supabase.auth.updateUser({
+          data: metadataUpdates,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error syncing auth metadata from profile:", error);
+    // Don't fail sign-in if sync fails
+  }
+};
+
 export function useSession() {
   const value = use(AuthContext);
   if (!value) {
@@ -105,6 +143,7 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
+  const { loadProfile } = useProfileStore();
   const { t } = useTranslation();
   const [[isLoadingSession, session], setSession] =
     useJsonStorageState<TSession>(STORAGE_KEY.SESSION);
@@ -116,7 +155,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [fetchingSession, setFetchingSession] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] = useState(false);
+  const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] =
+    useState(false);
   const [showCompleteProfileForm, setShowCompleteProfileForm] = useState(false);
   const [
     [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
@@ -156,8 +196,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
         ],
       });
 
-
-
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: "apple",
         token: credential.identityToken!,
@@ -169,25 +207,44 @@ export function SessionProvider({ children }: PropsWithChildren) {
         return;
       }
 
-      // Apple only provides the user's name the first time they sign in
-      // If it's available, update the user metadata with it
-      if (credential.fullName) {
-        const nameParts = [];
-        if (credential.fullName.givenName)
-          nameParts.push(credential.fullName.givenName);
-        if (credential.fullName.middleName)
-          nameParts.push(credential.fullName.middleName);
-        if (credential.fullName.familyName)
-          nameParts.push(credential.fullName.familyName);
-        const fullName = nameParts.join(" ");
-        await supabase.auth.updateUser({
-          data: {
-            name: fullName,
-            display_name: fullName,
-            first_name: credential.fullName.givenName,
-            last_name: credential.fullName.familyName,
-          },
-        });
+      // Only update metadata from Apple for NEW users (first time sign-up)
+      // For returning users, sync from database to preserve their changes
+      if (data.session?.user && credential.fullName) {
+        try {
+          const profile = await getUserProfile(data.session.user.id);
+
+          // If user hasn't completed onboarding, save Apple's name
+          if (!profile.onboarding_date && credential.fullName) {
+            const nameParts = [];
+            if (credential.fullName.givenName)
+              nameParts.push(credential.fullName.givenName);
+            if (credential.fullName.middleName)
+              nameParts.push(credential.fullName.middleName);
+            if (credential.fullName.familyName)
+              nameParts.push(credential.fullName.familyName);
+            const fullName = nameParts.join(" ");
+
+            if (fullName) {
+              await supabase.auth.updateUser({
+                data: {
+                  name: fullName,
+                  display_name: fullName,
+                  first_name: credential.fullName.givenName,
+                  last_name: credential.fullName.familyName,
+                },
+              });
+            }
+          } else {
+            // Returning user - sync metadata from database to preserve their changes
+            await syncAuthMetadataFromProfile(data.session.user.id);
+          }
+        } catch (profileError) {
+          console.error(
+            "Error checking profile during Apple sign-in:",
+            profileError,
+          );
+          // Continue with sign-in even if profile check fails
+        }
       }
 
       setSession(supabaseUtils.toLocalSession(data.session));
@@ -216,6 +273,21 @@ export function SessionProvider({ children }: PropsWithChildren) {
           provider: "google",
           token: response.data.idToken || "",
         });
+
+        // Sync metadata from database to preserve user's changes
+        // This ensures that if user updated their name/avatar in the app,
+        // those values are restored instead of using the old Google data
+        if (data.session?.user) {
+          try {
+            await syncAuthMetadataFromProfile(data.session.user.id);
+          } catch (profileError) {
+            console.error(
+              "Error syncing profile during Google sign-in:",
+              profileError,
+            );
+            // Continue with sign-in even if sync fails
+          }
+        }
 
         setSession(supabaseUtils.toLocalSession(data.session));
         router.replace(ROUTE.ROOT);
@@ -306,7 +378,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
     });
 
     if (error) {
-      toast.error(error.message);
+      let errorMessage = error.message;
+
+      if (error.message.includes("User already registered") ||
+          error.message.includes("user_already_exists")) {
+        errorMessage = t("error.userAlreadyExists");
+      } else if (error.message.includes("email_exists")) {
+        errorMessage = t("error.emailExists");
+      }
+
+      toast.error(errorMessage);
       setLoggingInWith(null);
       return;
     }
@@ -356,9 +437,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       toast.error(result.error.message);
     } else {
       setSession(supabaseUtils.toLocalSession(result.data.session));
-      toast.success("OTP verified successfully");
-      router.dismissAll();
-      router.push(ROUTE.EMAIL_VERIFIED);
+      router.replace(ROUTE.EMAIL_VERIFIED);
     }
   };
 
@@ -439,14 +518,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed:", { event: _event, session });
-      setSession(supabaseUtils.toLocalSession(session));
+      const localSession = supabaseUtils.toLocalSession(session);
+      setSession(localSession);
+      if (localSession?.user) {
+        loadProfile(localSession.user.id);
+      }
     });
 
     // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchSession, setSession]);
+  }, [fetchSession, loadProfile, setSession]);
 
   // Check profile completion when session user ID changes
   useEffect(() => {
@@ -476,6 +559,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
         resetPassword,
         verifyPasswordResetOtp,
         updatePassword,
+        loadProfile: () => {
+          if (session?.user?.id) {
+            loadProfile(session.user.id);
+          }
+        },
 
         session,
         isLoadingSession:

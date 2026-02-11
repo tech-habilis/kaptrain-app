@@ -23,30 +23,37 @@ export function Step4() {
   const choices: TChoice[] = useMemo(
     () => [
       {
+        id: "id-sports.athletics",
         text: "sports.athletics",
         leftIcon: <IcCycling />,
       },
       {
+        id: "id-sports.rowing",
         text: "sports.rowing",
         leftIcon: <IcRowing />,
       },
       {
+        id: "id-sports.basketball",
         text: "sports.basketball",
         leftIcon: <IcBasketball />,
       },
       {
+        id: "id-sports.crossfit",
         text: "sports.crossfit",
         leftIcon: <IcCrossfit />,
       },
       {
+        id: "id-sports.cycling",
         text: "sports.cycling",
         leftIcon: <IcCycling />,
       },
       {
+        id: "id-sports.bodybuilding",
         text: "sports.bodybuilding",
         leftIcon: <IcBodybuilding />,
       },
       {
+        id: "id-sports.yoga",
         text: "sports.yoga",
         leftIcon: <IcYoga />,
       },
@@ -59,9 +66,9 @@ export function Step4() {
   const filteredChoices = useMemo(
     () =>
       choices.filter((x) =>
-        x.text.toLowerCase().includes(search.toLowerCase()),
+        t(x.text).toLowerCase().includes(search.toLowerCase()),
       ),
-    [choices, search],
+    [choices, search, t],
   );
 
   const selectedChoices = choices.filter((c) =>
@@ -116,7 +123,7 @@ export function Step4() {
         </Pressable>
       </View>
 
-      <ScrollView className="mt-4">
+      <ScrollView className="mt-4 mb-safe pb-28 android:pb-34">
         <Choices
           data={filteredChoices}
           type="multipleChoice"

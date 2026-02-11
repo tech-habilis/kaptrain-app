@@ -156,7 +156,7 @@ export default function ExerciseFilterMuscles() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg flex-1">Muscles</Text>
+          <Text className="font-ls-bold text-lg flex-1">Muscles</Text>
           <Text className="text-sm text-secondary font-medium">
             Tout effacer
           </Text>

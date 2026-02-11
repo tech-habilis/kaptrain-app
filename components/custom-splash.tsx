@@ -13,7 +13,7 @@ export default function CustomSplash() {
       exiting={FadeOut}
     >
       <IcKaptrain />
-      <Text className="text-white text-[44px] font-bold mb-4 mt-3.5 uppercase">
+      <Text className="text-white text-[44px] font-ls-extrabold mb-4 mt-3.5 uppercase">
         {appName}
       </Text>
       <Text className="text-white font-medium">L'Expertise de haut niveau,</Text>

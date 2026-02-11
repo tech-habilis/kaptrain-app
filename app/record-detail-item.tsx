@@ -176,7 +176,7 @@ export default function RecordDetailItemScreen() {
         key="add-record"
         className="pb-safe"
       >
-        <Text className="font-bold text-lg text-secondary">
+        <Text className="font-ls-bold text-lg text-secondary">
           Ajoute un record
         </Text>
 
@@ -227,7 +227,7 @@ export default function RecordDetailItemScreen() {
         key="edit-record"
         className="pb-safe"
       >
-        <Text className="font-bold text-lg text-secondary">
+        <Text className="font-ls-bold text-lg text-secondary">
           Modifier un record
         </Text>
 

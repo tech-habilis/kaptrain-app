@@ -48,15 +48,10 @@ export type ProgramSectionProps = {
 };
 
 export interface TChoice {
+  id: string;
   text: string;
   secondaryText?: string;
   leftIcon?: React.ReactNode;
-}
-
-export interface Exercise {
-  id: string;
-  title: string;
-  image: string;
 }
 
 export interface ISessionNote {
@@ -82,4 +77,25 @@ export type SportOption = {
   id: string;
   name: string;
   icon: React.ReactNode;
+};
+
+export type SelectTimeProp = {
+  id: string;
+  type: "start" | "end";
+  value: string;
+};
+
+export interface TrainingBlock {
+  id: string;
+  title: string;
+  exerciseCount: number;
+}
+
+export const choicesToExercises = (
+  choices: TChoice[],
+  exercises: ExerciseItem[],
+) => {
+  return choices
+    .map((choice) => exercises.find((exercise) => exercise.id === choice.id))
+    .filter((x) => x !== undefined);
 };

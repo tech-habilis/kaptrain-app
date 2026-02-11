@@ -1,11 +1,6 @@
-import Button from "@/components/button";
-import { Chip } from "@/components/chip";
 import IcArrowLeft from "@/components/icons/arrow-left";
-import IcClock from "@/components/icons/clock";
-import IcHyrox from "@/components/icons/hyrox";
 import SessionNoteCard from "@/components/session-note-card";
 import Text from "@/components/text";
-import { mockExercises } from "@/constants/mock";
 import { SessionNoteCardProps } from "@/types";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -122,7 +117,7 @@ export default function NoteHistory() {
             <Pressable onPress={router.back} className="p-2">
               <IcArrowLeft />
             </Pressable>
-            <Text className="text-lg font-bold text-secondary flex-1">
+            <Text className="text-lg font-ls-bold text-secondary flex-1">
               Historique de mes notes
             </Text>
           </View>

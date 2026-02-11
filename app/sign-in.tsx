@@ -4,15 +4,14 @@ import Input, { PasswordInput } from "@/components/input";
 import { ROUTE } from "@/constants/route";
 import { useSession } from "@/contexts/auth-context";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { View, ImageBackground } from "react-native";
 import Text from "@/components/text";
 import IcGoogle from "@/components/icons/google";
 import IcApple from "@/components/icons/apple";
 import { appName } from "@/constants/misc";
-import IcEyeOff from "@/components/icons/eye-off";
-import IcEye from "@/components/icons/eye";
 import IcCheck from "@/components/icons/check";
+import { z } from "zod";
 
 export default function SignIn() {
   const {
@@ -27,6 +26,10 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const isEmailValid = useMemo(() => {
+    return z.string().email().safeParse(email).success;
+  }, [email]);
+
   return (
     <View className="w-full h-full flex bg-white">
       <ImageBackground source={require("../assets/images/onboarding-hero.png")}>
@@ -34,14 +37,14 @@ export default function SignIn() {
         <View className="px-4 pb-6 pt-2">
           <View className="flex flex-row gap-[4.5px] items-center pt-safe">
             <IcKaptrain size={18} />
-            <Text className="text-white text-lg font-bold uppercase">
+            <Text className="text-white text-lg font-bold uppercase font-ls-extrabold">
               {appName}
             </Text>
           </View>
-          <Text className="text-white text-2xl font-bold mt-3">
+          <Text className="text-white text-2xl font-ls-bold mt-3">
             signIn.loginToYourAccount
           </Text>
-          <View className="flex flex-row items-center gap-1.5 mt-4">
+          <View className="flex flex-row items-center gap-1.5">
             <Text className="text-white text-sm">
               signIn.youDontHaveAnAccount
             </Text>
@@ -61,7 +64,7 @@ export default function SignIn() {
           onChangeText={setEmail}
           placeholder="signIn.exampleEmail"
           autoCapitalize="none"
-          rightIcon={<IcCheck size={24} />}
+          rightIcon={isEmailValid ? <IcCheck size={24} /> : undefined}
           keyboardType="email-address"
         />
         <PasswordInput

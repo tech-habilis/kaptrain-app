@@ -14,7 +14,7 @@ export const TabataTheme = {
     progressColor: ColorConst.green,
     backgroundColor: hexToRgba(ColorConst.success, 0.1),
     borderColor: ColorConst.success,
-    cardBackgroundColor: hexToRgba(ColorConst.success, 0.05),
+    cardBackgroundColor: "#F6FDF7",
     tabBackgroundColor: ColorConst.green,
     textColor: ColorConst.success,
   },

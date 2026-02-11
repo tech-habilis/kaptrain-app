@@ -1,9 +1,10 @@
 import Button, { ButtonLink } from "@/components/button";
 import IcKaptrain from "@/components/icons/kaptrain";
+import IcCheck from "@/components/icons/check";
 import { appName } from "@/constants/misc";
 import { useSession } from "@/contexts/auth-context";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { View, ImageBackground, Text as RawText } from "react-native";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
@@ -14,6 +15,7 @@ import {
   signUpSchema,
   type SignUpFormData,
 } from "@/utilities/validation/schema";
+import { z } from "zod";
 
 export default function SignIn() {
   const { signUpWithEmail, isLoggedIn: isSigningUp } = useSession();
@@ -25,6 +27,10 @@ export default function SignIn() {
   const [errors, setErrors] = useState<
     Partial<Record<keyof SignUpFormData, string>>
   >({});
+
+  const isEmailValid = useMemo(() => {
+    return z.string().email().safeParse(email).success;
+  }, [email]);
 
   const validateForm = () => {
     const result = signUpSchema.safeParse({ email, password, confirmPassword });
@@ -51,14 +57,14 @@ export default function SignIn() {
         <View className="px-4 pb-6 pt-2">
           <View className="flex flex-row gap-[4.5px] items-center pt-safe">
             <IcKaptrain size={18} />
-            <Text className="text-white text-lg font-bold uppercase">
+            <Text className="text-white text-lg font-ls-extrabold uppercase">
               {appName}
             </Text>
           </View>
-          <Text className="text-white text-2xl font-bold mt-3">
+          <Text className="text-white text-2xl font-ls-bold mt-3">
             signUp.noAccountSignUp
           </Text>
-          <View className="flex flex-row items-center gap-1.5 mt-4">
+          <View className="flex flex-row items-center gap-1.5">
             <Text className="text-white text-sm">
               signUp.alreadyHaveAccount
             </Text>
@@ -80,6 +86,9 @@ export default function SignIn() {
           autoCapitalize="none"
           keyboardType="email-address"
           error={errors.email}
+          rightIcon={
+            isEmailValid && !errors.email ? <IcCheck size={24} /> : undefined
+          }
         />
         <PasswordInput
           label="signUp.createPassword"
@@ -92,6 +101,7 @@ export default function SignIn() {
           placeholder="common.password"
           className="mt-6"
           error={errors.password}
+          hintText="signUp.passwordRequirements"
         />
         <PasswordInput
           label="signUp.confirmPassword"

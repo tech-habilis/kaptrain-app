@@ -179,8 +179,7 @@ export default function ObjectiveForm({
                 </Pressable>
                 <Text className="text-text text-base font-medium">Le</Text>
                 <DatePicker
-                  label="12/11/2025"
-                  className="w-[90%]"
+                  className="grow"
                   selectedDate={date}
                   onSelect={setDate}
                 />
