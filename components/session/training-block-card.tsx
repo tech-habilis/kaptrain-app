@@ -4,26 +4,26 @@ import IcCheck from "@/components/icons/check";
 import IcCheckbox from "@/components/icons/checkbox";
 import IcArrowLeft from "@/components/icons/arrow-left";
 import { ColorConst } from "@/constants/theme";
-import { Exercise } from "@/types";
 import ExerciseCards from "../exercise-cards";
 import IcFile from "../icons/file";
 import Button from "../button";
 import IcPlus from "../icons/plus";
 import { clsx } from "clsx";
 import SessionNoteInput from "../session-note-input";
+import { ExerciseItem } from "@/types";
 
-interface SessionCardProps {
+interface TrainingBlockProps {
   title: string;
   description: string;
   isCompleted: boolean;
   onToggleComplete: () => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  exercises: Exercise[];
+  exercises: ExerciseItem[];
   haveNote?: boolean;
 }
 
-export function SessionCard({
+export function TrainingBlockCard({
   title,
   description,
   isCompleted,
@@ -32,7 +32,7 @@ export function SessionCard({
   onToggleExpand,
   exercises,
   haveNote,
-}: SessionCardProps) {
+}: TrainingBlockProps) {
   return (
     <View className="p-3 gap-3 border border-stroke rounded-xl">
       <Pressable onPress={onToggleExpand}>

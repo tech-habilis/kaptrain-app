@@ -2,7 +2,6 @@ import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
 import SingleFab from "@/components/fab";
 import IcChat from "@/components/icons/chat";
-import IcPlus from "@/components/icons/plus";
 import Input from "@/components/input";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
@@ -10,7 +9,7 @@ import { ColorConst } from "@/constants/theme";
 import cn from "@/utilities/cn";
 import { router } from "expo-router";
 import { useState } from "react";
-import { View, Image, Pressable } from "react-native";
+import { View, Image } from "react-native";
 
 const CoachCard = ({ className = "" }: { className?: string }) => {
   return (
@@ -42,7 +41,7 @@ export default function MyCoach() {
 
         <View className="border border-b border-stroke my-6" />
 
-        <Text className="text-secondary font-bold text-base">
+        <Text className="text-secondary font-ls-bold text-base">
           Demande d’invitation. Renseigne ton code ici
         </Text>
 

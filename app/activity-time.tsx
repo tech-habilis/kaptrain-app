@@ -15,7 +15,7 @@ export default function ActivityTime() {
           <Pressable onPress={router.back}>
             <IcArrowLeft />
           </Pressable>
-          <Text className="font-bold text-lg">Volume d’entrainement</Text>
+          <Text className="font-ls-bold text-lg">Volume d’entrainement</Text>
         </View>
       </View>
 

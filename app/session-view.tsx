@@ -9,7 +9,7 @@ import IcCheck from "@/components/icons/check";
 import IcClock from "@/components/icons/clock";
 import IcInfoCircle from "@/components/icons/info-circle";
 import IcLightning from "@/components/icons/lightning";
-import { SessionCard } from "@/components/session/session-card";
+import { TrainingBlockCard } from "@/components/session";
 import TabataCard from "@/components/tabata-card";
 import Text from "@/components/text";
 import { ROUTE } from "@/constants/route";
@@ -134,7 +134,7 @@ export default function SessionView() {
 
         <View className="gap-2 px-4">
           {sessionData.map((session, index) => (
-            <SessionCard
+            <TrainingBlockCard
               key={index}
               title={session.title}
               description={session.description}
@@ -171,6 +171,7 @@ export default function SessionView() {
           numColumns={2}
           data={timers.map((x, index) => ({
             text: x.name,
+            id: index + x.name
           }))}
           type="secondary"
           className="mt-3"

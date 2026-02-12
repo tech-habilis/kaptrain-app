@@ -1,282 +1,206 @@
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, View, Pressable } from "react-native";
+import { View, FlatList, ScrollView } from "react-native";
 import Text from "@/components/text";
-import { Chip } from "@/components/chip";
-import { Day, ActivityStatus } from "@/components/agenda/day";
-import { ActivityCard } from "@/components/agenda/activity-card";
-import IcArrowLeft from "@/components/icons/arrow-left";
-import IcArrowRight from "@/components/icons/arrow-right";
+import { SessionCard } from "@/components/agenda/session-card";
+import { AgendaCalendarView } from "@/components/agenda/agenda-calendar-view";
 import IcHyrox from "@/components/icons/hyrox";
 import IcPlus from "@/components/icons/plus";
+import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
+import SingleFab from "@/components/fab";
 import { ColorConst } from "@/constants/theme";
 import { router } from "expo-router";
 import { ROUTE } from "@/constants/route";
-import IcCheckCircleFilled from "@/components/icons/check-circle-filled";
-import SingleFab from "@/components/fab";
+import { useAgendaCalendar } from "@/hooks/use-agenda-calendar";
+import { useSession } from "@/contexts/auth-context";
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
+import { useProfileStore } from "@/stores/profile-store";
+import clsx from "clsx";
+import { useTimerStore } from "@/stores/timer-store";
+
+// Set dayjs locale to French
+dayjs.locale("fr");
 
 export default function Agenda() {
-  // Mock data for the calendar - April 2025
-  const weekDays = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+  const { session } = useSession();
+  const { profile } = useProfileStore();
+  const showWidget = useTimerStore((state) => state.showWidget);
+  const userId = session?.user?.id;
 
-  // Calendar data structure: [day, isCurrentMonth, activities[]]
-  const calendarWeeks = [
-    [
-      { day: "31", isCurrentMonth: false, activities: [] as ActivityStatus[] },
-      { day: "1", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      {
-        day: "2",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-      {
-        day: "3",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-      { day: "4", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      { day: "5", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      { day: "6", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-    ],
-    [
-      {
-        day: "7",
-        isCurrentMonth: true,
-        activities: ["blue" as ActivityStatus],
-      },
-      {
-        day: "8",
-        isCurrentMonth: true,
-        activities: [
-          "orange" as ActivityStatus,
-          "grey" as ActivityStatus,
-          "grey" as ActivityStatus,
-        ],
-      },
-      { day: "9", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      {
-        day: "10",
-        isCurrentMonth: true,
-        activities: ["orange" as ActivityStatus, "blue" as ActivityStatus],
-      },
-      {
-        day: "11",
-        isCurrentMonth: true,
-        activities: ["blue" as ActivityStatus],
-      },
-      { day: "12", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      { day: "13", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-    ],
-    [
-      {
-        day: "14",
-        isCurrentMonth: true,
-        activities: ["blue" as ActivityStatus],
-      },
-      {
-        day: "15",
-        isCurrentMonth: true,
-        activities: ["blue" as ActivityStatus],
-      },
-      { day: "16", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      {
-        day: "17",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-      { day: "18", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      {
-        day: "19",
-        isCurrentMonth: true,
-        activities: ["orange" as ActivityStatus],
-        isToday: true,
-      },
-      {
-        day: "20",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-    ],
-    [
-      { day: "21", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      {
-        day: "22",
-        isCurrentMonth: true,
-        activities: ["orange" as ActivityStatus],
-      },
-      {
-        day: "23",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-      { day: "24", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      {
-        day: "25",
-        isCurrentMonth: true,
-        activities: ["green" as ActivityStatus, "orange" as ActivityStatus],
-      },
-      { day: "26", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      { day: "27", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-    ],
-    [
-      {
-        day: "28",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-      {
-        day: "29",
-        isCurrentMonth: true,
-        activities: ["grey" as ActivityStatus],
-      },
-      { day: "30", isCurrentMonth: true, activities: [] as ActivityStatus[] },
-      { day: "1", isCurrentMonth: false, activities: [] as ActivityStatus[] },
-      { day: "2", isCurrentMonth: false, activities: [] as ActivityStatus[] },
-      { day: "3", isCurrentMonth: false, activities: [] as ActivityStatus[] },
-      { day: "4", isCurrentMonth: false, activities: [] as ActivityStatus[] },
-    ],
-  ];
+  const {
+    currentMonthLabel,
+    weekDays,
+    calendarWeeks,
+    selectedDate,
+    selectedDateSessions,
+    goToToday,
+    goToNextMonth,
+    goToPrevMonth,
+    selectDate,
+  } = useAgendaCalendar(userId);
 
-  // Mock activities for today (April 19, 2025)
-  const todayActivities = [
-    {
-      title: "Hyrox (programme)",
-      sessionTitle: "Hyrox Paris Grand palais",
-      coachName: "Par Enguerrand Aucher",
-      color: ColorConst.primary,
-      icon: <IcHyrox size={16} />,
-    },
-    {
-      title: "Préparation physique (individu/programmation)",
-      sessionTitle: "Souplesse / flexion cheville",
-      coachName: "Par Enguerrand Aucher",
-      color: ColorConst.tertiary,
-    },
-    {
-      title: "Préparation physique (perso)",
-      sessionTitle: "Souplesse / flexion cheville",
-      coachName: "Par Enguerrand Aucher",
-      color: ColorConst.tertiary,
-    },
-    {
-      title: "Préparation physique (perso done)",
-      sessionTitle: "Souplesse / flexion cheville",
-      coachName: "Par Enguerrand Aucher",
-      color: ColorConst.tertiary,
-      icon: <IcCheckCircleFilled size={16} />,
-    },
-  ];
+  // Format selected date for display (e.g., "19 avril 2025")
+  const selectedDateLabel = dayjs(selectedDate)
+    .format("D MMMM YYYY")
+    .replace(/^\w/, (c) => c.toUpperCase());
+
+  // Sessions for display - uses real session data when available
+  type SessionItem = {
+    id: string;
+    sessionId: string | null;
+    title: string;
+    sessionTitle: string;
+    coachName: string;
+    color: string;
+    icon?: React.JSX.Element;
+  };
+
+  const todaySessions: SessionItem[] =
+    selectedDateSessions.length > 0
+      ? selectedDateSessions.map((session) => {
+          // Get coach name from creator (coach) data
+          const firstName = session.coach?.first_name;
+          const displayName = session.coach?.display_name;
+          const coachName = firstName || displayName || "";
+          const formattedCoachName = coachName ? `Par ${coachName}` : "";
+
+          return {
+            id: session.id,
+            sessionId: session.id, // Add sessionId for navigation
+            title: session.title,
+            sessionTitle: session.description || "",
+            coachName: formattedCoachName,
+            color: session.activity_color || ColorConst.primary,
+            icon:
+              session.session_status === "completed" ? (
+                <IcCheckCircleFilled size={16} />
+              ) : undefined,
+          };
+        })
+      : // Fallback mock data for UI testing when no sessions exist
+        [
+          {
+            id: "mock-1",
+            sessionId: null, // No real session ID for mocks
+            title: "Hyrox (programme)",
+            sessionTitle: "Hyrox Paris Grand palais",
+            coachName: "Par Enguerrand Aucher",
+            color: ColorConst.primary,
+            icon: <IcHyrox size={16} />,
+          },
+          {
+            id: "mock-2",
+            sessionId: null,
+            title: "Préparation physique (individu/programmation)",
+            sessionTitle: "Souplesse / flexion cheville",
+            coachName: "Par Enguerrand Aucher",
+            color: ColorConst.tertiary,
+          },
+          {
+            id: "mock-3",
+            sessionId: null,
+            title: "Préparation physique (perso)",
+            sessionTitle: "Souplesse / flexion cheville",
+            coachName: "Par Enguerrand Aucher",
+            color: ColorConst.tertiary,
+          },
+          {
+            id: "mock-4",
+            sessionId: null,
+            title: "Préparation physique (perso done)",
+            sessionTitle: "Souplesse / flexion cheville",
+            coachName: "Par Enguerrand Aucher",
+            color: ColorConst.tertiary,
+            icon: <IcCheckCircleFilled size={16} />,
+          },
+        ];
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="auto" />
-
-      <ScrollView className="flex-1 pt-safe px-4">
-        {/* Header */}
-        <View className="flex-row items-center justify-between h-8 mb-6">
-          <Text className="text-lg font-bold text-secondary">Avril 2025</Text>
-
-          <View className="flex-row items-center gap-3">
-            {/* Today chip */}
-            <Chip
-              text="Aujourd'hui"
-              type="default"
-              className="border border-stroke"
-            />
-
-            {/* Navigation arrows */}
-            <Pressable className="w-10 h-10 items-center justify-center">
-              <IcArrowLeft size={24} color={ColorConst.accent} />
-            </Pressable>
-            <Pressable className="w-10 h-10 items-center justify-center">
-              <IcArrowRight size={24} color={ColorConst.accent} />
-            </Pressable>
-          </View>
-        </View>
-
+    <>
+      <StatusBar style="dark" />
+      <View
+        className={clsx("bg-white px-4 flex-1", {
+          "pt-4": showWidget,
+          "pt-safe": !showWidget,
+        })}
+      >
         {/* Calendar Section */}
-        <View className="gap-4 mb-6">
-          {/* Week day headers */}
-          <View className="flex-row justify-between items-center">
-            {weekDays.map((day) => (
-              <View key={day} className="w-8 items-center">
-                <Text className="text-xs font-medium text-subtleText">
-                  {day}
-                </Text>
-              </View>
-            ))}
-          </View>
+        <AgendaCalendarView
+          currentMonthLabel={currentMonthLabel}
+          weekDays={weekDays}
+          calendarWeeks={calendarWeeks}
+          selectDate={selectDate}
+          goToToday={goToToday}
+          goToNextMonth={goToNextMonth}
+          goToPrevMonth={goToPrevMonth}
+        />
 
-          {/* Calendar weeks */}
-          <View className="gap-2">
-            {calendarWeeks.map((week, weekIndex) => (
-              <View
-                key={weekIndex}
-                className="flex-row justify-between items-center"
-              >
-                {week.map((dayData, dayIndex) => (
-                  <Day
-                    key={`${weekIndex}-${dayIndex}`}
-                    day={dayData.day}
-                    isCurrentMonth={dayData.isCurrentMonth}
-                    isToday={dayData.isToday}
-                    activities={dayData.activities}
-                  />
-                ))}
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Daily Activities Section */}
+        {/* Daily Sessions Section */}
         <View className="gap-4 mb-24">
           {/* Section header */}
           <View className="flex-row items-center justify-between">
             <Text className="text-base font-bold text-secondary">
-              19 avril 2025
+              {selectedDateLabel}
             </Text>
             {/* Placeholder for "Tout voir" button - currently hidden as per Figma */}
           </View>
 
-          {/* Activities list */}
-          <View className="gap-2">
-            {todayActivities.map((activity, index) => (
-              <ActivityCard
-                key={index}
-                title={activity.title}
-                description={activity.sessionTitle}
-                coachName={activity.coachName}
-                borderColor={activity.color}
-                icon={activity.icon}
-                onLongPress={() =>
-                  router.push({
-                    pathname: ROUTE.CREATE_SESSION,
-                    params: { mode: "edit" },
-                  })
-                }
-                onPress={() => {
-                  if (index === 0) {
-                    router.push(ROUTE.SESSION_VIEW);
-                  } else if (index === 1) {
-                    router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
-                  } else if (index === 2) {
-                    router.push(ROUTE.SESSION_VIEW_PERSONAL);
-                  } else if (index === 3) {
+          <ScrollView>
+            {/* Sessions list */}
+            <FlatList
+              data={todaySessions}
+              className="pb-40"
+              keyExtractor={(_item, index) => index.toString()}
+              renderItem={({ item, index }) => (
+                <SessionCard
+                  title={item.title}
+                  description={item.sessionTitle}
+                  coachName={item.coachName}
+                  borderColor={item.color}
+                  icon={item.icon}
+                  onLongPress={() =>
                     router.push({
-                      pathname: ROUTE.SESSION_VIEW_PERSONAL,
-                      params: { status: "done" },
-                    });
+                      pathname: ROUTE.CREATE_SESSION,
+                      params: { mode: "edit", sessionId: item.id },
+                    })
                   }
-                }}
-              />
-            ))}
-          </View>
+                  onPress={() => {
+                    // For real sessions, navigate to individualized view with session ID
+                    if (item.sessionId) {
+                      router.push({
+                        pathname: ROUTE.SESSION_VIEW_INDIVIDUALIZED,
+                        params: { sessionId: item.sessionId },
+                      });
+                    } else {
+                      // Fallback navigation for mock data (preserves original UI behavior)
+                      if (index === 0) {
+                        router.push(ROUTE.SESSION_VIEW);
+                      } else if (index === 1) {
+                        router.push(ROUTE.SESSION_VIEW_INDIVIDUALIZED);
+                      } else if (index === 2) {
+                        router.push(ROUTE.SESSION_VIEW_PERSONAL);
+                      } else if (index === 3) {
+                        router.push({
+                          pathname: ROUTE.SESSION_VIEW_PERSONAL,
+                          params: { status: "done" },
+                        });
+                      }
+                    }
+                  }}
+                />
+              )}
+              ItemSeparatorComponent={() => <View className="h-2" />}
+              scrollEnabled={false}
+            />
+          </ScrollView>
         </View>
-      </ScrollView>
-
-      <SingleFab
-        onPress={() => router.push(ROUTE.CREATE_SESSION)}
-        icon={<IcPlus size={32} color="white" />}
-      />
-    </View>
+      </View>
+      {profile?.role === "coach" && (
+        <SingleFab
+          onPress={() => router.push(ROUTE.CREATE_SESSION)}
+          icon={<IcPlus size={32} color="white" />}
+        />
+      )}
+    </>
   );
 }

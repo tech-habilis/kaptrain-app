@@ -103,9 +103,9 @@ export default function Button({
     loading?: boolean;
     children?: React.ReactNode;
   }) {
-    if (text && children) {
-      throw new Error("Button cannot have both text prop and children");
-    }
+  if (text && children) {
+    throw new Error("Button cannot have both text prop and children");
+  }
 
   const loadingColorMap: Record<
     Exclude<ButtonVariants["type"], undefined>,

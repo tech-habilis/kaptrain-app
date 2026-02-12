@@ -37,7 +37,7 @@ export default function ExerciseFilterThemes() {
         <Pressable onPress={router.back}>
           <IcArrowLeft />
         </Pressable>
-        <Text className="font-bold text-lg flex-1">Thématiques</Text>
+        <Text className="font-ls-bold text-lg flex-1">Thématiques</Text>
         <Text className="text-sm text-secondary font-medium">Tout effacer</Text>
       </View>
 

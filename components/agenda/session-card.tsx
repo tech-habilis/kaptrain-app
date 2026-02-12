@@ -3,21 +3,21 @@ import Text from "@/components/text";
 import IcArrowRight from "@/components/icons/arrow-right";
 import { ColorConst } from "@/constants/theme";
 
-export type ActivityStatus = "completed" | "pending";
+export type SessionStatus = "completed" | "pending";
 
-interface ActivityCardProps {
+interface SessionCardProps {
   title: string;
   description: string;
   coachName: string;
   borderColor?: string;
   icon?: React.ReactNode;
-  status?: ActivityStatus;
+  status?: SessionStatus;
   completedIcon?: React.ReactNode;
   onPress?: () => void;
   onLongPress?: () => void;
 }
 
-export function ActivityCard({
+export function SessionCard({
   title,
   description,
   coachName,
@@ -27,7 +27,7 @@ export function ActivityCard({
   completedIcon,
   onPress,
   onLongPress,
-}: ActivityCardProps) {
+}: SessionCardProps) {
   return (
     <Pressable
       onPress={onPress}

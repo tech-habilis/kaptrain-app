@@ -4,14 +4,15 @@ import IcCheck from "@/components/icons/check";
 import IcClock from "@/components/icons/clock";
 import IcLightning from "@/components/icons/lightning";
 import IcLove from "@/components/icons/love";
-import TabataWidget from "@/components/tabata-widget";
 import Tabs from "@/components/tabs";
 import Text from "@/components/text";
 import { programs } from "@/constants/mock";
 import { ROUTE } from "@/constants/route";
 import { ColorConst } from "@/constants/theme";
+import { useTimerStore } from "@/stores/timer-store";
 import { ProgramSectionProps } from "@/types";
 import { hexToRgba } from "@/utilities/cn";
+import clsx from "clsx";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
@@ -85,6 +86,7 @@ const ProgramSection = ({
 export default function Library() {
   const tabs = ["Exercices", "Programmes"];
   const [tab, setTab] = useState(tabs[0]);
+  const showWidget = useTimerStore((state) => state.showWidget);
 
   const menu = [
     {
@@ -254,11 +256,13 @@ export default function Library() {
   };
 
   return (
-    <ScrollView className="bg-white">
+    <ScrollView
+      className={clsx("bg-white", {
+        "pt-4": showWidget,
+        "pt-safe": !showWidget,
+      })}
+    >
       <StatusBar style="auto" />
-
-      <TabataWidget />
-
       <View className="px-4">
         <Text className="font-bold text-lg text-secondary">Bibliothèque</Text>
         <Text className="text-subtleText text-base mt-1">

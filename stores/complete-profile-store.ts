@@ -49,6 +49,7 @@ const initialState: CompleteProfileFormData = {
   lastName: "",
   birthDate: "",
   gender: "",
+  phone: "",
   weight: undefined,
   preferNotToAnswer: false,
   sportLevel: "",
@@ -131,6 +132,7 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
       if (profile.first_name) mappedData.firstName = profile.first_name;
       if (profile.last_name) mappedData.lastName = profile.last_name;
       if (profile.date_of_birth) mappedData.birthDate = profile.date_of_birth;
+      if (profile.phone) mappedData.phone = profile.phone;
       if (profile.gender) {
         // Map database gender enum to translation keys
         const genderMap: Record<string, string> = {
@@ -230,6 +232,9 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
       if (step >= 1 && formData.birthDate) {
         updates.date_of_birth = formData.birthDate;
       }
+      if (step >= 1 && formData.phone) {
+        updates.phone = formData.phone;
+      }
       if (step >= 1 && formData.gender) {
         // Map gender values to database enum
         const genderMap: Record<string, string> = {
@@ -321,6 +326,7 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
           lastName: formData.lastName,
           birthDate: formData.birthDate,
           gender: formData.gender,
+          phone: formData.phone,
         };
         break;
       case 2:

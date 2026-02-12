@@ -17,7 +17,7 @@ export default function ProfileCompleted() {
         <View className="grow" />
 
         <IcCheckVerified />
-        <Text className="text-white text-2xl font-bold">profileCompleted.title</Text>
+        <Text className="text-white text-2xl font-ls-bold">profileCompleted.title</Text>
         <Text className="text-white text-base text-center">
           profileCompleted.description
         </Text>

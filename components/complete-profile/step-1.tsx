@@ -2,69 +2,65 @@ import { Choices } from "@/components/choices";
 import { TChoice } from "@/types";
 import IcPlus from "@/components/icons/plus";
 import IcUser from "@/components/icons/user";
+import IcCheck from "@/components/icons/check";
 import Input from "@/components/input";
 import DatePicker from "@/components/date-picker";
 import Text from "@/components/text";
 import { useTranslation } from "react-i18next";
 import { useCompleteProfileStore } from "@/stores/complete-profile-store";
-import { View, Image, Pressable, Alert, Platform } from "react-native";
-import { useState } from "react";
+import { View, Image, Pressable, Alert } from "react-native";
+import { useState, useMemo } from "react";
 import dayjs from "dayjs";
-import * as ImagePicker from "expo-image-picker";
-import { toast } from "../toast";
+import ImagePicker from "react-native-image-crop-picker";
+import { phoneSchema } from "@/utilities/validation/schema";
+import { IMAGE_PICKER_OPTIONS } from "@/constants/misc";
 
 export function Step1() {
   const { t } = useTranslation();
-  const { formData, errors, updateStep1, localAvatarUri, setLocalAvatarUri } = useCompleteProfileStore();
+  const { formData, errors, updateStep1, localAvatarUri, setLocalAvatarUri } =
+    useCompleteProfileStore();
   const [isPickerLoading, setIsPickerLoading] = useState(false);
 
+  const isPhoneValid = useMemo(() => {
+    return phoneSchema.safeParse(formData.phone).success;
+  }, [formData.phone]);
+
   const genders: TChoice[] = [
-    { text: "completeProfile.step1.genderFemale" },
-    { text: "completeProfile.step1.genderMale" },
-    { text: "completeProfile.step1.genderNonBinary" },
+    {
+      id: "completeProfile.step1.genderFemale",
+      text: "completeProfile.step1.genderFemale",
+    },
+    {
+      id: "completeProfile.step1.genderMale",
+      text: "completeProfile.step1.genderMale",
+    },
+    {
+      id: "completeProfile.step1.genderNonBinary",
+      text: "completeProfile.step1.genderNonBinary",
+    },
   ];
 
   const selectedGender = genders.find((g) => g.text === formData.gender);
 
   const handlePickImage = async () => {
     try {
-      if (Platform.OS === 'ios') {
-        toast.info('Not available on iOS yet')
-        return;
-      }
-
       setIsPickerLoading(true);
 
-      // Request permission
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          t("completeProfile.step1.permissionDenied") || "Permission needed",
-          t("completeProfile.step1.permissionMessage") ||
-            "Sorry, we need camera roll permissions to make this work."
-        );
+      const result = await ImagePicker.openPicker(IMAGE_PICKER_OPTIONS);
+
+      // Store local URI for preview and upload
+      updateStep1({ avatarUrl: result.path });
+      setLocalAvatarUri(result.path);
+    } catch (error: any) {
+      // User cancelled the picker
+      if (error.code === "E_PICKER_CANCELLED") {
         return;
       }
-
-      // Pick image
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri;
-        // Store local URI for preview and upload
-        updateStep1({ avatarUrl: uri });
-        setLocalAvatarUri(uri);
-      }
-    } catch (error) {
       console.error("Error picking image:", error);
       Alert.alert(
         t("completeProfile.step1.errorTitle") || "Error",
-        t("completeProfile.step1.errorMessage") || "Failed to pick image. Please try again."
+        t("completeProfile.step1.errorMessage") ||
+          "Failed to pick image. Please try again.",
       );
     } finally {
       setIsPickerLoading(false);
@@ -120,15 +116,33 @@ export function Step1() {
 
       <DatePicker
         label="completeProfile.step1.birthDate"
-        selectedDate={formData.birthDate ? dayjs(formData.birthDate).toDate() : undefined}
-        onSelect={(date) => updateStep1({ birthDate: dayjs(date).format("YYYY-MM-DD") })}
+        selectedDate={
+          formData.birthDate ? dayjs(formData.birthDate).toDate() : undefined
+        }
+        onSelect={(date) =>
+          updateStep1({ birthDate: dayjs(date).format("YYYY-MM-DD") })
+        }
         error={errors.birthDate ? t(errors.birthDate) : undefined}
         maxDate={dayjs().toDate()}
         showIcon={false}
         placeholder="completeProfile.step1.birthDatePlaceholder"
       />
 
-      <View className="mb-28">
+      <Input
+        label="Numéro de téléphone"
+        placeholder="06 12 34 56 78"
+        value={formData.phone}
+        onChangeText={(text) => {
+          updateStep1({ phone: text });
+        }}
+        keyboardType="phone-pad"
+        error={errors.phone ? t(errors.phone) : undefined}
+        rightIcon={
+          isPhoneValid && !errors.phone ? <IcCheck size={24} /> : undefined
+        }
+      />
+
+      <View className="mb-28 android:mb-34">
         <Text className="text-accent font-medium text-sm">
           completeProfile.step1.gender
         </Text>

@@ -1,1 +1,1 @@
-export { SessionCard } from "./session-card";
+export { TrainingBlockCard } from "./training-block-card";
