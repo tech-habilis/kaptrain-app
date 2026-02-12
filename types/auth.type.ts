@@ -32,5 +32,4 @@ export type TAuthUser = {
   export type TPayloadVerifyOtp = {
     email: string
     token: string,
-    type: "recovery" | "signup"
   }
