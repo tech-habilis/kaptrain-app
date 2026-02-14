@@ -1,14 +1,14 @@
-import { Pressable, View, ViewStyle } from "react-native";
-import Text from "./text";
-import { tv, VariantProps } from "tailwind-variants";
-import cn from "@/utilities/cn";
-import IcCheckboxSelected from "./icons/checkbox-selected";
-import IcCheckbox from "./icons/checkbox";
-import IcRadio from "./icons/radio";
-import IcRadioSelected from "./icons/radio-selected";
-import { TChoice } from "@/types";
-import { clsx } from "clsx";
-import { ReactNode, useState } from "react";
+import { TChoice } from "@/types"
+import cn from "@/utilities/cn"
+import { clsx } from "clsx"
+import { ReactNode, useState } from "react"
+import { Pressable, View, ViewStyle } from "react-native"
+import { tv, VariantProps } from "tailwind-variants"
+import IcCheckbox from "./icons/checkbox"
+import IcCheckboxSelected from "./icons/checkbox-selected"
+import IcRadio from "./icons/radio"
+import IcRadioSelected from "./icons/radio-selected"
+import Text from "./text"
 
 const choiceWrapper = tv({
   base: "rounded-lg px-2 py-4 justify-center items-center",
@@ -29,7 +29,7 @@ const choiceWrapper = tv({
     type: "default",
     selected: false,
   },
-});
+})
 
 const choiceText = tv({
   base: "text-sm font-medium",
@@ -64,9 +64,9 @@ const choiceText = tv({
     type: "default",
     selected: false,
   },
-});
+})
 
-type ChoiceVariants = VariantProps<typeof choiceWrapper>;
+type ChoiceVariants = VariantProps<typeof choiceWrapper>
 
 export const Choice = ({
   choice,
@@ -77,21 +77,21 @@ export const Choice = ({
   type,
   style,
 }: {
-  choice: TChoice;
-  className?: string;
-  textClassName?: string;
-  selected: boolean;
-  onPress: () => void;
-  type: ChoiceVariants["type"];
-  style?: ViewStyle;
+  choice: TChoice
+  className?: string
+  textClassName?: string
+  selected: boolean
+  onPress: () => void
+  type: ChoiceVariants["type"]
+  style?: ViewStyle
 }) => {
   const renderLeftSide = (choice: TChoice) => {
     if (choice.leftIcon) {
-      return <View className="mr-1.5">{choice.leftIcon}</View>;
+      return <View className="mr-1.5">{choice.leftIcon}</View>
     }
 
-    return null;
-  };
+    return null
+  }
 
   const renderRightSide = (choice: TChoice) => {
     if (type === "secondary" && choice.secondaryText !== undefined) {
@@ -101,7 +101,7 @@ export const Choice = ({
             {choice.secondaryText}
           </Text>
         </View>
-      );
+      )
     }
 
     if (type === "multipleChoice") {
@@ -113,7 +113,7 @@ export const Choice = ({
             <IcCheckbox size={24} />
           )}
         </View>
-      );
+      )
     }
 
     // multipleChoiceWithoutIcon doesn't render any icon
@@ -123,11 +123,11 @@ export const Choice = ({
         <View className="flex-1 flex-row justify-end items-center">
           {selected ? <IcRadioSelected size={24} /> : <IcRadio size={24} />}
         </View>
-      );
+      )
     }
 
-    return null;
-  };
+    return null
+  }
 
   return (
     <Pressable
@@ -148,8 +148,8 @@ export const Choice = ({
       </View>
       {renderRightSide(choice)}
     </Pressable>
-  );
-};
+  )
+}
 
 export const Choices = ({
   label,
@@ -168,30 +168,30 @@ export const Choices = ({
   itemTextClassName = "",
   extraComponent,
 }: {
-  label?: string;
-  data: TChoice[];
-  selectedChoice?: TChoice;
-  selectedChoices?: TChoice[];
-  onChange?: (choice: TChoice) => void;
-  onChangeMultiple?: (choices: TChoice[]) => void;
-  maxChoice?: number;
-  className?: string;
-  numColumns?: number;
-  itemClassName?: string;
-  activeItemClassName?: string;
-  inactiveItemClassName?: string;
-  itemTextClassName?: string;
-  extraComponent?: ReactNode;
+  label?: string
+  data: TChoice[]
+  selectedChoice?: TChoice
+  selectedChoices?: TChoice[]
+  onChange?: (choice: TChoice) => void
+  onChangeMultiple?: (choices: TChoice[]) => void
+  maxChoice?: number
+  className?: string
+  numColumns?: number
+  itemClassName?: string
+  activeItemClassName?: string
+  inactiveItemClassName?: string
+  itemTextClassName?: string
+  extraComponent?: ReactNode
 } & Omit<ChoiceVariants, "selected">) => {
-  const [width, setWidth] = useState(0);
-  const gap = numColumns > 1 ? 8 : 0;
-  const itemWidth = (width - gap) / numColumns;
+  const [width, setWidth] = useState(0)
+  const gap = numColumns > 1 ? 8 : 0
+  const itemWidth = (width - gap) / numColumns
 
   return (
     <View
       className={cn("gap-2", className)}
       onLayout={(event) => {
-        setWidth(event.nativeEvent.layout.width);
+        setWidth(event.nativeEvent.layout.width)
       }}
     >
       {label !== undefined && (
@@ -224,32 +224,34 @@ export const Choices = ({
                 type === "multipleChoice" ||
                 type === "multipleChoiceWithoutIcon"
               ) {
-                const nonNullSelectedChoices = selectedChoices || [];
-                const isSelecting = !selectedChoices?.some((c) => c.id === item.id);
+                const nonNullSelectedChoices = selectedChoices || []
+                const isSelecting = !selectedChoices?.some(
+                  (c) => c.id === item.id
+                )
 
                 if (
                   maxChoice !== undefined &&
                   isSelecting &&
                   nonNullSelectedChoices.length >= maxChoice
                 ) {
-                  return;
+                  return
                 }
 
                 onChangeMultiple?.(
                   isSelecting
                     ? [...nonNullSelectedChoices, item]
-                    : nonNullSelectedChoices.filter((c) => c.id !== item.id),
-                );
+                    : nonNullSelectedChoices.filter((c) => c.id !== item.id)
+                )
 
-                return;
+                return
               }
 
-              onChange?.(item);
+              onChange?.(item)
             }}
           />
         ))}
         {extraComponent}
       </View>
     </View>
-  );
-};
+  )
+}
