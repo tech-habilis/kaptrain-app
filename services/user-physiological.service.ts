@@ -10,7 +10,7 @@ export async function getAthletePhysiologicalData(): Promise<TUserPhysiological 
   const athlete = await getCurrentUser()
 
   const { data } = await supabaseClient
-    .from("user_physiological")
+    .from("user_physiologicals")
     .select("heart_rate, pace, power")
     .eq("user_id", athlete.id)
     .maybeSingle()
