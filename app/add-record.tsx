@@ -1,7 +1,4 @@
 import BasicScreen from "@/components/basic-screen"
-import BottomSheetModal, {
-  RawBottomSheetModalType,
-} from "@/components/bottom-sheet-modal"
 import Button from "@/components/button"
 import { Choices } from "@/components/choices"
 import ChooseSubSport from "@/components/choose-sub-sport"
@@ -13,21 +10,38 @@ import IcSearch from "@/components/icons/search"
 import Input from "@/components/input"
 import SportOptionItem from "@/components/sport-option-item"
 import Text from "@/components/text"
-import { ALL_SPORTS, mockSports } from "@/constants/mock"
 import { ColorConst } from "@/constants/theme"
+import { useAthleteSports, useSports } from "@/hooks/use-sports"
 import { TChoice } from "@/types"
-import { useRef, useState } from "react"
-import { Pressable, View } from "react-native"
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet"
+import { useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Image, Pressable, View } from "react-native"
 import { DateType } from "react-native-ui-datepicker"
 
 export default function AddRecord() {
+  const { i18n } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedSport, setSelectedSport] = useState<TChoice>()
-
   const today = new Date()
   const [date, setDate] = useState<DateType>(today)
-
-  const chooseSportModalRef = useRef<RawBottomSheetModalType>(null)
+  const chooseSportModalRef = useRef<BottomSheet>(null)
+  const [iconErrorIds, setIconErrorIds] = useState<Set<string>>(new Set())
+  const { data: athleteSports, isLoading, isError, error } = useAthleteSports()
+  const { data: sports, isLoading: sportsLoading } = useSports()
+  const [search, setSearch] = useState<string>("")
+  const filteredSports = useMemo(() => {
+    return sports
+      ?.filter(
+        (sport) =>
+          !athleteSports?.some((athleteSport) => athleteSport.id === sport.id)
+      )
+      ?.filter((sport) =>
+        i18n.language === "en"
+          ? sport.name.en?.toLowerCase().includes(search.toLowerCase())
+          : sport.name.fr?.toLowerCase().includes(search.toLowerCase())
+      )
+  }, [sports, search])
 
   const getTitle = () => {
     switch (currentStep) {
@@ -40,85 +54,159 @@ export default function AddRecord() {
     }
   }
 
+  const snapPoints = useMemo(() => ["80%"], [])
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
         return (
-          <View className="gap-3">
-            <Choices
-              numColumns={2}
-              data={mockSports}
-              selectedChoice={selectedSport}
-              onChange={setSelectedSport}
-            />
+          <View className="flex-1">
+            <View className="flex-1">
+              <Choices
+                numColumns={2}
+                data={[
+                  ...(athleteSports?.map((sport) => ({
+                    id: sport.id,
+                    text:
+                      i18n.language === "en"
+                        ? sport.name.en || sport.name.fr
+                        : sport.name.fr || sport.name.en,
+                    leftIcon:
+                      sport.iconName && !iconErrorIds.has(sport.id) ? (
+                        <Image
+                          source={{ uri: sport.iconName }}
+                          style={{ width: 24, height: 24 }}
+                          resizeMode="contain"
+                          onError={() =>
+                            setIconErrorIds((prev) =>
+                              new Set(prev).add(sport.id)
+                            )
+                          }
+                        />
+                      ) : (
+                        <View className="size-6 bg-light rounded-full items-center justify-center">
+                          <Text className="text-text text-sm font-medium">
+                            {sport.name.en.charAt(0)}
+                          </Text>
+                        </View>
+                      ),
+                  })) ?? []),
+                  {
+                    id: "choose-other",
+                    text: "Choisir un autre",
+                    leftIcon: <IcPlus color={ColorConst.accent} size={24} />,
+                  },
+                ]}
+                selectedChoice={selectedSport}
+                onChange={(choice) => {
+                  if (choice.id === "choose-other") {
+                    chooseSportModalRef.current?.snapToIndex(0)
+                  } else {
+                    setSelectedSport(choice)
+                    chooseSportModalRef.current?.snapToIndex(1)
+                  }
+                }}
+              />
+            </View>
+
             <Button
-              text="Choisir un autre"
-              leftIcon={<IcPlus color={ColorConst.accent} size={24} />}
-              type="tertiary"
-              onPress={() => chooseSportModalRef.current?.present()}
+              text={renderCtaText()}
+              className="mb-6"
+              onPress={getCtaAction()}
             />
 
-            <BottomSheetModal
+            <BottomSheet
+              index={-1}
               ref={chooseSportModalRef}
-              name="choose-sport-modal"
-              snapPoints={["85%"]}
+              snapPoints={snapPoints}
+              enableDynamicSizing={false}
+              enablePanDownToClose={true}
             >
-              <View className="flex-1 pb-safe">
-                <Text className="text-lg text-secondary font-bold">
-                  Choisir un sport
-                </Text>
-                {/* Search */}
-                <View className="flex-row gap-3 items-center mb-6 mt-6">
-                  <Input
-                    className="flex-1"
-                    leftIcon={<IcSearch size={16} />}
-                    inputClassName="text-sm"
-                  />
-                  <Pressable onPress={() => {}}>
-                    <IcClose size={24} color={ColorConst.accent} />
-                  </Pressable>
-                </View>
-
-                {/* Sports List */}
-                <View className="flex-col gap-2">
-                  {ALL_SPORTS.map((sport) => {
-                    const isSelected = selectedSport?.text === sport.name
-
-                    return (
-                      <SportOptionItem
-                        key={sport.id}
-                        sport={sport}
-                        isSelected={isSelected}
-                        isDisabled={false}
-                        onPress={() =>
-                          setSelectedSport({
-                            text: sport.name,
-                            id: sport.id,
-                          })
-                        }
-                        isMultipleSelection={false}
-                      />
-                    )
-                  })}
-                </View>
-
-                <View className="grow" />
-                <Button
-                  text="Suivant"
-                  className="mb-6"
-                  onPress={() => {
-                    chooseSportModalRef.current?.dismiss()
-                    setCurrentStep(1)
-                  }}
+              <Text className="text-lg text-secondary font-bold">
+                Choisir un sport
+              </Text>
+              {/* Search */}
+              <View className="flex-row gap-3 items-center mb-6 mt-6">
+                <Input
+                  className="flex-1"
+                  leftIcon={<IcSearch size={16} />}
+                  inputClassName="text-sm"
+                  value={search}
+                  onChangeText={setSearch}
                 />
+                <Pressable
+                  onPress={() => {
+                    setSearch("")
+                  }}
+                >
+                  <IcClose size={24} color={ColorConst.accent} />
+                </Pressable>
               </View>
-            </BottomSheetModal>
+
+              <BottomSheetScrollView
+                contentContainerClassName="gap-3 pb-safe"
+                showsVerticalScrollIndicator={false}
+              >
+                {(filteredSports ?? []).map((sport) => {
+                  const displayName =
+                    i18n.language === "en"
+                      ? sport.name.en || sport.name.fr
+                      : sport.name.fr || sport.name.en
+                  const isSelected = selectedSport?.id === sport.id
+
+                  return (
+                    <SportOptionItem
+                      key={sport.id}
+                      sport={{
+                        id: sport.id,
+                        name: displayName,
+                        icon:
+                          sport.iconName && !iconErrorIds.has(sport.id) ? (
+                            <Image
+                              source={{ uri: sport.iconName }}
+                              style={{ width: 24, height: 24 }}
+                              resizeMode="contain"
+                              onError={() =>
+                                setIconErrorIds((prev) =>
+                                  new Set(prev).add(sport.id)
+                                )
+                              }
+                            />
+                          ) : (
+                            <View className="size-6 bg-light rounded-full items-center justify-center">
+                              <Text className="text-text text-sm font-medium">
+                                {sport.name.en?.charAt(0) ?? "?"}
+                              </Text>
+                            </View>
+                          ),
+                      }}
+                      isSelected={isSelected}
+                      isDisabled={false}
+                      onPress={() =>
+                        setSelectedSport({
+                          text: displayName,
+                          id: sport.id,
+                        })
+                      }
+                      isMultipleSelection={false}
+                    />
+                  )
+                })}
+              </BottomSheetScrollView>
+              <Button
+                text="Suivant"
+                className="mb-6"
+                onPress={() => {
+                  chooseSportModalRef.current?.snapToIndex(-1)
+                }}
+              />
+            </BottomSheet>
           </View>
         )
       case 1:
         return (
           <View className="flex-1">
-            <ChooseSubSport sportId={ALL_SPORTS[0].id} />;
+            <ChooseSubSport sportId={selectedSport?.id ?? ""} />;
           </View>
         )
       case 2:
@@ -203,12 +291,6 @@ export default function AddRecord() {
         </View>
 
         {renderStep()}
-
-        <Button
-          text={renderCtaText()}
-          className="mb-6"
-          onPress={getCtaAction()}
-        />
       </View>
     </BasicScreen>
   )
