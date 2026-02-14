@@ -1,14 +1,15 @@
-import { supabase } from "./index";
 import { Database } from "./database.types";
+import { supabase } from "./index";
 
-type UserProfileUpdate = Database["public"]["Tables"]["user_profiles"]["Update"];
+type UserProfileUpdate =
+  Database["public"]["Tables"]["user_profiles"]["Update"];
 
 /**
  * Updates the user's profile in the database
  */
 export async function updateUserProfile(
   userId: string,
-  updates: UserProfileUpdate
+  updates: UserProfileUpdate,
 ) {
   const { data, error } = await supabase
     .from("user_profiles")
@@ -31,7 +32,7 @@ export async function updateUserProfile(
  */
 export async function acceptCoachInvitation(
   athleteId: string,
-  invitationCode: string
+  invitationCode: string,
 ) {
   // First, find the pending invitation with this code
   const { data: relationship, error: fetchError } = await supabase
@@ -108,4 +109,31 @@ export async function getUserProfile(userId: string) {
   }
 
   return data;
+}
+
+/**
+ * Checks if the user has already submitted wellness tracking for today.
+ * Returns `true` if wellness form should be shown (no entry for today),
+ * `false` if already submitted.
+ */
+export async function checkTodayWellnessNeeded(
+  userId: string,
+): Promise<boolean> {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+  const { data, error } = await supabase
+    .from("wellness_tracking")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("tracked_date", today)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error checking today's wellness:", error);
+    // If there's an error, don't block the user — skip wellness
+    return false;
+  }
+
+  // If no entry found for today, wellness is needed
+  return data === null;
 }

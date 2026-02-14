@@ -1,28 +1,28 @@
 import BasicScreen from "@/components/basic-screen";
 import Button from "@/components/button";
-import Input from "@/components/input";
-import Toggle from "@/components/toggle";
-import IcPencil from "@/components/icons/pencil";
-import IcCheck from "@/components/icons/check";
-import { useState, useRef, useMemo } from "react";
-import { Image, Pressable, ScrollView, View, Alert } from "react-native";
-import Text from "@/components/text";
+import DatePicker from "@/components/date-picker";
 import DeleteAccountModal, {
   DeleteAccountModalRef,
 } from "@/components/delete-account-modal";
 import Dropdown from "@/components/dropdown";
-import { TChoice } from "@/types";
-import DatePicker from "@/components/date-picker";
-import { useProfileStore } from "@/stores/profile-store";
-import { useSession } from "@/contexts/auth-context";
-import { StatusBar } from "expo-status-bar";
-import ImagePicker from "react-native-image-crop-picker";
-import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
+import IcCheck from "@/components/icons/check";
+import IcPencil from "@/components/icons/pencil";
+import Input from "@/components/input";
+import Text from "@/components/text";
 import { toast } from "@/components/toast";
+import Toggle from "@/components/toggle";
+import { IMAGE_PICKER_OPTIONS } from "@/constants/misc";
+import { useSession } from "@/contexts/auth-context";
+import { useProfileStore } from "@/stores/profile-store";
+import { TChoice } from "@/types";
 import { editProfileSchema } from "@/utilities/validation/edit-profile-schema";
 import { phoneSchema } from "@/utilities/validation/schema";
-import { IMAGE_PICKER_OPTIONS } from "@/constants/misc";
+import dayjs from "dayjs";
+import { StatusBar } from "expo-status-bar";
+import { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Alert, Image, Pressable, ScrollView, View } from "react-native";
+import ImagePicker from "react-native-image-crop-picker";
 
 export default function EditProfile() {
   const { t } = useTranslation();
@@ -57,6 +57,8 @@ export default function EditProfile() {
     sportLevel,
     phone,
   } = useProfileStore();
+
+  console.log("Profile", profile);
 
   const displayImageUri = localAvatarUri || profile?.avatar_url;
 

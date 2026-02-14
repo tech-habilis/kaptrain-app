@@ -1,4 +1,3 @@
-import "../global.css";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,20 +6,21 @@ import {
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import "../global.css";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { SplashScreenController } from "@/components/splash";
-import { SessionProvider, useSession } from "@/contexts/auth-context";
 import { ROUTE_NAME } from "@/constants/route";
+import { SessionProvider, useSession } from "@/contexts/auth-context";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { initI18n } from "@/utilities/i18n";
+import { Toasts } from "@backpackapp-io/react-native-toast";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { useFonts } from "expo-font";
+import { Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaListener } from "react-native-safe-area-context";
 import { Uniwind } from "uniwind";
-import { Toasts } from "@backpackapp-io/react-native-toast";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { Platform } from "react-native";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { useFonts } from "expo-font";
 
 /**
  * Place all initialization logic here for easier management
@@ -81,7 +81,8 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isFirstOpen, isLoggedIn, showCompleteProfileForm } = useSession();
+  const { isFirstOpen, isLoggedIn, showCompleteProfileForm, showWellness } =
+    useSession();
 
   return (
     <Stack
@@ -95,7 +96,13 @@ function RootNavigator() {
           <Stack.Screen name={ROUTE_NAME.COMPLETE_PROFILE} />
         </Stack.Protected>
 
-        <Stack.Screen name={ROUTE_NAME.TABS} />
+        <Stack.Protected guard={!showCompleteProfileForm && showWellness}>
+          <Stack.Screen name={ROUTE_NAME.WELLNESS} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={!showCompleteProfileForm && !showWellness}>
+          <Stack.Screen name={ROUTE_NAME.TABS} />
+        </Stack.Protected>
       </Stack.Protected>
 
       {/* non-loggedin stack */}
