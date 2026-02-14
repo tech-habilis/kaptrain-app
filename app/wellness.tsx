@@ -9,6 +9,7 @@ import Text from "@/components/text"
 import { toast } from "@/components/toast"
 import { useSession } from "@/contexts/auth-context"
 import { supabase } from "@/utilities/supabase"
+import { updateUserPreferences } from "@/utilities/supabase/profile"
 import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet"
 import { StatusBar } from "expo-status-bar"
 import { useRef, useState } from "react"
@@ -23,6 +24,7 @@ export default function Wellness() {
   const [douleurs, setDouleurs] = useState(0)
   const [stress, setStress] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [autoWellnessTracking, setAutoWellnessTracking] = useState(false)
 
   const bottomSheetModalRef = useRef<BottomSheetModalType>(null)
 
@@ -63,6 +65,17 @@ export default function Wellness() {
   }
 
   const handleSkip = () => {
+    markWellnessComplete()
+  }
+
+  const disableAutoWellnessTracking = async () => {
+    if (!session?.user?.id) return
+    setAutoWellnessTracking(true)
+    await updateUserPreferences(session.user.id, {
+      autoWellnessTracking: false,
+    })
+    setAutoWellnessTracking(false)
+    bottomSheetModalRef.current?.close()
     markWellnessComplete()
   }
 
@@ -188,7 +201,12 @@ export default function Wellness() {
 
         <View className="grow" />
 
-        <Button text="Désactiver quand même" type="secondary" />
+        <Button
+          text="Désactiver quand même"
+          type="secondary"
+          onPress={disableAutoWellnessTracking}
+          loading={autoWellnessTracking}
+        />
         <Button
           text="Conserver le rappel"
           className="mt-2 mb-6"

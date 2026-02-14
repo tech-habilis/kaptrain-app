@@ -148,7 +148,7 @@ const syncAuthMetadataFromProfile = async (
     if (!profile.role) {
       await updateUserProfile(userId, {
         last_login: new Date().toISOString(),
-        avatar_url: profile.avatar_url,
+        avatar_url: userData?.user?.user_metadata.picture,
         role: "user",
       })
     } else {
@@ -318,7 +318,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
         // those values are restored instead of using the old Google data
         if (data.session?.user) {
           try {
-            console.log("Syncing profile during Google sign-in:", data.session)
+            console.log(
+              "Google images url:",
+              data.session.user.user_metadata.picture
+            )
             await syncAuthMetadataFromProfile(
               data.session.user.id,
               data.session
@@ -562,7 +565,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", { event: _event, session })
       const localSession = supabaseUtils.toLocalSession(session)
       setSession(localSession)
       if (localSession?.user) {

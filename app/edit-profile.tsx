@@ -1,35 +1,35 @@
-import BasicScreen from "@/components/basic-screen";
-import Button from "@/components/button";
-import DatePicker from "@/components/date-picker";
+import BasicScreen from "@/components/basic-screen"
+import Button from "@/components/button"
+import DatePicker from "@/components/date-picker"
 import DeleteAccountModal, {
   DeleteAccountModalRef,
-} from "@/components/delete-account-modal";
-import Dropdown from "@/components/dropdown";
-import IcCheck from "@/components/icons/check";
-import IcPencil from "@/components/icons/pencil";
-import Input from "@/components/input";
-import Text from "@/components/text";
-import { toast } from "@/components/toast";
-import Toggle from "@/components/toggle";
-import { IMAGE_PICKER_OPTIONS } from "@/constants/misc";
-import { useSession } from "@/contexts/auth-context";
-import { useProfileStore } from "@/stores/profile-store";
-import { TChoice } from "@/types";
-import { editProfileSchema } from "@/utilities/validation/edit-profile-schema";
-import { phoneSchema } from "@/utilities/validation/schema";
-import dayjs from "dayjs";
-import { StatusBar } from "expo-status-bar";
-import { useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Alert, Image, Pressable, ScrollView, View } from "react-native";
-import ImagePicker from "react-native-image-crop-picker";
+} from "@/components/delete-account-modal"
+import Dropdown from "@/components/dropdown"
+import IcCheck from "@/components/icons/check"
+import IcPencil from "@/components/icons/pencil"
+import Input from "@/components/input"
+import Text from "@/components/text"
+import { toast } from "@/components/toast"
+import Toggle from "@/components/toggle"
+import { IMAGE_PICKER_OPTIONS } from "@/constants/misc"
+import { useSession } from "@/contexts/auth-context"
+import { useProfileStore } from "@/stores/profile-store"
+import { TChoice } from "@/types"
+import { editProfileSchema } from "@/utilities/validation/edit-profile-schema"
+import { phoneSchema } from "@/utilities/validation/schema"
+import dayjs from "dayjs"
+import { StatusBar } from "expo-status-bar"
+import { useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Alert, Image, Pressable, ScrollView, View } from "react-native"
+import ImagePicker from "react-native-image-crop-picker"
 
 export default function EditProfile() {
-  const { t } = useTranslation();
-  const { session } = useSession();
-  const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null);
-  const [isPickerLoading, setIsPickerLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { t } = useTranslation()
+  const { session } = useSession()
+  const deleteAccountModalRef = useRef<DeleteAccountModalRef>(null)
+  const [isPickerLoading, setIsPickerLoading] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const {
     profile,
@@ -56,15 +56,15 @@ export default function EditProfile() {
     weight,
     sportLevel,
     phone,
-  } = useProfileStore();
+  } = useProfileStore()
 
-  console.log("Profile", profile);
+  console.log("profile avatar url : ", profile?.avatar_url)
 
-  const displayImageUri = localAvatarUri || profile?.avatar_url;
+  const displayImageUri = localAvatarUri || profile?.avatar_url
 
   const isPhoneValid = useMemo(() => {
-    return phoneSchema.safeParse(phone).success;
-  }, [phone]);
+    return phoneSchema.safeParse(phone).success
+  }, [phone])
 
   const genders: TChoice[] = [
     {
@@ -79,15 +79,15 @@ export default function EditProfile() {
       id: "completeProfile.step1.genderNonBinary",
       text: "completeProfile.step1.genderNonBinary",
     },
-  ];
+  ]
 
   const genderMap: Record<string, "female" | "male" | "nonbinary"> = {
     "completeProfile.step1.genderFemale": "female",
     "completeProfile.step1.genderMale": "male",
     "completeProfile.step1.genderNonBinary": "nonbinary",
-  };
+  }
 
-  const selectedGender = genders.find((g) => genderMap?.[g.text] === gender);
+  const selectedGender = genders.find((g) => genderMap?.[g.text] === gender)
 
   const practiceLevels: TChoice[] = [
     {
@@ -115,7 +115,7 @@ export default function EditProfile() {
       text: "completeProfile.step3.levelExpert",
       secondaryText: "+ de 12h par semaine",
     },
-  ];
+  ]
 
   const sportLevelMap = {
     beginner: "completeProfile.step3.levelBeginner",
@@ -123,39 +123,39 @@ export default function EditProfile() {
     advanced: "completeProfile.step3.levelAdvanced",
     confirmed: "completeProfile.step3.levelConfirmed",
     expert: "completeProfile.step3.levelExpert",
-  };
+  }
 
   const selectedPracticeLevel = practiceLevels.find((l) =>
-    sportLevel ? sportLevelMap[sportLevel] === l.text : false,
-  );
+    sportLevel ? sportLevelMap[sportLevel] === l.text : false
+  )
 
   const handlePickImage = async () => {
     try {
-      setIsPickerLoading(true);
+      setIsPickerLoading(true)
 
-      const result = await ImagePicker.openPicker(IMAGE_PICKER_OPTIONS);
+      const result = await ImagePicker.openPicker(IMAGE_PICKER_OPTIONS)
 
-      setLocalAvatarUri(result.path);
+      setLocalAvatarUri(result.path)
     } catch (error: any) {
       // User cancelled the picker
       if (error.code === "E_PICKER_CANCELLED") {
-        return;
+        return
       }
-      console.error("Error picking image:", error);
+      console.error("Error picking image:", error)
       Alert.alert(
         t("completeProfile.step1.errorTitle") || "Error",
         t("completeProfile.step1.errorMessage") ||
-          "Failed to pick image. Please try again.",
-      );
+          "Failed to pick image. Please try again."
+      )
     } finally {
-      setIsPickerLoading(false);
+      setIsPickerLoading(false)
     }
-  };
+  }
 
   const handleSave = async () => {
     if (!session?.user?.id) {
-      toast.error("User session not found");
-      return;
+      toast.error("User session not found")
+      return
     }
 
     // Validate using Zod schema
@@ -169,29 +169,29 @@ export default function EditProfile() {
       height,
       inWheelchair,
       phone,
-    });
+    })
 
     if (!result.success) {
-      const newErrors: Record<string, string> = {};
+      const newErrors: Record<string, string> = {}
       result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as string;
-        newErrors[field] = t(issue.message);
-      });
-      setErrors(newErrors);
-      return;
+        const field = issue.path[0] as string
+        newErrors[field] = t(issue.message)
+      })
+      setErrors(newErrors)
+      return
     }
 
-    await saveProfile(session.user.id);
-  };
+    await saveProfile(session.user.id)
+  }
 
   const handleDeleteAccountPress = () => {
-    deleteAccountModalRef.current?.present();
-  };
+    deleteAccountModalRef.current?.present()
+  }
 
   const handleDeleteAccountConfirm = () => {
-    console.log("Account deletion confirmed");
+    console.log("Account deletion confirmed")
     // TODO: Implement account deletion logic
-  };
+  }
 
   return (
     <BasicScreen
@@ -236,12 +236,12 @@ export default function EditProfile() {
               label="Prénom"
               value={firstName}
               onChangeText={(text) => {
-                setFirstName(text);
+                setFirstName(text)
                 if (errors.firstName) {
                   setErrors((prev) => {
-                    const { firstName, ...rest } = prev;
-                    return rest;
-                  });
+                    const { firstName, ...rest } = prev
+                    return rest
+                  })
                 }
               }}
               error={errors.firstName}
@@ -251,12 +251,12 @@ export default function EditProfile() {
               label="Nom"
               value={lastName}
               onChangeText={(text) => {
-                setLastName(text);
+                setLastName(text)
                 if (errors.lastName) {
                   setErrors((prev) => {
-                    const { lastName, ...rest } = prev;
-                    return rest;
-                  });
+                    const { lastName, ...rest } = prev
+                    return rest
+                  })
                 }
               }}
               error={errors.lastName}
@@ -266,12 +266,12 @@ export default function EditProfile() {
               label="Date de naissance"
               selectedDate={birthDate ? dayjs(birthDate).toDate() : undefined}
               onSelect={(date) => {
-                setBirthDate(dayjs(date).format("YYYY-MM-DD"));
+                setBirthDate(dayjs(date).format("YYYY-MM-DD"))
                 if (errors.birthDate) {
                   setErrors((prev) => {
-                    const { birthDate, ...rest } = prev;
-                    return rest;
-                  });
+                    const { birthDate, ...rest } = prev
+                    return rest
+                  })
                 }
               }}
               maxDate={dayjs().toDate()}
@@ -285,12 +285,12 @@ export default function EditProfile() {
               placeholder="06 12 34 56 78"
               value={phone}
               onChangeText={(text) => {
-                setPhone(text);
+                setPhone(text)
                 if (errors.phone) {
                   setErrors((prev) => {
-                    const { phone: _, ...rest } = prev;
-                    return rest;
-                  });
+                    const { phone: _, ...rest } = prev
+                    return rest
+                  })
                 }
               }}
               keyboardType="phone-pad"
@@ -309,14 +309,14 @@ export default function EditProfile() {
               options={genders}
               selectedOption={selectedGender}
               onSelect={(choice) => {
-                const mappedGender = genderMap?.[choice.text];
+                const mappedGender = genderMap?.[choice.text]
                 if (mappedGender) {
-                  setGender(mappedGender);
+                  setGender(mappedGender)
                   if (errors.gender) {
                     setErrors((prev) => {
-                      const { gender, ...rest } = prev;
-                      return rest;
-                    });
+                      const { gender, ...rest } = prev
+                      return rest
+                    })
                   }
                 }
               }}
@@ -344,12 +344,12 @@ export default function EditProfile() {
               label="Poids (kg)"
               value={weight}
               onChangeText={(text) => {
-                setWeight(text);
+                setWeight(text)
                 if (errors.weight) {
                   setErrors((prev) => {
-                    const { weight, ...rest } = prev;
-                    return rest;
-                  });
+                    const { weight, ...rest } = prev
+                    return rest
+                  })
                 }
               }}
               placeholder="63.5"
@@ -364,20 +364,20 @@ export default function EditProfile() {
               options={practiceLevels}
               onSelect={(choice) => {
                 const mappedLevel = Object.entries(sportLevelMap).find(
-                  ([_, text]) => text === choice.text,
+                  ([_, text]) => text === choice.text
                 )?.[0] as
                   | "beginner"
                   | "intermediate"
                   | "advanced"
                   | "confirmed"
-                  | "expert";
+                  | "expert"
                 if (mappedLevel) {
-                  setSportLevel(mappedLevel);
+                  setSportLevel(mappedLevel)
                   if (errors.sportLevel) {
                     setErrors((prev) => {
-                      const { sportLevel, ...rest } = prev;
-                      return rest;
-                    });
+                      const { sportLevel, ...rest } = prev
+                      return rest
+                    })
                   }
                 }
               }}
@@ -419,5 +419,5 @@ export default function EditProfile() {
         onConfirm={handleDeleteAccountConfirm}
       />
     </BasicScreen>
-  );
+  )
 }

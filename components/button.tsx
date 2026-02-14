@@ -112,7 +112,7 @@ export default function Button({
     string
   > = {
     primary: "white",
-    secondary: "white",
+    secondary: ColorConst.primary,
     tertiary: "white",
     link: ColorConst.primary,
     secondaryV2: ColorConst.secondary500,
