@@ -1,14 +1,14 @@
-import Button from "@/components/button";
-import IcCheckVerified from "@/components/icons/check-verified";
-import Text from "@/components/text";
-import { ROUTE } from "@/constants/route";
-import { useSession } from "@/contexts/auth-context";
-import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { ImageBackground, View } from "react-native";
+import Button from "@/components/button"
+import IcCheckVerified from "@/components/icons/check-verified"
+import Text from "@/components/text"
+import { ROUTE } from "@/constants/route"
+import { useSession } from "@/contexts/auth-context"
+import { router } from "expo-router"
+import { StatusBar } from "expo-status-bar"
+import { ImageBackground, View } from "react-native"
 
 export default function ProfileCompleted() {
-  const { markProfileComplete } = useSession();
+  const { markProfileComplete } = useSession()
 
   return (
     <ImageBackground
@@ -33,11 +33,11 @@ export default function ProfileCompleted() {
           className="w-full mb-6"
           text="profileCompleted.explore"
           onPress={() => {
-            markProfileComplete();
-            router.replace(ROUTE.TABS);
+            markProfileComplete()
+            router.replace(ROUTE.WELLNESS)
           }}
         />
       </View>
     </ImageBackground>
-  );
+  )
 }

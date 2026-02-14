@@ -1,37 +1,37 @@
-import Button from "@/components/button";
-import IcClose from "@/components/icons/close";
-import IcCog from "@/components/icons/cog";
-import IcMuscular from "@/components/icons/muscular";
-import IcVeryDissatisfied from "@/components/icons/very-dissatisfied";
-import { Slider } from "@/components/slider";
-import Text from "@/components/text";
-import { useSession } from "@/contexts/auth-context";
-import { supabase } from "@/utilities/supabase";
-import { StatusBar } from "expo-status-bar";
-import { useRef, useState } from "react";
-import { Pressable, View } from "react-native";
-import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet";
-import BottomSheetModal from "@/components/bottom-sheet-modal";
-import { toast } from "@/components/toast";
+import BottomSheetModal from "@/components/bottom-sheet-modal"
+import Button from "@/components/button"
+import IcClose from "@/components/icons/close"
+import IcCog from "@/components/icons/cog"
+import IcMuscular from "@/components/icons/muscular"
+import IcVeryDissatisfied from "@/components/icons/very-dissatisfied"
+import { Slider } from "@/components/slider"
+import Text from "@/components/text"
+import { toast } from "@/components/toast"
+import { useSession } from "@/contexts/auth-context"
+import { supabase } from "@/utilities/supabase"
+import { BottomSheetModal as BottomSheetModalType } from "@gorhom/bottom-sheet"
+import { StatusBar } from "expo-status-bar"
+import { useRef, useState } from "react"
+import { Pressable, View } from "react-native"
 
 export default function Wellness() {
-  const { session, markWellnessComplete } = useSession();
-  const [sommeil, setSommeil] = useState(0);
-  const [energie, setEnergie] = useState(0);
-  const [nutrition, setNutrition] = useState(0);
-  const [hydratation, setHydratation] = useState(0);
-  const [douleurs, setDouleurs] = useState(0);
-  const [stress, setStress] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { session, markWellnessComplete } = useSession()
+  const [sommeil, setSommeil] = useState(0)
+  const [energie, setEnergie] = useState(0)
+  const [nutrition, setNutrition] = useState(0)
+  const [hydratation, setHydratation] = useState(0)
+  const [douleurs, setDouleurs] = useState(0)
+  const [stress, setStress] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const bottomSheetModalRef = useRef<BottomSheetModalType>(null);
+  const bottomSheetModalRef = useRef<BottomSheetModalType>(null)
 
   const handleSubmit = async () => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) return
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split("T")[0]
 
       const { error } = await supabase.from("wellness_tracking").upsert(
         {
@@ -45,32 +45,34 @@ export default function Wellness() {
           stress_level: stress,
         },
         { onConflict: "user_id,tracked_date" }
-      );
+      )
 
       if (error) {
-        console.error("Error saving wellness:", error);
-        toast.error("Failed to save wellness data");
-        return;
+        console.error("Error saving wellness:", error)
+        toast.error("Failed to save wellness data")
+        return
       }
 
-      markWellnessComplete();
+      markWellnessComplete()
     } catch (error) {
-      console.error("Error submitting wellness:", error);
-      toast.error("Failed to save wellness data");
+      console.error("Error submitting wellness:", error)
+      toast.error("Failed to save wellness data")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleSkip = () => {
-    markWellnessComplete();
-  };
+    markWellnessComplete()
+  }
 
   return (
-    <View className="py-safe px-4 flex-1 bg-white">
+    <View className="px-4 py-16 flex-1 bg-white">
       <StatusBar style="dark" />
       <View className="flex-row items-center justify-between">
-        <Text className="text-lg text-secondary font-ls-bold">wellness.title</Text>
+        <Text className="text-lg text-secondary font-ls-bold">
+          wellness.title
+        </Text>
 
         <Pressable onPress={handleSkip}>
           <IcClose />
@@ -194,5 +196,5 @@ export default function Wellness() {
         />
       </BottomSheetModal>
     </View>
-  );
+  )
 }

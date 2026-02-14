@@ -93,14 +93,15 @@ export async function acceptCoachInvitation(
 }
 
 /**
- * Fetches the current user profile from the database
+ * Fetches the current user profile from the database.
+ * Returns null if no profile exists for the user.
  */
 export async function getUserProfile(userId: string) {
   const { data, error } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("id", userId)
-    .single()
+    .maybeSingle()
 
   if (error) {
     console.error("Error fetching user profile:", error)
