@@ -21,7 +21,7 @@ async function isAthleteAlreadyConnectedToAnyCoaches(
   athleteId: string
 ): Promise<boolean> {
   const { data, error } = await supabaseClient
-    .from("user_profiles")
+    .from("coach_connections")
     .select("id")
     .eq("user_id", athleteId)
     .not("connected_at", "is", null)
@@ -38,8 +38,25 @@ async function connectAthleteToCoach(
   coachId: string
 ): Promise<void> {
   await supabaseClient
-    .from("user_profiles")
+    .from("coach_connections")
     .insert({ coach_id: coachId, user_id: athleteId })
+    .throwOnError()
+}
+
+async function isReferralCodeAlreadyUsed(payload: {
+  coachId: string
+  athleteId: string
+}): Promise<boolean> {
+  const { data } = await supabaseClient
+    .from("coach_connections")
+    .select("id")
+    .eq("coach_id", payload.coachId)
+    .eq("user_id", payload.athleteId)
+    .maybeSingle()
+    .throwOnError()
+    .overrideTypes<{ id: string }>()
+
+  return !!data?.id
 }
 
 export async function submitReferralCode(referralCode: string) {
@@ -49,6 +66,11 @@ export async function submitReferralCode(referralCode: string) {
   ])
 
   if (!coachId) throw new Error("Invalid referral code")
+
+  if (
+    await isReferralCodeAlreadyUsed({ coachId: coachId, athleteId: athlete.id })
+  )
+    throw new Error("Referral code already used")
 
   if (await isAthleteAlreadyConnectedToAnyCoaches(athlete.id))
     throw new Error("Athlete already connected to certain coach")
