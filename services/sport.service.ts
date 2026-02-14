@@ -10,6 +10,43 @@ import { transformKeysToSnakeCase } from "../utilities/object"
 import { supabaseClient } from "../utilities/supabase/client.supabase"
 import { getCurrentUser } from "./auth.service"
 
+export async function updateAthleteSports(sportIds: string[]): Promise<void> {
+  const [athlete, currentAthleteSports] = await Promise.all([
+    getCurrentUser(),
+    fetchAthleteSports(),
+  ])
+
+  const newlyAddedSportIds = sportIds.filter(
+    (sportId) => !currentAthleteSports.some((sport) => sport.id === sportId)
+  )
+
+  if (newlyAddedSportIds.length)
+    await supabaseClient
+      .from("user_sports")
+      .insert(
+        newlyAddedSportIds.map((sportId) => ({
+          user_id: athlete.id,
+          sport_id: sportId,
+        }))
+      )
+      .throwOnError()
+
+  const removedSports = currentAthleteSports.filter(
+    (sport) => !sportIds.includes(sport.id)
+  )
+
+  if (removedSports.length)
+    await supabaseClient
+      .from("user_sports")
+      .delete()
+      .in(
+        "sport_id",
+        removedSports.map((sport) => sport.id)
+      )
+      .eq("user_id", athlete.id)
+      .throwOnError()
+}
+
 export async function fetchSports(query?: TSportQuery): Promise<TSport[]> {
   if (query?.withRecords) {
     return fetchSportsWithRecord(query)
