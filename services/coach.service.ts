@@ -1,4 +1,5 @@
 import { TCoach } from "../types/coach.type"
+import { FileHandler } from "../utilities/file-handler"
 import { supabaseClient } from "../utilities/supabase/client.supabase"
 import { getCurrentUser } from "./auth.service"
 
@@ -30,7 +31,11 @@ export async function getCoachData(): Promise<TCoach | null> {
 
   return {
     id: coachProfile.id,
-    profilePicture: coachProfile.profilePicture,
+    profilePicture: coachProfile.profilePicture
+      ? new FileHandler().readFile({
+          filePath: coachProfile.profilePicture,
+        })
+      : null,
     name: coachProfile.name,
     connectedSince: coachConnection.connectedSince,
   }
