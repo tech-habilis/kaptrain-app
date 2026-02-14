@@ -127,6 +127,28 @@ export const useCompleteProfileStore = create<CompleteProfileState>((set, get) =
       // Map database values back to form values
       const mappedData: Partial<CompleteProfileFormData> = {};
 
+      if (!profile) {
+        // No profile row exists yet — populate from auth metadata if available
+        if (authMetadata?.name) {
+          const nameParts = authMetadata.name.trim().split(" ");
+          if (nameParts.length > 0) {
+            mappedData.firstName = nameParts[0];
+            if (nameParts.length > 1) {
+              mappedData.lastName = nameParts.slice(1).join(" ");
+            }
+          }
+        }
+        if (authMetadata?.avatarUrl) {
+          mappedData.avatarUrl = authMetadata.avatarUrl;
+        }
+
+        set((state) => ({
+          formData: { ...state.formData, ...mappedData },
+          isLoading: false,
+        }));
+        return;
+      }
+
       // Step 1: Personal info
       if (profile.avatar_url) mappedData.avatarUrl = profile.avatar_url;
       if (profile.first_name) mappedData.firstName = profile.first_name;

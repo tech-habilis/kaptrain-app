@@ -85,6 +85,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       set({ isLoading: true });
       const profile = await getUserProfile(userId);
+
+      if (!profile) {
+        // No profile row exists yet — keep defaults
+        set({ profile: null });
+        return;
+      }
+
       set({
         profile,
         firstName: profile.first_name || "",
