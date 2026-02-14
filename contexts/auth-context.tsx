@@ -1,8 +1,28 @@
+import { toast } from "@/components/toast";
+import { appScheme } from "@/constants/misc";
+import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { STORAGE_KEY } from "@/constants/storage-key";
 import {
   useJsonStorageState,
   useStorageState,
 } from "@/hooks/use-storage-state";
+import { useProfileStore } from "@/stores/profile-store";
+import { TSession } from "@/types";
+import { supabase, supabaseUtils } from "@/utilities/supabase";
+import {
+  checkTodayWellnessNeeded,
+  getUserProfile,
+  updateUserProfile,
+} from "@/utilities/supabase/profile";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+import { AuthError, Session } from "@supabase/auth-js";
+import * as AppleAuthentication from "expo-apple-authentication";
+import { router } from "expo-router";
 import {
   createContext,
   PropsWithChildren,
@@ -11,23 +31,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import * as AppleAuthentication from "expo-apple-authentication";
-import {
-  GoogleSignin,
-  isErrorWithCode,
-  isSuccessResponse,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
-import { router } from "expo-router";
-import { toast } from "@/components/toast";
-import { supabase, supabaseUtils } from "@/utilities/supabase";
-import { getUserProfile } from "@/utilities/supabase/profile";
-import { TSession } from "@/types";
-import { ROUTE, ROUTE_NAME } from "@/constants/route";
 import { useTranslation } from "react-i18next";
-import { appScheme } from "@/constants/misc";
-import { AuthError } from "@supabase/auth-js";
-import { useProfileStore } from "@/stores/profile-store";
 
 type TEmailSignIn = {
   email: string;
@@ -56,6 +60,8 @@ type TAuthContext = {
   verifyPasswordResetOtp: (email: string, otp: string) => void;
   updatePassword: (newPassword: string) => void;
   loadProfile: () => void;
+  markProfileComplete: () => void;
+  markWellnessComplete: () => void;
 
   session: TSession | null;
   isLoadingSession: boolean;
@@ -65,6 +71,7 @@ type TAuthContext = {
   loggingInWith: TSignInMethod | null;
   isFirstOpen: boolean;
   showCompleteProfileForm: boolean;
+  showWellness: boolean;
   isResettingPassword: boolean;
   isUpdatingPassword: boolean;
   isCheckingProfileCompletion: boolean;
@@ -85,6 +92,8 @@ const AuthContext = createContext<TAuthContext>({
   verifyPasswordResetOtp: (email: string, otp: string) => {},
   updatePassword: (newPassword: string) => {},
   loadProfile: () => {},
+  markProfileComplete: () => {},
+  markWellnessComplete: () => {},
 
   session: null,
   isLoadingSession: false,
@@ -94,6 +103,7 @@ const AuthContext = createContext<TAuthContext>({
   loggingInWith: null,
   isFirstOpen: false,
   showCompleteProfileForm: false,
+  showWellness: false,
   isResettingPassword: false,
   isUpdatingPassword: false,
   isCheckingProfileCompletion: false,
@@ -102,11 +112,13 @@ const AuthContext = createContext<TAuthContext>({
 // Helper function to sync auth metadata from database profile
 // This ensures that if user has updated their profile in the database,
 // those values take precedence over social provider data on re-login
-const syncAuthMetadataFromProfile = async (userId: string) => {
+const syncAuthMetadataFromProfile = async (
+  userId: string,
+  userData?: Session | null,
+) => {
   try {
     const profile = await getUserProfile(userId);
 
-    // Only update if user has completed onboarding and has profile data
     if (profile.onboarding_date) {
       const metadataUpdates: Record<string, string | null> = {};
 
@@ -121,12 +133,28 @@ const syncAuthMetadataFromProfile = async (userId: string) => {
         metadataUpdates.avatar_url = profile.avatar_url;
       }
 
+      if (!profile.role) {
+        metadataUpdates.role = "user";
+      }
+
       // Only update if we have something to update
       if (Object.keys(metadataUpdates).length > 0) {
         await supabase.auth.updateUser({
           data: metadataUpdates,
         });
       }
+    }
+
+    if (!profile.role) {
+      await updateUserProfile(userId, {
+        last_login: new Date().toISOString(),
+        avatar_url: profile.avatar_url,
+        role: "user",
+      });
+    } else {
+      await updateUserProfile(userId, {
+        last_login: new Date().toISOString(),
+      });
     }
   } catch (error) {
     console.error("Error syncing auth metadata from profile:", error);
@@ -158,6 +186,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [isCheckingProfileCompletion, setIsCheckingProfileCompletion] =
     useState(false);
   const [showCompleteProfileForm, setShowCompleteProfileForm] = useState(false);
+  const [showWellness, setShowWellness] = useState(false);
   const [
     [isLoadingFirstOpenTimestamp, firstOpenTimestamp],
     setFirstOpenTimestamp,
@@ -183,6 +212,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setShowCompleteProfileForm(true);
     } finally {
       setIsCheckingProfileCompletion(false);
+    }
+  }, []);
+
+  // Function to check if user needs to fill wellness today
+  const checkWellness = useCallback(async (userId: string) => {
+    try {
+      const needed = await checkTodayWellnessNeeded(userId);
+      setShowWellness(needed);
+    } catch (error) {
+      console.error("Error checking wellness:", error);
+      // Don't block user if check fails
+      setShowWellness(false);
     }
   }, []);
 
@@ -279,7 +320,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
         // those values are restored instead of using the old Google data
         if (data.session?.user) {
           try {
-            await syncAuthMetadataFromProfile(data.session.user.id);
+            console.log("Syncing profile during Google sign-in:", data.session);
+            await syncAuthMetadataFromProfile(
+              data.session.user.id,
+              data.session,
+            );
           } catch (profileError) {
             console.error(
               "Error syncing profile during Google sign-in:",
@@ -380,8 +425,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
     if (error) {
       let errorMessage = error.message;
 
-      if (error.message.includes("User already registered") ||
-          error.message.includes("user_already_exists")) {
+      if (
+        error.message.includes("User already registered") ||
+        error.message.includes("user_already_exists")
+      ) {
         errorMessage = t("error.userAlreadyExists");
       } else if (error.message.includes("email_exists")) {
         errorMessage = t("error.emailExists");
@@ -540,6 +587,15 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
   }, [session?.user?.id, checkProfileCompletion]);
 
+  // Check if wellness needs to be filled today (only when profile is complete)
+  useEffect(() => {
+    if (session?.user?.id && !showCompleteProfileForm) {
+      checkWellness(session.user.id);
+    } else {
+      setShowWellness(false);
+    }
+  }, [session?.user?.id, showCompleteProfileForm, checkWellness]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -564,6 +620,12 @@ export function SessionProvider({ children }: PropsWithChildren) {
             loadProfile(session.user.id);
           }
         },
+        markProfileComplete: () => {
+          setShowCompleteProfileForm(false);
+        },
+        markWellnessComplete: () => {
+          setShowWellness(false);
+        },
 
         session,
         isLoadingSession:
@@ -577,6 +639,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         loggingInWith,
         isFirstOpen,
         showCompleteProfileForm,
+        showWellness,
         isResettingPassword,
         isUpdatingPassword,
         isCheckingProfileCompletion,
