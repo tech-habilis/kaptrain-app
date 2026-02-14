@@ -1,21 +1,27 @@
-import Button from "@/components/button";
-import IcArrowLeft from "@/components/icons/arrow-left";
-import { Step1 } from "@/components/complete-profile/step-1";
-import { Step2 } from "@/components/complete-profile/step-2";
-import { Step3 } from "@/components/complete-profile/step-3";
-import { Step4 } from "@/components/complete-profile/step-4";
-import { Step5 } from "@/components/complete-profile/step-5";
-import Text from "@/components/text";
-import { ROUTE } from "@/constants/route";
-import cn from "@/utilities/cn";
-import { useCompleteProfileStore } from "@/stores/complete-profile-store";
-import { useSession } from "@/contexts/auth-context";
-import { router, useLocalSearchParams } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, BackHandler, Pressable, ScrollView, View } from "react-native";
-import { useEffect } from "react";
-import { toast } from "@/components/toast";
-import FadedBottomBar from "@/components/faded-bottom-bar";
+import Button from "@/components/button"
+import { Step1 } from "@/components/complete-profile/step-1"
+import { Step2 } from "@/components/complete-profile/step-2"
+import { Step3 } from "@/components/complete-profile/step-3"
+import { Step4 } from "@/components/complete-profile/step-4"
+import { Step5 } from "@/components/complete-profile/step-5"
+import FadedBottomBar from "@/components/faded-bottom-bar"
+import IcArrowLeft from "@/components/icons/arrow-left"
+import Text from "@/components/text"
+import { toast } from "@/components/toast"
+import { ROUTE } from "@/constants/route"
+import { useSession } from "@/contexts/auth-context"
+import { useCompleteProfileStore } from "@/stores/complete-profile-store"
+import cn from "@/utilities/cn"
+import { router, useLocalSearchParams } from "expo-router"
+import { StatusBar } from "expo-status-bar"
+import { useEffect } from "react"
+import {
+  ActivityIndicator,
+  BackHandler,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native"
 
 const STEP_CONFIG = {
   1: {
@@ -43,11 +49,11 @@ const STEP_CONFIG = {
     description: "completeProfile.step5.description",
     progress: "completeProfile.step5.progress",
   },
-};
+}
 
 export default function CompleteProfile() {
-  const { session } = useSession();
-  const { step: stepParam } = useLocalSearchParams();
+  const { session } = useSession()
+  const { step: stepParam } = useLocalSearchParams()
   const {
     currentStep,
     nextStep,
@@ -59,9 +65,9 @@ export default function CompleteProfile() {
     isSaving,
     isLoading,
     loadProfileData,
-  } = useCompleteProfileStore();
+  } = useCompleteProfileStore()
 
-  const config = STEP_CONFIG[currentStep as keyof typeof STEP_CONFIG];
+  const config = STEP_CONFIG[currentStep as keyof typeof STEP_CONFIG]
 
   // Load existing profile data on mount
   useEffect(() => {
@@ -69,21 +75,21 @@ export default function CompleteProfile() {
       loadProfileData(session.user.id, {
         name: session.user.name,
         avatarUrl: session.user.avatarUrl,
-      });
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]);
+  }, [session?.user?.id])
 
   // FOR DEV ONLY; handle step parameter from URL (?step=N)
   useEffect(() => {
     if (__DEV__ && stepParam) {
-      const step = parseInt(stepParam.toString(), 10);
+      const step = parseInt(stepParam.toString(), 10)
       if (!isNaN(step) && step >= 1 && step <= 5) {
-        setCurrentStep(step);
+        setCurrentStep(step)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepParam]);
+  }, [stepParam])
 
   // Handle Android back button
   useEffect(() => {
@@ -92,42 +98,42 @@ export default function CompleteProfile() {
       () => {
         if (currentStep > 1) {
           // Navigate to previous step instead of going back to OTP screen
-          previousStep();
-          return true; // Prevent default back behavior
+          previousStep()
+          return true // Prevent default back behavior
         }
         // On step 1, allow default back behavior (go to OTP screen)
-        return false;
+        return false
       }
-    );
+    )
 
-    return () => backHandler.remove();
-  }, [currentStep, previousStep]);
+    return () => backHandler.remove()
+  }, [currentStep, previousStep])
 
   const handleContinue = async () => {
     if (!validateStep(currentStep)) {
-      return;
+      return
     }
 
     if (!session?.user?.id) {
-      toast.error("User session not found");
-      return;
+      toast.error("User session not found")
+      return
     }
 
     // Save to Supabase
-    const saved = await saveStep(currentStep, session.user.id);
+    const saved = await saveStep(currentStep, session.user.id)
     if (!saved) {
       // Save failed, don't proceed
-      return;
+      return
     }
 
     // Proceed to next step or complete
     if (currentStep < 5) {
-      nextStep();
+      nextStep()
     } else {
       // All steps completed, navigate to profile completed
-      router.replace(ROUTE.PROFILE_COMPLETED);
+      router.replace(ROUTE.PROFILE_COMPLETED)
     }
-  };
+  }
 
   const isStepComplete = () => {
     switch (currentStep) {
@@ -137,51 +143,49 @@ export default function CompleteProfile() {
           formData.lastName &&
           formData.birthDate &&
           formData.gender
-        );
+        )
       case 2:
-        return true; // Step 2 is optional
+        return true // Step 2 is optional
       case 3:
-        return !!formData.sportLevel;
+        return !!formData.sportLevel
       case 4:
-        return formData.selectedSports && formData.selectedSports.length > 0;
+        return formData.selectedSports && formData.selectedSports.length > 0
       case 5:
-        return true; // Step 5 is optional
+        return true // Step 5 is optional
       default:
-        return false;
+        return false
     }
-  };
+  }
 
   const handleBack = () => {
     if (currentStep > 1) {
-      previousStep();
+      previousStep()
     } else {
-      router.back();
+      router.back()
     }
-  };
+  }
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1 />;
+        return <Step1 />
       case 2:
-        return <Step2 continueToNextStep={handleContinue} />;
+        return <Step2 continueToNextStep={handleContinue} />
       case 3:
-        return <Step3 />;
+        return <Step3 />
       case 4:
-        return <Step4 />;
+        return <Step4 />
       case 5:
         return (
           <Step5
-            onConnectWithCoach={() => {
-              // Handled internally in Step5 - shows "feature coming soon"
-            }}
+            onConnectWithCoach={handleContinue}
             onContinueWithoutCoach={handleContinue}
           />
-        );
+        )
       default:
-        return <Step1 />;
+        return <Step1 />
     }
-  };
+  }
 
   return (
     <>
@@ -202,7 +206,7 @@ export default function CompleteProfile() {
             <Text
               className={cn(
                 "text-secondary font-ls-bold",
-                currentStep === 1 ? "text-2xl" : "text-2xl mt-2",
+                currentStep === 1 ? "text-2xl" : "text-2xl mt-2"
               )}
             >
               {config.title}
@@ -229,7 +233,7 @@ export default function CompleteProfile() {
                   key={index}
                   className={cn(
                     "flex-1 h-2 rounded-full",
-                    index < currentStep ? "bg-secondary" : "bg-stroke",
+                    index < currentStep ? "bg-secondary" : "bg-stroke"
                   )}
                 />
               ))}
@@ -247,5 +251,5 @@ export default function CompleteProfile() {
         </FadedBottomBar>
       )}
     </>
-  );
+  )
 }

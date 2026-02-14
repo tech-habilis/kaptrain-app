@@ -1,34 +1,46 @@
-import Button from "@/components/button";
-import Input from "@/components/input";
-import { useCompleteProfileStore } from "@/stores/complete-profile-store";
-import { toast } from "@/components/toast";
+import Button from "@/components/button"
+import Input from "@/components/input"
+import { submitReferralCode } from "@/services/referral-code.service"
+import { toast } from "@backpackapp-io/react-native-toast"
+import { useState } from "react"
 
 export function Step5({
   onConnectWithCoach,
   onContinueWithoutCoach,
 }: {
-  onContinueWithoutCoach: () => void;
-  onConnectWithCoach: () => void;
+  onContinueWithoutCoach: () => void
+  onConnectWithCoach: () => void
 }) {
-  const { formData, updateStep5 } = useCompleteProfileStore();
-  const isConnectToCoachEnabled =
-    formData.invitationCode && formData.invitationCode.length > 0;
+  const [invitationCode, setInvitationCode] = useState("")
+  const isConnectToCoachEnabled = invitationCode.length > 0
+  const [submitting, setSubmitting] = useState(false)
 
   const handleConnectWithCoach = () => {
-    if (!isConnectToCoachEnabled) return;
-    // For now, just show feature coming soon toast
-    toast.info("Feature coming soon");
-    // Don't call onConnectWithCoach yet
-  };
+    if (!isConnectToCoachEnabled) return
+    setSubmitting(true)
+    submitReferralCode(invitationCode)
+      .then((response) => {
+        toast.success("Coach connected successfully")
+        setSubmitting(false)
+        setTimeout(() => {
+          onConnectWithCoach()
+        }, 1000)
+      })
+      .catch((error) => {
+        console.error(error)
+        toast.error(error.message || "Failed to connect to coach")
+        setSubmitting(false)
+      })
+  }
 
   return (
     <>
       <Input
         label="completeProfile.step5.invitationCode"
         placeholder="EX : JNKMD701"
-        value={formData.invitationCode || ""}
+        value={invitationCode || ""}
         onChangeText={(text) => {
-          updateStep5({ invitationCode: text.toUpperCase() });
+          setInvitationCode(text.toUpperCase())
         }}
         className="mt-16"
       />
@@ -37,6 +49,7 @@ export function Step5({
         text="completeProfile.step5.connectToCoach"
         className="mt-4"
         disabled={!isConnectToCoachEnabled}
+        loading={submitting}
         onPress={handleConnectWithCoach}
       />
 
@@ -46,5 +59,5 @@ export function Step5({
         onPress={onContinueWithoutCoach}
       />
     </>
-  );
+  )
 }
