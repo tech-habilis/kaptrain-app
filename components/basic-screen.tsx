@@ -1,10 +1,10 @@
-import IcArrowLeft from "@/components/icons/arrow-left";
-import Text from "@/components/text";
-import cn from "@/utilities/cn";
-import { router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import React, { PropsWithChildren } from "react";
-import { Pressable, View } from "react-native";
+import IcArrowLeft from "@/components/icons/arrow-left"
+import Text from "@/components/text"
+import cn from "@/utilities/cn"
+import { router } from "expo-router"
+import { StatusBar } from "expo-status-bar"
+import React, { PropsWithChildren } from "react"
+import { Pressable, View } from "react-native"
 
 export default function BasicScreen({
   children,
@@ -14,11 +14,11 @@ export default function BasicScreen({
   rightIcon,
   onRightIconPress,
 }: PropsWithChildren & {
-  title: string;
-  description?: string;
-  headerClassName?: string;
-  rightIcon?: React.ReactNode;
-  onRightIconPress?: () => void;
+  title: string
+  description?: string
+  headerClassName?: string
+  rightIcon?: React.ReactNode
+  onRightIconPress?: () => void
 }) {
   return (
     <View className="flex-1 bg-white">
@@ -47,5 +47,5 @@ export default function BasicScreen({
       {/* Content */}
       {children}
     </View>
-  );
+  )
 }

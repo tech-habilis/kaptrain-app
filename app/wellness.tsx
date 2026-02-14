@@ -39,12 +39,12 @@ export default function Wellness() {
         {
           user_id: session.user.id,
           tracked_date: today,
-          sleep_quality: sommeil,
-          energy_level: energie,
-          nutrition_score: nutrition,
-          hydration_score: hydratation,
-          muscle_soreness: douleurs,
-          stress_level: stress,
+          sleep_quality: sommeil + 1,
+          energy_level: energie + 1,
+          nutrition_score: nutrition + 1,
+          hydration_score: hydratation + 1,
+          muscle_soreness: douleurs + 1,
+          stress_level: stress + 1,
         },
         { onConflict: "user_id,tracked_date" }
       )

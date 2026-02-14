@@ -1,4 +1,5 @@
 import { toast } from "@/components/toast"
+import { updateAthleteSports } from "@/services/sport.service"
 import { supabase } from "@/utilities/supabase"
 import { getUserProfile, updateUserProfile } from "@/utilities/supabase/profile"
 import { uploadProfileImage } from "@/utilities/supabase/storage"
@@ -305,8 +306,15 @@ export const useCompleteProfileStore = create<CompleteProfileState>(
           formData.selectedSports &&
           formData.selectedSports.length > 0
         ) {
-          updates.preferences = {
-            selectedSports: formData.selectedSports,
+          try {
+            const updatedSports = await updateAthleteSports(
+              formData.selectedSports
+            )
+          } catch (error: any) {
+            console.error("Error updating athlete sports:", error)
+            toast.error(error.message || "Failed to update athlete sports")
+            set({ isSaving: false })
+            return false
           }
         }
 

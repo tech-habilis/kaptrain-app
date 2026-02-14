@@ -1,44 +1,44 @@
-import BasicScreen from "@/components/basic-screen";
+import BasicScreen from "@/components/basic-screen"
 import BottomSheetModal, {
   RawBottomSheetModalType,
-} from "@/components/bottom-sheet-modal";
-import Button from "@/components/button";
-import { Choices } from "@/components/choices";
-import ChooseSubSport from "@/components/choose-sub-sport";
-import DatePicker from "@/components/date-picker";
-import IcClose from "@/components/icons/close";
-import IcMuscular from "@/components/icons/muscular";
-import IcPlus from "@/components/icons/plus";
-import IcSearch from "@/components/icons/search";
-import Input from "@/components/input";
-import SportOptionItem from "@/components/sport-option-item";
-import Text from "@/components/text";
-import { ALL_SPORTS, mockSports } from "@/constants/mock";
-import { ColorConst } from "@/constants/theme";
-import { TChoice } from "@/types";
-import { useRef, useState } from "react";
-import { Pressable, View } from "react-native";
-import { DateType } from "react-native-ui-datepicker";
+} from "@/components/bottom-sheet-modal"
+import Button from "@/components/button"
+import { Choices } from "@/components/choices"
+import ChooseSubSport from "@/components/choose-sub-sport"
+import DatePicker from "@/components/date-picker"
+import IcClose from "@/components/icons/close"
+import IcMuscular from "@/components/icons/muscular"
+import IcPlus from "@/components/icons/plus"
+import IcSearch from "@/components/icons/search"
+import Input from "@/components/input"
+import SportOptionItem from "@/components/sport-option-item"
+import Text from "@/components/text"
+import { ALL_SPORTS, mockSports } from "@/constants/mock"
+import { ColorConst } from "@/constants/theme"
+import { TChoice } from "@/types"
+import { useRef, useState } from "react"
+import { Pressable, View } from "react-native"
+import { DateType } from "react-native-ui-datepicker"
 
 export default function AddRecord() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedSport, setSelectedSport] = useState<TChoice>();
+  const [currentStep, setCurrentStep] = useState(0)
+  const [selectedSport, setSelectedSport] = useState<TChoice>()
 
-  const today = new Date();
-  const [date, setDate] = useState<DateType>(today);
+  const today = new Date()
+  const [date, setDate] = useState<DateType>(today)
 
-  const chooseSportModalRef = useRef<RawBottomSheetModalType>(null);
+  const chooseSportModalRef = useRef<RawBottomSheetModalType>(null)
 
   const getTitle = () => {
     switch (currentStep) {
       case 0:
       default:
-        return "Choisir un sport";
+        return "Choisir un sport"
       case 1:
       case 2:
-        return "Ajoute un record";
+        return "Ajoute un record"
     }
-  };
+  }
 
   const renderStep = () => {
     switch (currentStep) {
@@ -82,7 +82,7 @@ export default function AddRecord() {
                 {/* Sports List */}
                 <View className="flex-col gap-2">
                   {ALL_SPORTS.map((sport) => {
-                    const isSelected = selectedSport?.text === sport.name;
+                    const isSelected = selectedSport?.text === sport.name
 
                     return (
                       <SportOptionItem
@@ -93,11 +93,12 @@ export default function AddRecord() {
                         onPress={() =>
                           setSelectedSport({
                             text: sport.name,
+                            id: sport.id,
                           })
                         }
                         isMultipleSelection={false}
                       />
-                    );
+                    )
                   })}
                 </View>
 
@@ -106,20 +107,20 @@ export default function AddRecord() {
                   text="Suivant"
                   className="mb-6"
                   onPress={() => {
-                    chooseSportModalRef.current?.dismiss();
-                    setCurrentStep(1);
+                    chooseSportModalRef.current?.dismiss()
+                    setCurrentStep(1)
                   }}
                 />
               </View>
             </BottomSheetModal>
           </View>
-        );
+        )
       case 1:
         return (
           <View className="flex-1">
             <ChooseSubSport sportId={ALL_SPORTS[0].id} />;
           </View>
-        );
+        )
       case 2:
         return (
           <>
@@ -144,42 +145,41 @@ export default function AddRecord() {
 
             <DatePicker
               label="Date du record"
-              labelOnTop
               selectedDate={date}
               onSelect={(selectedDate) => setDate(selectedDate)}
               maxDate={today}
             />
           </>
-        );
+        )
     }
-  };
+  }
 
   const renderCtaText = () => {
     switch (currentStep) {
       case 0:
       case 1:
-        return "Suivant";
+        return "Suivant"
       case 2:
-        return "Ajouter";
+        return "Ajouter"
       default:
-        return "";
+        return ""
     }
-  };
+  }
 
   const getCtaAction = () => {
     switch (currentStep) {
       case 0:
-        return () => setCurrentStep(1);
+        return () => setCurrentStep(1)
       case 1:
-        return () => setCurrentStep(2);
+        return () => setCurrentStep(2)
       case 2:
         return () => {
           // Add record logic here
-        };
+        }
       default:
-        return () => {};
+        return () => {}
     }
-  };
+  }
 
   return (
     <BasicScreen title={getTitle()} headerClassName="bg-white">
@@ -211,5 +211,5 @@ export default function AddRecord() {
         />
       </View>
     </BasicScreen>
-  );
+  )
 }

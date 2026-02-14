@@ -1,52 +1,50 @@
-import { router } from "expo-router";
-import { View, ScrollView, Pressable } from "react-native";
-import Text from "@/components/text";
-import { ColorConst } from "@/constants/theme";
-import { ROUTE } from "@/constants/route";
-import BasicScreen from "@/components/basic-screen";
-import IcArrowRight from "@/components/icons/arrow-right";
-import IcCrossfit from "@/components/icons/crossfit";
-import Button from "@/components/button";
-import IcRowing from "@/components/icons/rowing";
-import IcMuscular from "@/components/icons/muscular";
-import IcHyrox from "@/components/icons/hyrox";
+import BasicScreen from "@/components/basic-screen"
+import Button from "@/components/button"
+import IcArrowRight from "@/components/icons/arrow-right"
+import Text from "@/components/text"
+import { ROUTE } from "@/constants/route"
+import { ColorConst } from "@/constants/theme"
+import { useAthleteSports } from "@/hooks/use-sports"
+import { TSport } from "@/types/sport.type"
+import { router } from "expo-router"
+import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  Text as RawText,
+  ScrollView,
+  View,
+} from "react-native"
 
-type SportRecordCardData = {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  recordCount: number;
-};
+function SportRecordCard({ sport }: { sport: TSport }) {
+  const { i18n } = useTranslation()
+  const lang = (i18n.language === "fr" ? "fr" : "en") as "en" | "fr"
+  const sportName = sport.name[lang] || sport.name.en
+  const recordCount = sport.records?.length ?? 0
+  const [imageError, setImageError] = useState(false)
 
-// Using IcLightning as placeholder for missing sport icons
-const MOCK_SPORT_RECORDS: SportRecordCardData[] = [
-  {
-    id: "musculation",
-    name: "Musculation",
-    icon: <IcMuscular size={24} />,
-    recordCount: 5,
-  },
-  {
-    id: "crossfit",
-    name: "Crossfit",
-    icon: <IcCrossfit size={24} />,
-    recordCount: 4,
-  },
-  {
-    id: "aviron",
-    name: "Aviron",
-    icon: <IcRowing size={24} />,
-    recordCount: 2,
-  },
-  {
-    id: "hyrox",
-    name: "Hyrox",
-    icon: <IcHyrox size={24} />,
-    recordCount: 0,
-  },
-];
+  useEffect(() => {
+    setImageError(false)
+  }, [sport.iconName])
 
-function SportRecordCard({ sport }: { sport: SportRecordCardData }) {
+  const icon =
+    sport.iconName && !imageError ? (
+      <Image
+        source={{ uri: sport.iconName }}
+        style={{ width: 24, height: 24 }}
+        resizeMode="contain"
+        onError={() => setImageError(true)}
+      />
+    ) : (
+      <View className="size-6 bg-light rounded-full items-center justify-center">
+        <Text className="text-text text-sm font-medium">
+          {sportName.charAt(0)}
+        </Text>
+      </View>
+    )
+
   return (
     <Pressable
       className="bg-white border border-stroke rounded-xl p-3 flex-row items-center gap-2"
@@ -59,23 +57,32 @@ function SportRecordCard({ sport }: { sport: SportRecordCardData }) {
     >
       <View className="flex-1 flex-col gap-1">
         <View className="flex-row items-center gap-1.5">
-          {sport.icon}
+          {icon}
           <Text className="text-secondary text-base font-semibold">
-            {sport.name}
+            {sportName}
           </Text>
         </View>
         <Text className="text-subtleText text-sm">
-          {sport.recordCount > 0
-            ? `${sport.recordCount} records enregistrés`
+          {recordCount > 0
+            ? `${recordCount} records enregistrés`
             : "Aucun record"}
         </Text>
       </View>
       <IcArrowRight size={24} color={ColorConst.accent} />
     </Pressable>
-  );
+  )
 }
 
 export default function MyRecordsScreen() {
+  const {
+    data: athleteSports = [],
+    isLoading,
+    isError,
+    error,
+  } = useAthleteSports({
+    withRecords: true,
+  })
+
   return (
     <BasicScreen
       title="Mes records"
@@ -83,11 +90,23 @@ export default function MyRecordsScreen() {
       headerClassName="bg-light"
     >
       <ScrollView className="flex-1 px-4 pt-6 pb-48">
-        <View className="flex flex-col gap-2">
-          {MOCK_SPORT_RECORDS.map((sport) => (
-            <SportRecordCard key={sport.id} sport={sport} />
-          ))}
-        </View>
+        {isLoading ? (
+          <View className="flex-1 justify-center items-center py-12">
+            <ActivityIndicator size="large" />
+          </View>
+        ) : isError ? (
+          <View className="flex-1 justify-center items-center py-12">
+            <RawText className="text-error text-sm text-center">
+              {error?.message ?? "Une erreur est survenue"}
+            </RawText>
+          </View>
+        ) : (
+          <View className="flex flex-col gap-2">
+            {athleteSports.map((sport) => (
+              <SportRecordCard key={sport.id} sport={sport} />
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       {/* CTA with gradient overlay */}
@@ -100,5 +119,5 @@ export default function MyRecordsScreen() {
         />
       </View>
     </BasicScreen>
-  );
+  )
 }

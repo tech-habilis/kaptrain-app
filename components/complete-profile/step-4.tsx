@@ -1,83 +1,84 @@
-import { Chip } from "@/components/chip";
-import { Choices } from "@/components/choices";
-import { TChoice } from "@/types";
-import IcBasketball from "@/components/icons/basketball";
-import IcBodybuilding from "@/components/icons/bodybuilding";
-import IcClose from "@/components/icons/close";
-import IcCrossfit from "@/components/icons/crossfit";
-import IcCycling from "@/components/icons/cycling";
-import IcRowing from "@/components/icons/rowing";
-import IcSearch from "@/components/icons/search";
-import IcYoga from "@/components/icons/yoga";
-import Input from "@/components/input";
-import { ColorConst } from "@/constants/theme";
-import { useCompleteProfileStore } from "@/stores/complete-profile-store";
-import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, View, Text as RawText } from "react-native";
+import { Chip } from "@/components/chip"
+import { Choices } from "@/components/choices"
+import IcClose from "@/components/icons/close"
+import IcLightning from "@/components/icons/lightning"
+import IcSearch from "@/components/icons/search"
+import Input from "@/components/input"
+import { ColorConst } from "@/constants/theme"
+import { useSports } from "@/hooks/use-sports"
+import { useCompleteProfileStore } from "@/stores/complete-profile-store"
+import { TChoice } from "@/types"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  Text as RawText,
+  ScrollView,
+  View,
+} from "react-native"
 
 export function Step4() {
-  const { t } = useTranslation();
-  const { formData, updateStep4 } = useCompleteProfileStore();
+  const { i18n, t } = useTranslation()
+  const { formData, updateStep4 } = useCompleteProfileStore()
+  const { data: sports = [], isLoading, isError, error } = useSports()
+
+  const lang = (i18n.language === "fr" ? "fr" : "en") as "en" | "fr"
 
   const choices: TChoice[] = useMemo(
-    () => [
-      {
-        id: "id-sports.athletics",
-        text: "sports.athletics",
-        leftIcon: <IcCycling />,
-      },
-      {
-        id: "id-sports.rowing",
-        text: "sports.rowing",
-        leftIcon: <IcRowing />,
-      },
-      {
-        id: "id-sports.basketball",
-        text: "sports.basketball",
-        leftIcon: <IcBasketball />,
-      },
-      {
-        id: "id-sports.crossfit",
-        text: "sports.crossfit",
-        leftIcon: <IcCrossfit />,
-      },
-      {
-        id: "id-sports.cycling",
-        text: "sports.cycling",
-        leftIcon: <IcCycling />,
-      },
-      {
-        id: "id-sports.bodybuilding",
-        text: "sports.bodybuilding",
-        leftIcon: <IcBodybuilding />,
-      },
-      {
-        id: "id-sports.yoga",
-        text: "sports.yoga",
-        leftIcon: <IcYoga />,
-      },
-    ],
-    [],
-  );
+    () =>
+      sports.map((sport) => ({
+        id: sport.id,
+        text: sport.name[lang] || sport.name.en,
+        leftIcon: sport.iconName ? (
+          <Image
+            source={{ uri: sport.iconName }}
+            style={{ width: 24, height: 24 }}
+            resizeMode="contain"
+          />
+        ) : (
+          <IcLightning size={24} color={ColorConst.accent} />
+        ),
+      })),
+    [sports, lang]
+  )
 
-  const [search, setSearch] = useState<string>("");
+  const [search, setSearch] = useState<string>("")
 
   const filteredChoices = useMemo(
     () =>
       choices.filter((x) =>
-        t(x.text).toLowerCase().includes(search.toLowerCase()),
+        x.text.toLowerCase().includes(search.toLowerCase())
       ),
-    [choices, search, t],
-  );
+    [choices, search]
+  )
 
   const selectedChoices = choices.filter((c) =>
-    formData.selectedSports?.includes(c.text),
-  );
+    formData.selectedSports?.includes(c.id)
+  )
 
   const clearSearch = () => {
-    setSearch("");
-  };
+    setSearch("")
+  }
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center py-12">
+        <ActivityIndicator size="large" />
+      </View>
+    )
+  }
+
+  if (isError) {
+    return (
+      <View className="flex-1 justify-center items-center py-12">
+        <RawText className="text-error text-sm text-center">
+          {error?.message ?? t("common.error")}
+        </RawText>
+      </View>
+    )
+  }
 
   return (
     <>
@@ -86,15 +87,15 @@ export function Step4() {
           selectedChoices.length > 0 ? "flex-row flex-wrap gap-2 mt-6" : ""
         }
       >
-        {selectedChoices.map((choice, index) => (
+        {selectedChoices.map((choice) => (
           <Chip
-            key={index}
+            key={choice.id}
             text={choice.text}
             type="selected"
             onLeftSidePress={() => {
               const updatedSports =
-                formData.selectedSports?.filter((s) => s !== choice.text) || [];
-              updateStep4({ selectedSports: updatedSports });
+                formData.selectedSports?.filter((s) => s !== choice.id) || []
+              updateStep4({ selectedSports: updatedSports })
             }}
           />
         ))}
@@ -129,12 +130,12 @@ export function Step4() {
           type="multipleChoice"
           selectedChoices={selectedChoices}
           onChangeMultiple={(newChoices) => {
-            const selectedSports = newChoices.map((c) => c.text);
-            updateStep4({ selectedSports: selectedSports });
+            const selectedSports = newChoices.map((c) => c.id)
+            updateStep4({ selectedSports })
           }}
           maxChoice={5}
         />
       </ScrollView>
     </>
-  );
+  )
 }

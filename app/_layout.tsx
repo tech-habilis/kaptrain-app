@@ -11,6 +11,7 @@ import "../global.css"
 import { SplashScreenController } from "@/components/splash"
 import { ROUTE_NAME } from "@/constants/route"
 import { SessionProvider, useSession } from "@/contexts/auth-context"
+import { QueryProvider } from "@/contexts/query-context"
 import { useColorScheme } from "@/hooks/use-color-scheme"
 import { initI18n } from "@/utilities/i18n"
 import { Toasts } from "@backpackapp-io/react-native-toast"
@@ -60,23 +61,27 @@ export default function RootLayout() {
   }
 
   return (
-    <SessionProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <SafeAreaListener
-          onChange={({ insets }) => {
-            Uniwind.updateInsets(insets) // enable className such as p-safe etc.
-          }}
+    <QueryProvider>
+      <SessionProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
-          <GestureHandlerRootView className="flex-1">
-            <BottomSheetModalProvider>
-              <SplashScreenController onFinishRender={<RootNavigator />} />
-              <Toasts />
-            </BottomSheetModalProvider>
-          </GestureHandlerRootView>
-        </SafeAreaListener>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </SessionProvider>
+          <SafeAreaListener
+            onChange={({ insets }) => {
+              Uniwind.updateInsets(insets) // enable className such as p-safe etc.
+            }}
+          >
+            <GestureHandlerRootView className="flex-1">
+              <BottomSheetModalProvider>
+                <SplashScreenController onFinishRender={<RootNavigator />} />
+                <Toasts />
+              </BottomSheetModalProvider>
+            </GestureHandlerRootView>
+          </SafeAreaListener>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </SessionProvider>
+    </QueryProvider>
   )
 }
 
