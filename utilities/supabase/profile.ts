@@ -132,7 +132,12 @@ export async function checkTodayWellnessNeeded(
     return false
   }
 
-  const showWellness = pref?.preferences?.["autoWellnessTracking"] ?? true
+  const showWellness: boolean =
+    (typeof pref?.preferences === "object" &&
+    pref?.preferences !== null &&
+    "autoWellnessTracking" in pref.preferences
+      ? (pref.preferences["autoWellnessTracking"] as boolean)
+      : true) ?? true
 
   const { data, error } = await supabase
     .from("wellness_tracking")
@@ -149,4 +154,45 @@ export async function checkTodayWellnessNeeded(
 
   // If no entry found for today, wellness is needed
   return showWellness && data === null
+}
+
+export async function updateUserPreferences(
+  userId: string,
+  preferences: Record<string, any>
+) {
+  // Fetch current preferences
+  const { data: currentData, error: fetchError } = await supabase
+    .from("user_profiles")
+    .select("preferences")
+    .eq("id", userId)
+    .single()
+
+  if (fetchError) {
+    console.error("Error fetching user preferences:", fetchError)
+    throw fetchError
+  }
+
+  // Merge: existing preferences + new preferences
+  const mergedPreferences = {
+    ...(typeof currentData?.preferences === "object" &&
+    currentData?.preferences !== null
+      ? currentData.preferences
+      : {}),
+    ...preferences,
+  }
+
+  // Update with merged data
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .update({ preferences: mergedPreferences })
+    .eq("id", userId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error("Error updating user preferences:", error)
+    throw error
+  }
+
+  return data
 }
